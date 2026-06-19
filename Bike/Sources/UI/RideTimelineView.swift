@@ -35,6 +35,14 @@ struct RideTimelineView: View {
                 }
                 #endif
             }
+            #if DEBUG
+            // 截图/演示用：以环境变量 SEED_SAMPLE=1 启动时自动注入示例数据。
+            .onAppear {
+                if ProcessInfo.processInfo.environment["SEED_SAMPLE"] == "1", rides.isEmpty {
+                    addSamples()
+                }
+            }
+            #endif
         }
     }
 
