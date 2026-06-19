@@ -45,6 +45,15 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
+        NSMotionUsageDescription: "用于在后台被动识别你的骑行，自动记录骑行时长与时间，全程在设备本地处理。"
+        NSLocationWhenInUseUsageDescription: "用于在骑行时记录距离、速度与路线轨迹。"
+        NSLocationAlwaysAndWhenInUseUsageDescription: "允许「始终」定位后，App 才能在你开始骑行时自动唤醒并记录路线，无需手动开始。位置数据仅存于设备本地。"
+        UIBackgroundModes:
+          - location
+          - fetch
+          - processing
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.bochen.bike.reconcile
     dependencies:
       - package: CyclingDomain
         product: CyclingDomain

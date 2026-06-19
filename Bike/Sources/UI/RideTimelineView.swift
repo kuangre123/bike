@@ -5,6 +5,7 @@ import SwiftData
 struct RideTimelineView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \RideModel.startDate, order: .reverse) private var rides: [RideModel]
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationStack {
@@ -29,11 +30,17 @@ struct RideTimelineView: View {
             }
             .navigationTitle("骑行")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("设置", systemImage: "gearshape") { showingSettings = true }
+                }
                 #if DEBUG
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("示例", systemImage: "plus", action: addSamples)
                 }
                 #endif
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
             #if DEBUG
             // 截图/演示用：以环境变量 SEED_SAMPLE=1 启动时自动注入示例数据。
