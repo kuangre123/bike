@@ -63,4 +63,25 @@ enum Formatters {
         case .other:   return "figure.mixed.cardio"
         }
     }
+
+    static func fullDateTime(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "zh_CN")
+        f.dateFormat = "M月d日 EEEE HH:mm"
+        return f.string(from: date)
+    }
+
+    static func speed(_ mps: Double?) -> String {
+        guard let mps else { return "—" }
+        return String(format: "%.1f km/h", mps * 3.6)
+    }
+
+    static func sourceLabel(_ source: RideSource) -> String {
+        switch source {
+        case .motionOnly:    return "运动历史"
+        case .gpsTracked:    return "GPS 实采"
+        case .merged:        return "运动历史 + GPS"
+        case .heartRateOnly: return "心率检测"
+        }
+    }
 }

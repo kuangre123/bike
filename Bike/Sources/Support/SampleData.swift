@@ -10,13 +10,26 @@ enum SampleData {
             let base = cal.date(byAdding: .day, value: -daysAgo, to: now)!
             return cal.date(bySettingHour: hour, minute: minute, second: 0, of: base)!
         }
+        // 一条示例 GPS 轨迹（旧金山一段斜线），用于详情页地图演示
+        func route(from start: Date) -> [GPSSample] {
+            (0..<12).map { i in
+                GPSSample(
+                    timestamp: start.addingTimeInterval(Double(i) * 75),
+                    latitude: 37.7749 + Double(i) * 0.0009,
+                    longitude: -122.4194 + Double(i) * 0.0006,
+                    speedMps: 5
+                )
+            }
+        }
         return [
             Ride(activityType: .cycling, start: at(0, 8, 12), end: at(0, 8, 27), source: .merged,
-                 distanceMeters: 4200, avgSpeedMps: 4200 / (15 * 60), calories: 95, confidence: 2),
+                 distanceMeters: 4200, avgSpeedMps: 4200 / (15 * 60), calories: 95, confidence: 2,
+                 route: route(from: at(0, 8, 12))),
             Ride(activityType: .walking, start: at(0, 12, 30), end: at(0, 12, 44), source: .motionOnly,
                  distanceMeters: nil, avgSpeedMps: nil, calories: nil, confidence: 1),
             Ride(activityType: .running, start: at(1, 7, 0), end: at(1, 7, 32), source: .merged,
-                 distanceMeters: 5200, avgSpeedMps: 5200 / (32 * 60), calories: 320, confidence: 2),
+                 distanceMeters: 5200, avgSpeedMps: 5200 / (32 * 60), calories: 320, confidence: 2,
+                 route: route(from: at(1, 7, 0))),
             Ride(activityType: .cycling, start: at(2, 17, 20), end: at(2, 17, 31), source: .merged,
                  distanceMeters: 3100, avgSpeedMps: 3100 / (11 * 60), calories: 70, confidence: 2),
             // 心率兜底检测出的「其他运动」（如器械训练）：无位移、无路线，靠心率

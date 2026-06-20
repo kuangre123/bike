@@ -1,14 +1,15 @@
 import SwiftUI
 import SwiftData
 
-/// 运动时间线：按自然日分组展示，支持滑动删除（撤销自动添加）。
+/// 运动时间线：本周概览 + 按自然日分组；点进单次看详情，滑动删除（撤销自动添加）。
 struct RideTimelineView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \RideModel.startDate, order: .reverse) private var rides: [RideModel]
     @State private var showingSettings = false
+    @State private var path = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Group {
                 if rides.isEmpty {
                     ContentUnavailableView(
@@ -18,16 +19,21 @@ struct RideTimelineView: View {
                     )
                 } else {
                     List {
+                        Section("本周") {
+                            StatsSummaryView(rides: rides)
+                        }
                         ForEach(groupedByDay, id: \.day) { group in
                             Section(group.day) {
                                 ForEach(group.rides) { ride in
-                                    RideRowView(ride: ride)
-                                        .swipeActions(edge: .trailing) {
-                                            Button("删除", role: .destructive) {
-                                                context.delete(ride)
-                                                try? context.save()
-                                            }
+                                    NavigationLink(value: ride) {
+                                        RideRowView(ride: ride)
+                                    }
+                                    .swipeActions(edge: .trailing) {
+                                        Button("删除", role: .destructive) {
+                                            context.delete(ride)
+                                            try? context.save()
                                         }
+                                    }
                                 }
                             }
                         }
@@ -35,6 +41,9 @@ struct RideTimelineView: View {
                 }
             }
             .navigationTitle("运动")
+            .navigationDestination(for: RideModel.self) { ride in
+                RideDetailView(ride: ride)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("设置", systemImage: "gearshape") { showingSettings = true }
@@ -49,10 +58,14 @@ struct RideTimelineView: View {
                 SettingsView()
             }
             #if DEBUG
-            // 截图/演示用：以环境变量 SEED_SAMPLE=1 启动时自动注入示例数据。
             .onAppear {
                 if ProcessInfo.processInfo.environment["SEED_SAMPLE"] == "1", rides.isEmpty {
                     addSamples()
+                }
+                // 深链：直接打开第一条详情（截图地图用）
+                if ProcessInfo.processInfo.environment["OPEN_FIRST_DETAIL"] == "1",
+                   path.isEmpty, let first = rides.first(where: { $0.routeData != nil }) ?? rides.first {
+                    path.append(first)
                 }
             }
             #endif
