@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(PermissionsManager.self) private var permissions
     @Environment(RideDetectionCoordinator.self) private var coordinator
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("healthWriteBack") private var healthWriteBack = true
 
     var body: some View {
         NavigationStack {
@@ -22,6 +23,12 @@ struct SettingsView: View {
                         LabeledContent("上次对账", value: last.formatted(date: .omitted, time: .standard))
                     }
                     LabeledContent("本次会话已保存", value: "\(coordinator.savedRideCount)")
+                }
+                Section("Apple 健康") {
+                    Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)
+                    Text("检测到的运动会写成 Apple 健康里的一次运动（含距离/卡路里/路线）。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("设置")

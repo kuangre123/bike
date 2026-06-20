@@ -92,9 +92,27 @@ final class RideDetectionCoordinator {
         lastReconcileDate = now
         guard !rides.isEmpty else { return }
 
-        let store = RideStore(context: ModelContext(container))
+        let context = ModelContext(container)
+        let store = RideStore(context: context)
         let inserted = (try? store.save(rides, autoDetected: true)) ?? []
         savedRideCount += inserted.count
+
+        // 写回 Apple 健康（默认开；含路线）。回填 workout UUID 便于后续去重 / 删除联动。
+        let writeBack = UserDefaults.standard.object(forKey: "healthWriteBack") as? Bool ?? true
+        if writeBack {
+            for model in inserted {
+                let route = RideMapping.decodeRoute(model.routeData)
+                if let uuid = await health.saveWorkout(
+                    activityType: RideMapping.activityType(of: model),
+                    start: model.startDate, end: model.endDate,
+                    calories: model.calories, distanceMeters: model.distanceMeters, route: route
+                ) {
+                    model.healthKitWorkoutUUID = uuid
+                }
+            }
+            try? context.save()
+        }
+
         for model in inserted where now.timeIntervalSince(model.endDate) < 20 * 60 {
             notifications.notifyWorkoutAdded(
                 rideID: model.rideID,

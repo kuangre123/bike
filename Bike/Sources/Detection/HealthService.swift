@@ -1,22 +1,41 @@
 import Foundation
 import HealthKit
+import CoreLocation
 import CyclingDomain
 
-/// 读取 HealthKit 心率 + 静息心率，供心率兜底检测。
-/// 心率需 Apple Watch 记录；无表 / 无数据时返回空，检测自动退回纯动作。
+/// 读写 HealthKit：读心率（兜底检测）+ 写运动 workout（含 GPS 路线）。
+/// 心率需 Apple Watch 记录；无表 / 无数据时读返回空，检测自动退回纯动作。
 @MainActor
 final class HealthService {
     private let store = HKHealthStore()
 
     var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
 
+    /// ActivityType → HealthKit workout 类型。
+    nonisolated static func workoutActivityType(for type: ActivityType) -> HKWorkoutActivityType {
+        switch type {
+        case .walking: return .walking
+        case .running: return .running
+        case .cycling: return .cycling
+        case .other:   return .other
+        }
+    }
+
     func requestAuthorization() {
         guard isAvailable else { return }
         var read: Set<HKObjectType> = []
         if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) { read.insert(hr) }
         if let resting = HKObjectType.quantityType(forIdentifier: .restingHeartRate) { read.insert(resting) }
-        store.requestAuthorization(toShare: [], read: read) { _, _ in }
+
+        var share: Set<HKSampleType> = [HKObjectType.workoutType(), HKSeriesType.workoutRoute()]
+        if let e = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) { share.insert(e) }
+        if let dC = HKObjectType.quantityType(forIdentifier: .distanceCycling) { share.insert(dC) }
+        if let dWR = HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning) { share.insert(dWR) }
+
+        store.requestAuthorization(toShare: share, read: read) { _, _ in }
     }
+
+    // MARK: - 读心率（兜底检测）
 
     /// [from, to] 的心率样本（bpm，按时间升序）。
     func heartRateSamples(from: Date, to: Date) async -> [HeartRateSample] {
@@ -53,6 +72,56 @@ final class HealthService {
                 cont.resume(returning: bpm)
             }
             store.execute(query)
+        }
+    }
+
+    // MARK: - 写运动
+
+    /// 把一条运动写成 `HKWorkout`（含能量 / 距离 / GPS 路线）。返回 workout UUID；失败 nil。
+    func saveWorkout(
+        activityType: ActivityType, start: Date, end: Date,
+        calories: Double?, distanceMeters: Double?, route: [RoutePointDTO]
+    ) async -> UUID? {
+        guard isAvailable else { return nil }
+        let config = HKWorkoutConfiguration()
+        config.activityType = Self.workoutActivityType(for: activityType)
+        let builder = HKWorkoutBuilder(healthStore: store, configuration: config, device: .local())
+        do {
+            try await builder.beginCollection(at: start)
+
+            var samples: [HKSample] = []
+            if let kcal = calories, let t = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) {
+                samples.append(HKQuantitySample(
+                    type: t, quantity: HKQuantity(unit: .kilocalorie(), doubleValue: kcal),
+                    start: start, end: end))
+            }
+            if let dist = distanceMeters {
+                let id: HKQuantityTypeIdentifier = activityType == .cycling ? .distanceCycling : .distanceWalkingRunning
+                if let t = HKQuantityType.quantityType(forIdentifier: id) {
+                    samples.append(HKQuantitySample(
+                        type: t, quantity: HKQuantity(unit: .meter(), doubleValue: dist),
+                        start: start, end: end))
+                }
+            }
+            if !samples.isEmpty { try await builder.addSamples(samples) }
+
+            try await builder.endCollection(at: end)
+            guard let workout = try await builder.finishWorkout() else { return nil }
+
+            if !route.isEmpty {
+                let routeBuilder = HKWorkoutRouteBuilder(healthStore: store, device: .local())
+                let locations = route.map {
+                    CLLocation(
+                        coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude),
+                        altitude: 0, horizontalAccuracy: 5, verticalAccuracy: -1,
+                        course: -1, speed: max(0, $0.speedMps), timestamp: $0.timestamp)
+                }
+                try await routeBuilder.insertRouteData(locations)
+                try await routeBuilder.finishRoute(with: workout, metadata: nil)
+            }
+            return workout.uuid
+        } catch {
+            return nil
         }
     }
 }

@@ -22,7 +22,7 @@ public enum RideReconciler {
             activityType: tracked.activityType,
             start: tracked.start, end: tracked.end, source: source,
             distanceMeters: distance, avgSpeedMps: speed, calories: kcal,
-            confidence: confidence
+            confidence: confidence, route: tracked.samples
         )
     }
 

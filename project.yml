@@ -49,6 +49,7 @@ targets:
         NSLocationWhenInUseUsageDescription: "用于在骑行时记录距离、速度与路线轨迹。"
         NSLocationAlwaysAndWhenInUseUsageDescription: "允许「始终」定位后，App 才能在你开始骑行时自动唤醒并记录路线，无需手动开始。位置数据仅存于设备本地。"
         NSHealthShareUsageDescription: "用于读取你的心率，识别 iPhone 动作分类不出的运动（如器械训练）并自动记录。仅在设备本地处理。"
+        NSHealthUpdateUsageDescription: "用于把检测到的运动写回 Apple 健康（含距离、卡路里与路线），与系统运动数据汇总。"
         UIBackgroundModes:
           - location
           - fetch
