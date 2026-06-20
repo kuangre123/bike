@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// 骑行时间线：按自然日分组展示。
+/// 运动时间线：按自然日分组展示，支持滑动删除（撤销自动添加）。
 struct RideTimelineView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \RideModel.startDate, order: .reverse) private var rides: [RideModel]
@@ -12,9 +12,9 @@ struct RideTimelineView: View {
             Group {
                 if rides.isEmpty {
                     ContentUnavailableView(
-                        "还没有骑行记录",
-                        systemImage: "bicycle",
-                        description: Text("骑行会被自动检测并出现在这里。")
+                        "还没有运动记录",
+                        systemImage: "figure.run",
+                        description: Text("步行、跑步、骑行会被自动检测并出现在这里。")
                     )
                 } else {
                     List {
@@ -22,13 +22,19 @@ struct RideTimelineView: View {
                             Section(group.day) {
                                 ForEach(group.rides) { ride in
                                     RideRowView(ride: ride)
+                                        .swipeActions(edge: .trailing) {
+                                            Button("删除", role: .destructive) {
+                                                context.delete(ride)
+                                                try? context.save()
+                                            }
+                                        }
                                 }
                             }
                         }
                     }
                 }
             }
-            .navigationTitle("骑行")
+            .navigationTitle("运动")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("设置", systemImage: "gearshape") { showingSettings = true }
@@ -65,7 +71,7 @@ struct RideTimelineView: View {
     #if DEBUG
     private func addSamples() {
         let store = RideStore(context: context)
-        try? store.save(SampleData.rides())
+        try? store.save(SampleData.rides(), autoDetected: false)
     }
     #endif
 }

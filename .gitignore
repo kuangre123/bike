@@ -15,3 +15,4 @@ xcuserdata/
 
 # XcodeGen 生成物（source of truth 是 project.yml）
 Bike/Info.plist
+Bike/Bike.entitlements

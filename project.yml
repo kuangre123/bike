@@ -48,6 +48,7 @@ targets:
         NSMotionUsageDescription: "用于在后台被动识别你的骑行，自动记录骑行时长与时间，全程在设备本地处理。"
         NSLocationWhenInUseUsageDescription: "用于在骑行时记录距离、速度与路线轨迹。"
         NSLocationAlwaysAndWhenInUseUsageDescription: "允许「始终」定位后，App 才能在你开始骑行时自动唤醒并记录路线，无需手动开始。位置数据仅存于设备本地。"
+        NSHealthShareUsageDescription: "用于读取你的心率，识别 iPhone 动作分类不出的运动（如器械训练）并自动记录。仅在设备本地处理。"
         UIBackgroundModes:
           - location
           - fetch
@@ -57,6 +58,10 @@ targets:
     dependencies:
       - package: CyclingDomain
         product: CyclingDomain
+    entitlements:
+      path: Bike/Bike.entitlements
+      properties:
+        com.apple.developer.healthkit: true
     settings:
       base:
         INFOPLIST_FILE: Bike/Info.plist

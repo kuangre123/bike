@@ -2,42 +2,46 @@ import Foundation
 
 /// 运动分类器的一条原始活动样本 —— `CMMotionActivity` 的简化投影，便于纯逻辑测试。
 /// 每条样本代表「从 `start` 起、直到下一条样本 `start`」期间的活动状态。
+/// `activity == nil` 表示静止 / 驾车 / 未知（非记录目标）。
 public struct RawActivitySample: Equatable, Sendable {
     public let start: Date
-    public let isCycling: Bool
+    public let activity: ActivityType?
     public let confidence: Int   // 0=low, 1=medium, 2=high
-    public init(start: Date, isCycling: Bool, confidence: Int) {
+    public init(start: Date, activity: ActivityType?, confidence: Int) {
         self.start = start
-        self.isCycling = isCycling
+        self.activity = activity
         self.confidence = confidence
     }
 }
 
-/// 把（可乱序的）原始活动样本切分成连续骑行时段。
-/// - 末尾若仍处于骑行，以 `queryEnd` 收尾。
-/// - 连续骑行段的置信度取段内最大值。
-/// - 不做最小时长 / 间隔过滤 —— 那交给 `mergeCyclingSegments`。
-public func buildCyclingSegments(from samples: [RawActivitySample], queryEnd: Date) -> [MotionSegment] {
+/// 把（可乱序的）原始活动样本切分成连续的同类型运动时段。
+/// - 活动类型变化（含切到 nil）即收尾当前段。
+/// - 末尾若仍处于某活动，以 `queryEnd` 收尾。
+/// - 连续同类型段的置信度取段内最大值。
+/// - 不做最小时长 / 间隔过滤 —— 那交给 `mergeActivitySegments`。
+public func buildActivitySegments(from samples: [RawActivitySample], queryEnd: Date) -> [MotionSegment] {
     let sorted = samples.sorted { $0.start < $1.start }
     var segments: [MotionSegment] = []
-    var segStart: Date? = nil
-    var segConfidence = 0
-    for sample in sorted {
-        if sample.isCycling {
-            if segStart == nil {
-                segStart = sample.start
-                segConfidence = sample.confidence
-            } else {
-                segConfidence = max(segConfidence, sample.confidence)
-            }
-        } else if let start = segStart {
-            segments.append(MotionSegment(start: start, end: sample.start, confidence: segConfidence))
-            segStart = nil
-            segConfidence = 0
+    var curType: ActivityType? = nil
+    var curStart: Date? = nil
+    var curConfidence = 0
+
+    func closeCurrent(end: Date) {
+        if let type = curType, let start = curStart, start < end {
+            segments.append(MotionSegment(activityType: type, start: start, end: end, confidence: curConfidence))
         }
     }
-    if let start = segStart, start < queryEnd {
-        segments.append(MotionSegment(start: start, end: queryEnd, confidence: segConfidence))
+
+    for sample in sorted {
+        if sample.activity == curType {
+            if curType != nil { curConfidence = max(curConfidence, sample.confidence) }
+        } else {
+            closeCurrent(end: sample.start)
+            curType = sample.activity
+            curStart = sample.activity == nil ? nil : sample.start
+            curConfidence = sample.confidence
+        }
     }
+    closeCurrent(end: queryEnd)
     return segments
 }

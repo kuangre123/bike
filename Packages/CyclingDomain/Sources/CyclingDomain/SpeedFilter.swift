@@ -1,11 +1,14 @@
 import Foundation
 
-/// 均速是否落在合理骑行区间（约 8–35 km/h，边界含）。
-public func isPlausibleCyclingSpeed(
-    mps: Double,
-    minKmh: Double = 8,
-    maxKmh: Double = 35
-) -> Bool {
+/// 均速是否落在该运动类型的合理区间（边界含），用于过滤误判（如把驾车当骑行）。
+public func isPlausibleSpeed(mps: Double, for type: ActivityType) -> Bool {
     let kmh = mps * 3.6
-    return kmh >= minKmh && kmh <= maxKmh
+    let bounds: (min: Double, max: Double)
+    switch type {
+    case .walking: bounds = (1.5, 9)
+    case .running: bounds = (5, 22)
+    case .cycling: bounds = (8, 40)
+    case .other:   bounds = (0, .infinity)   // 心率兜底，不做速度门槛
+    }
+    return kmh >= bounds.min && kmh <= bounds.max
 }
