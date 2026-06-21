@@ -50,8 +50,8 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         let actionID = response.actionIdentifier
         let idString = response.notification.request.content.userInfo["rideID"] as? String
         if actionID == Self.undoActionID, let idString, let id = UUID(uuidString: idString) {
-            MainActor.assumeIsolated {
-                deleteRide(id: id)
+            Task { @MainActor [weak self, id] in
+                self?.deleteRide(id: id)
             }
         }
         completionHandler()

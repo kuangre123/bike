@@ -66,12 +66,14 @@ public struct Ride: Equatable, Sendable {
     public let confidence: Int
     /// 均心率（bpm），来自 HealthKit；无则 nil。
     public let avgHeartRate: Double?
+    /// 有效运动时长（秒）。手动暂停时会小于起止时间差；自动检测记录通常为 nil。
+    public let activeDuration: TimeInterval?
     /// GPS 轨迹点（有实采时）；用于地图展示与写回 HealthKit 路线。
     public let route: [GPSSample]?
     public init(activityType: ActivityType, start: Date, end: Date, source: RideSource,
                 distanceMeters: Double?, avgSpeedMps: Double?,
                 calories: Double?, confidence: Int, avgHeartRate: Double? = nil,
-                route: [GPSSample]? = nil) {
+                activeDuration: TimeInterval? = nil, route: [GPSSample]? = nil) {
         self.activityType = activityType
         self.start = start
         self.end = end
@@ -81,14 +83,15 @@ public struct Ride: Equatable, Sendable {
         self.calories = calories
         self.confidence = confidence
         self.avgHeartRate = avgHeartRate
+        self.activeDuration = activeDuration
         self.route = route
     }
-    public var duration: TimeInterval { end.timeIntervalSince(start) }
+    public var duration: TimeInterval { activeDuration ?? end.timeIntervalSince(start) }
 
     /// 返回一个附加/替换均心率的副本（保留其余字段，含路线）。
     public func withAvgHeartRate(_ bpm: Double?) -> Ride {
         Ride(activityType: activityType, start: start, end: end, source: source,
              distanceMeters: distanceMeters, avgSpeedMps: avgSpeedMps, calories: calories,
-             confidence: confidence, avgHeartRate: bpm, route: route)
+             confidence: confidence, avgHeartRate: bpm, activeDuration: activeDuration, route: route)
     }
 }

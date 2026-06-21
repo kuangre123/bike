@@ -4,33 +4,58 @@ import CoreLocation
 import Observation
 
 /// 申请并暴露 运动 + 定位 授权状态。
-/// 状态用计算属性按需读取（M3 不做实时观察刷新；重开设置页即刷新）。
+/// 监听定位授权变化（delegate）即时刷新；运动授权按需 refresh。
 @MainActor
 @Observable
-final class PermissionsManager {
+final class PermissionsManager: NSObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     private let activityManager = CMMotionActivityManager()
-    private let probeQueue = OperationQueue()
 
-    var locationStatus: CLAuthorizationStatus { locationManager.authorizationStatus }
-    var motionStatus: CMAuthorizationStatus { CMMotionActivityManager.authorizationStatus() }
+    private(set) var locationStatus: CLAuthorizationStatus = .notDetermined
+    private(set) var motionStatus: CMAuthorizationStatus = CMMotionActivityManager.authorizationStatus()
 
-    /// 请求「始终」定位（需先有 When-In-Use 才能升级，系统会分步提示）。
+    override init() {
+        super.init()
+        locationManager.delegate = self   // 设 delegate 后会回调一次当前授权状态
+        locationStatus = locationManager.authorizationStatus
+    }
+
+    /// 检测要正常工作，需要「始终」定位 + 运动授权。
+    var needsAttention: Bool {
+        locationStatus != .authorizedAlways || motionStatus != .authorized
+    }
+
+    /// 请求「始终」定位（需先 When-In-Use 才能升级，系统分步提示）。
     func requestLocationAlways() {
         locationManager.requestWhenInUseAuthorization()
         locationManager.requestAlwaysAuthorization()
     }
 
-    /// 通过发起一次历史查询来触发运动权限提示。
+    /// 通过发起一次历史查询触发运动权限提示。
     func requestMotion() {
         guard CMMotionActivityManager.isActivityAvailable() else { return }
         activityManager.queryActivityStarting(
-            from: Date().addingTimeInterval(-60), to: Date(), to: probeQueue
-        ) { _, _ in }
+            from: Date().addingTimeInterval(-60), to: Date(), to: .main
+        ) { [weak self] _, _ in
+            Task { @MainActor in self?.motionStatus = CMMotionActivityManager.authorizationStatus() }
+        }
     }
 
     func requestAll() {
         requestLocationAlways()
         requestMotion()
+    }
+
+    /// 重新读取一次当前授权（从设置页返回时调用）。
+    func refresh() {
+        locationStatus = locationManager.authorizationStatus
+        motionStatus = CMMotionActivityManager.authorizationStatus()
+    }
+
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus   // 先取出 Sendable 值，避免把 manager 带过隔离边界
+        Task { @MainActor [weak self, status] in
+            self?.locationStatus = status
+        }
     }
 }

@@ -6,13 +6,11 @@ struct StatsSummaryView: View {
     let rides: [RideModel]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                stat("本周运动", "\(weekRides.count) 次")
-                Spacer()
-                stat("总时长", Formatters.duration(totalDuration))
-                Spacer()
-                stat("总距离", totalDistanceText)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                stat("本周运动", "\(weekRides.count) 次", "figure.outdoor.cycle")
+                stat("总时长", Formatters.duration(totalDuration), "clock.fill")
+                stat("总距离", totalDistanceText, "point.topleft.down.curvedto.point.bottomright.up")
             }
 
             Chart(last7Days) { bar in
@@ -20,11 +18,36 @@ struct StatsSummaryView: View {
                     x: .value("日", bar.label),
                     y: .value("分钟", bar.minutes)
                 )
-                .foregroundStyle(.tint)
+                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.05, green: 0.64, blue: 0.86),
+                            Color(red: 0.28, green: 0.84, blue: 0.62)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
             }
-            .frame(height: 110)
+            .chartYAxis(.hidden)
+            .chartXAxis {
+                AxisMarks { _ in
+                    AxisValueLabel()
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(height: 112)
         }
-        .padding(.vertical, 4)
+        .padding(16)
+        .background(Color.white.opacity(0.78))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.white.opacity(0.85), lineWidth: 1)
+        )
+        .shadow(color: Color(red: 0.20, green: 0.70, blue: 0.80).opacity(0.12), radius: 14, y: 8)
     }
 
     // MARK: 计算
@@ -63,10 +86,25 @@ struct StatsSummaryView: View {
         }
     }
 
-    private func stat(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value).font(.headline)
-            Text(title).font(.caption).foregroundStyle(.secondary)
+    private func stat(_ title: String, _ value: String, _ icon: String) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Image(systemName: icon)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color(red: 0.04, green: 0.61, blue: 0.78))
+                .frame(width: 24, height: 24)
+                .background(Color(red: 0.04, green: 0.68, blue: 0.82).opacity(0.12))
+                .clipShape(Circle())
+            Text(value)
+                .font(.subheadline.weight(.heavy))
+                .lineLimit(1)
+                .minimumScaleFactor(0.66)
+            Text(title)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(Color.white.opacity(0.62))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }

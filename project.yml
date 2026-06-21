@@ -34,8 +34,8 @@ targets:
     info:
       path: Bike/Info.plist
       properties:
-        CFBundleName: "Bike"
-        CFBundleDisplayName: "Bike"
+        CFBundleName: "快乐轻骑"
+        CFBundleDisplayName: "快乐轻骑"
         CFBundleDevelopmentRegion: en
         CFBundleIdentifier: "com.bochen.bike"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"

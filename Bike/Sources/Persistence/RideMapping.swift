@@ -17,6 +17,7 @@ enum RideMapping {
             confidence: ride.confidence,
             routeData: encodeRoute(ride.route),
             avgHeartRate: ride.avgHeartRate,
+            activeDurationSeconds: ride.activeDuration,
             isAutoDetected: autoDetected
         )
     }

@@ -24,10 +24,19 @@ enum Formatters {
         return "\(Int(kcal.rounded())) 千卡"
     }
 
-    /// 均心率展示，如「♥ 132」；无则 nil。
+    static func carbonSaved(_ meters: Double?) -> String {
+        guard let meters else { return "—" }
+        let grams = meters / 1000 * 48.5
+        if grams >= 1000 {
+            return String(format: "%.1f 千克", grams / 1000)
+        }
+        return "\(Int(grams.rounded())) 克"
+    }
+
+    /// 均心率展示，如「132 次/分钟」；无则 nil。
     static func heartRate(_ bpm: Double?) -> String? {
         guard let bpm else { return nil }
-        return "♥ \(Int(bpm.rounded()))"
+        return "\(Int(bpm.rounded())) 次/分钟"
     }
 
     static func clockTime(_ date: Date) -> String {
@@ -73,7 +82,16 @@ enum Formatters {
 
     static func speed(_ mps: Double?) -> String {
         guard let mps else { return "—" }
-        return String(format: "%.1f km/h", mps * 3.6)
+        return String(format: "%.1f 公里/时", mps * 3.6)
+    }
+
+    static func pace(duration: TimeInterval, distanceMeters: Double?) -> String? {
+        guard let distanceMeters, distanceMeters >= 100 else { return nil }
+        let secondsPerKm = duration / (distanceMeters / 1000)
+        guard secondsPerKm.isFinite, secondsPerKm > 0 else { return nil }
+        let minutes = Int(secondsPerKm) / 60
+        let seconds = Int(secondsPerKm.rounded()) % 60
+        return "\(minutes)分\(String(format: "%02d", seconds))秒/公里"
     }
 
     static func sourceLabel(_ source: RideSource) -> String {

@@ -16,9 +16,9 @@ final class RideDetectionCoordinator {
     private let wake = LocationWakeService()
     private let health = HealthService()
     private let activityManager = CMMotionActivityManager()
-    private let activityQueue = OperationQueue()
 
     private var pendingTracked: [TrackedRide] = []
+    private var liveStopTask: Task<Void, Never>?
     private var started = false
 
     private(set) var lastReconcileDate: Date?
@@ -36,18 +36,20 @@ final class RideDetectionCoordinator {
         started = true
         notifications.requestAuthorization()
         permissions.requestAll()
-        health.requestAuthorization()
         wake.onSignificantChange = { [weak self] in
             Task { await self?.runReconciliation() }
         }
         wake.start()
         startActivityMonitoring()
-        Task { await runReconciliation() }
+        Task {
+            _ = await health.requestReadAuthorization()
+            await runReconciliation()
+        }
     }
 
     private func startActivityMonitoring() {
         guard CMMotionActivityManager.isActivityAvailable() else { return }
-        activityManager.startActivityUpdates(to: activityQueue) { [weak self] activity in
+        activityManager.startActivityUpdates(to: .main) { [weak self] activity in
             guard let activity else { return }
             let type = MotionHistoryService.activityType(of: activity)
             let confident = activity.confidence != .low
@@ -58,14 +60,28 @@ final class RideDetectionCoordinator {
     }
 
     private func handleLiveActivity(type: ActivityType?, confident: Bool) {
-        if let type, confident, !liveTracker.isRunning {
-            liveTracker.start(activityType: type) { [weak self] ride in
-                guard let self else { return }
-                self.pendingTracked.append(ride)
-                Task { await self.runReconciliation() }
+        if let type, confident {
+            liveStopTask?.cancel()
+            liveStopTask = nil
+            if !liveTracker.isRunning {
+                liveTracker.start(activityType: type) { [weak self] ride in
+                    guard let self else { return }
+                    self.pendingTracked.append(ride)
+                    Task { await self.runReconciliation() }
+                }
             }
-        } else if type == nil, liveTracker.isRunning {
-            liveTracker.stop()
+        } else if liveTracker.isRunning, liveStopTask == nil {
+            liveStopTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(90))
+                guard !Task.isCancelled else { return }
+                guard let self else { return }
+                await MainActor.run {
+                    self.liveStopTask = nil
+                    if self.liveTracker.isRunning {
+                        self.liveTracker.stop()
+                    }
+                }
+            }
         }
     }
 
@@ -77,7 +93,13 @@ final class RideDetectionCoordinator {
 
         // 基线：动作历史时段
         let rawSegments = await motionHistory.activitySegments(from: from, to: now)
-        let segments = mergeActivitySegments(rawSegments, maxGap: 60, minDuration: 90)
+        let segments = mergeActivitySegments(
+            rawSegments,
+            maxGap: RideDetectionPolicy.defaultMotionMergeGap,
+            minDuration: RideDetectionPolicy.minimumRideDuration,
+            gapForType: RideDetectionPolicy.motionMergeGap(for:),
+            minDurationForType: RideDetectionPolicy.minimumDuration(for:)
+        )
 
         // 心率：兜底检测出动作分类不到的运动 + 给已检测运动附均心率
         let hrSamples = await health.heartRateSamples(from: from, to: now)
@@ -99,13 +121,16 @@ final class RideDetectionCoordinator {
 
         // 写回 Apple 健康（默认开；含路线）。回填 workout UUID 便于后续去重 / 删除联动。
         let writeBack = UserDefaults.standard.object(forKey: "healthWriteBack") as? Bool ?? true
-        if writeBack {
+        if writeBack, await health.requestWriteAuthorization() {
             for model in inserted {
                 let route = RideMapping.decodeRoute(model.routeData)
                 if let uuid = await health.saveWorkout(
                     activityType: RideMapping.activityType(of: model),
                     start: model.startDate, end: model.endDate,
-                    calories: model.calories, distanceMeters: model.distanceMeters, route: route
+                    calories: model.calories,
+                    distanceMeters: model.distanceMeters,
+                    avgSpeedMps: model.avgSpeedMps,
+                    route: route
                 ) {
                     model.healthKitWorkoutUUID = uuid
                 }

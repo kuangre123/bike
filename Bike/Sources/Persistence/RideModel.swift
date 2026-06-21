@@ -21,6 +21,8 @@ final class RideModel {
     /// JSON 编码的 `[RoutePointDTO]`；无 GPS 时为 nil。
     var routeData: Data?
     var avgHeartRate: Double?
+    /// 有效运动时长（秒）。手动骑行暂停时不计入暂停时间；历史/自动记录为 nil。
+    var activeDurationSeconds: Double?
     var healthKitWorkoutUUID: UUID?
     /// 是否由被动检测自动添加（用于「待确认」指示与撤销提示）。
     var isAutoDetected: Bool = false
@@ -38,6 +40,7 @@ final class RideModel {
         confidence: Int,
         routeData: Data? = nil,
         avgHeartRate: Double? = nil,
+        activeDurationSeconds: Double? = nil,
         healthKitWorkoutUUID: UUID? = nil,
         isAutoDetected: Bool = false,
         createdAt: Date = Date()
@@ -53,10 +56,11 @@ final class RideModel {
         self.confidence = confidence
         self.routeData = routeData
         self.avgHeartRate = avgHeartRate
+        self.activeDurationSeconds = activeDurationSeconds
         self.healthKitWorkoutUUID = healthKitWorkoutUUID
         self.isAutoDetected = isAutoDetected
         self.createdAt = createdAt
     }
 
-    var duration: TimeInterval { endDate.timeIntervalSince(startDate) }
+    var duration: TimeInterval { activeDurationSeconds ?? endDate.timeIntervalSince(startDate) }
 }

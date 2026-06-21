@@ -6,7 +6,7 @@ import CoreLocation
 final class LocationWakeService: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
 
-    /// 收到显著位置变化时回调（在主线程）。
+    /// 收到显著位置变化时回调。
     var onSignificantChange: (() -> Void)?
 
     override init() {
@@ -24,8 +24,8 @@ final class LocationWakeService: NSObject, CLLocationManagerDelegate {
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        MainActor.assumeIsolated {
-            onSignificantChange?()
+        Task { @MainActor [weak self] in
+            self?.onSignificantChange?()
         }
     }
 }

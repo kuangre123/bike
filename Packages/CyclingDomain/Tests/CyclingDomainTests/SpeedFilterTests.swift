@@ -3,6 +3,7 @@ import XCTest
 
 final class SpeedFilterTests: XCTestCase {
     func test_cyclingRange() {
+        XCTAssertTrue(isPlausibleSpeed(mps: 6.4 / 3.6, for: .cycling))
         XCTAssertTrue(isPlausibleSpeed(mps: 20 / 3.6, for: .cycling))
         XCTAssertFalse(isPlausibleSpeed(mps: 80 / 3.6, for: .cycling)) // 太快=驾车
         XCTAssertFalse(isPlausibleSpeed(mps: 4 / 3.6, for: .cycling))  // 太慢

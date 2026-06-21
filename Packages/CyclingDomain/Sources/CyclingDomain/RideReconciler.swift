@@ -33,9 +33,13 @@ public enum RideReconciler {
     public static func reconcile(
         motionSegments: [MotionSegment],
         trackedRides: [TrackedRide],
-        heartRateSegments: [HRSegment] = []
+        heartRateSegments: [HRSegment] = [],
+        minimumDuration: TimeInterval = RideDetectionPolicy.minimumRideDuration
     ) -> [Ride] {
         var rides: [Ride] = []
+        let motionSegments = motionSegments.filter { $0.duration >= minimumDuration }
+        let trackedRides = trackedRides.filter { $0.end.timeIntervalSince($0.start) >= minimumDuration }
+        let heartRateSegments = heartRateSegments.filter { $0.duration >= minimumDuration }
 
         // 1) 每条 tracked：有同类型重叠 motion 段 → merged，否则 gpsTracked；均速不合理则丢弃。
         for tracked in trackedRides {
@@ -57,10 +61,14 @@ public enum RideReconciler {
                 $0.activityType == seg.activityType && overlaps($0.start, $0.end, seg.start, seg.end)
             }
             if !coveredByMerged {
+                let duration = seg.end.timeIntervalSince(seg.start)
+                let distance = estimatedDistanceMeters(for: seg.activityType, duration: duration)
+                let speed = distance == nil ? nil : estimatedSpeedMps(for: seg.activityType)
+                let kcal = estimatedCaloriesForMotionOnly(type: seg.activityType, duration: duration)
                 rides.append(Ride(
                     activityType: seg.activityType,
                     start: seg.start, end: seg.end, source: .motionOnly,
-                    distanceMeters: nil, avgSpeedMps: nil, calories: nil,
+                    distanceMeters: distance, avgSpeedMps: speed, calories: kcal,
                     confidence: seg.confidence
                 ))
             }

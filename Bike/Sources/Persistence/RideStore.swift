@@ -14,13 +14,27 @@ struct RideStore {
     /// 保存一批领域 Ride；与已存在记录时间重叠的跳过。返回实际插入的模型。
     @discardableResult
     func save(_ rides: [Ride], autoDetected: Bool) throws -> [RideModel] {
-        let existing = try context.fetch(FetchDescriptor<RideModel>())
+        var existing = try context.fetch(FetchDescriptor<RideModel>())
         var inserted: [RideModel] = []
-        for ride in rides {
-            let overlaps = existing.contains { ride.start < $0.endDate && $0.startDate < ride.end }
-            if overlaps { continue }
+        for ride in rides where ride.duration >= RideDetectionPolicy.minimumRideDuration {
+            let overlapping = existing.filter { ride.start < $0.endDate && $0.startDate < ride.end }
+            if !overlapping.isEmpty {
+                let replaceable = overlapping.filter {
+                    autoDetected
+                        && $0.isAutoDetected
+                        && $0.activityTypeRaw == ride.activityType.rawValue
+                        && ride.duration >= $0.duration
+                }
+                let blocked = overlapping.count != replaceable.count
+                if blocked { continue }
+                for model in replaceable {
+                    context.delete(model)
+                    existing.removeAll { $0.rideID == model.rideID }
+                }
+            }
             let model = RideMapping.makeModel(from: ride, autoDetected: autoDetected)
             context.insert(model)
+            existing.append(model)
             inserted.append(model)
         }
         try context.save()

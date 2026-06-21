@@ -21,18 +21,56 @@ final class HealthService {
         }
     }
 
-    func requestAuthorization() {
-        guard isAvailable else { return }
+    func requestReadAuthorization() async -> Bool {
+        guard isAvailable else { return false }
         var read: Set<HKObjectType> = []
         if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) { read.insert(hr) }
         if let resting = HKObjectType.quantityType(forIdentifier: .restingHeartRate) { read.insert(resting) }
+        guard !read.isEmpty else { return true }
 
+        return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
+            store.requestAuthorization(toShare: [], read: read) { success, _ in
+                cont.resume(returning: success)
+            }
+        }
+    }
+
+    func requestWriteAuthorization() async -> Bool {
+        guard isAvailable else { return false }
+        let share = writeTypes()
+        guard !share.isEmpty else { return false }
+        if hasWorkoutWriteAuthorization {
+            return true
+        }
+
+        return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
+            store.requestAuthorization(toShare: share, read: []) { [weak self] _, _ in
+                Task { @MainActor in
+                    cont.resume(returning: self?.hasWorkoutWriteAuthorization ?? false)
+                }
+            }
+        }
+    }
+
+    private var hasWorkoutWriteAuthorization: Bool {
+        store.authorizationStatus(for: HKObjectType.workoutType()) == .sharingAuthorized
+    }
+
+    private func canWrite(_ type: HKSampleType) -> Bool {
+        store.authorizationStatus(for: type) == .sharingAuthorized
+    }
+
+    private func writeTypes() -> Set<HKSampleType> {
         var share: Set<HKSampleType> = [HKObjectType.workoutType(), HKSeriesType.workoutRoute()]
         if let e = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) { share.insert(e) }
+        if let b = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned) { share.insert(b) }
         if let dC = HKObjectType.quantityType(forIdentifier: .distanceCycling) { share.insert(dC) }
         if let dWR = HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning) { share.insert(dWR) }
-
-        store.requestAuthorization(toShare: share, read: read) { _, _ in }
+        if #available(iOS 17.0, *),
+           let sC = HKObjectType.quantityType(forIdentifier: .cyclingSpeed) {
+            share.insert(sC)
+        }
+        return share
     }
 
     // MARK: - 读心率（兜底检测）
@@ -80,9 +118,9 @@ final class HealthService {
     /// 把一条运动写成 `HKWorkout`（含能量 / 距离 / GPS 路线）。返回 workout UUID；失败 nil。
     func saveWorkout(
         activityType: ActivityType, start: Date, end: Date,
-        calories: Double?, distanceMeters: Double?, route: [RoutePointDTO]
+        calories: Double?, distanceMeters: Double?, avgSpeedMps: Double? = nil, route: [RoutePointDTO]
     ) async -> UUID? {
-        guard isAvailable else { return nil }
+        guard isAvailable, hasWorkoutWriteAuthorization else { return nil }
         let config = HKWorkoutConfiguration()
         config.activityType = Self.workoutActivityType(for: activityType)
         let builder = HKWorkoutBuilder(healthStore: store, configuration: config, device: .local())
@@ -90,25 +128,46 @@ final class HealthService {
             try await builder.beginCollection(at: start)
 
             var samples: [HKSample] = []
-            if let kcal = calories, let t = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) {
+            if let kcal = calories,
+               let t = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
+               canWrite(t) {
                 samples.append(HKQuantitySample(
                     type: t, quantity: HKQuantity(unit: .kilocalorie(), doubleValue: kcal),
                     start: start, end: end))
             }
+            if let basalKcal = restingEnergyKcal(start: start, end: end),
+               let t = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned),
+               canWrite(t) {
+                samples.append(HKQuantitySample(
+                    type: t, quantity: HKQuantity(unit: .kilocalorie(), doubleValue: basalKcal),
+                    start: start, end: end))
+            }
             if let dist = distanceMeters {
                 let id: HKQuantityTypeIdentifier = activityType == .cycling ? .distanceCycling : .distanceWalkingRunning
-                if let t = HKQuantityType.quantityType(forIdentifier: id) {
+                if let t = HKQuantityType.quantityType(forIdentifier: id), canWrite(t) {
                     samples.append(HKQuantitySample(
                         type: t, quantity: HKQuantity(unit: .meter(), doubleValue: dist),
                         start: start, end: end))
                 }
+            }
+            if #available(iOS 17.0, *),
+               activityType == .cycling,
+               let speed = avgSpeedMps,
+               let t = HKQuantityType.quantityType(forIdentifier: .cyclingSpeed),
+               canWrite(t) {
+                samples.append(HKQuantitySample(
+                    type: t,
+                    quantity: HKQuantity(unit: .meter().unitDivided(by: .second()), doubleValue: speed),
+                    start: start,
+                    end: end
+                ))
             }
             if !samples.isEmpty { try await builder.addSamples(samples) }
 
             try await builder.endCollection(at: end)
             guard let workout = try await builder.finishWorkout() else { return nil }
 
-            if !route.isEmpty {
+            if !route.isEmpty, canWrite(HKSeriesType.workoutRoute()) {
                 let routeBuilder = HKWorkoutRouteBuilder(healthStore: store, device: .local())
                 let locations = route.map {
                     CLLocation(
@@ -116,12 +175,45 @@ final class HealthService {
                         altitude: 0, horizontalAccuracy: 5, verticalAccuracy: -1,
                         course: -1, speed: max(0, $0.speedMps), timestamp: $0.timestamp)
                 }
-                try await routeBuilder.insertRouteData(locations)
-                try await routeBuilder.finishRoute(with: workout, metadata: nil)
+                do {
+                    try await routeBuilder.insertRouteData(locations)
+                    try await routeBuilder.finishRoute(with: workout, metadata: nil)
+                } catch {
+                    // Workout 已经写入成功；路线失败不影响主记录。
+                }
             }
             return workout.uuid
         } catch {
             return nil
         }
+    }
+
+    func deleteWorkout(uuid: UUID) async -> Bool {
+        guard isAvailable, hasWorkoutWriteAuthorization else { return false }
+        let predicate = HKQuery.predicateForObject(with: uuid)
+        let workouts: [HKWorkout] = await withCheckedContinuation { cont in
+            let query = HKSampleQuery(
+                sampleType: HKObjectType.workoutType(),
+                predicate: predicate,
+                limit: 1,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                cont.resume(returning: samples as? [HKWorkout] ?? [])
+            }
+            store.execute(query)
+        }
+        guard let workout = workouts.first else { return false }
+        return await withCheckedContinuation { cont in
+            store.delete(workout) { success, _ in
+                cont.resume(returning: success)
+            }
+        }
+    }
+
+    /// HealthKit 的“总千卡”通常由动态能量 + 静息能量构成；这里用 70kg 的保守默认值估算静息能量。
+    private func restingEnergyKcal(start: Date, end: Date) -> Double? {
+        let duration = end.timeIntervalSince(start)
+        guard duration > 0 else { return nil }
+        return 70 * duration / 3600
     }
 }

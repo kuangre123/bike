@@ -6,13 +6,12 @@ import CyclingDomain
 @MainActor
 final class MotionHistoryService {
     private let activityManager = CMMotionActivityManager()
-    private let queue = OperationQueue()
 
     /// 查询 [from, to] 的运动历史 → 运动时段（仅切分，过滤交给 mergeActivitySegments）。
     func activitySegments(from: Date, to: Date) async -> [MotionSegment] {
         guard CMMotionActivityManager.isActivityAvailable() else { return [] }
         let samples: [RawActivitySample] = await withCheckedContinuation { cont in
-            activityManager.queryActivityStarting(from: from, to: to, to: queue) { activities, _ in
+            activityManager.queryActivityStarting(from: from, to: to, to: .main) { activities, _ in
                 // 回调线程内把非 Sendable 的 CMMotionActivity 映射成 Sendable 的 RawActivitySample
                 let mapped = (activities ?? []).map { act in
                     RawActivitySample(

@@ -49,4 +49,25 @@ final class SegmentMergingTests: XCTestCase {
         let merged = mergeActivitySegments(segs, maxGap: 60, minDuration: 90)
         XCTAssertEqual(merged[0].confidence, 2)
     }
+
+    func test_cyclingCanUseLongerGapWithoutChangingWalking() {
+        let segs = [
+            MotionSegment(activityType: .cycling, start: d(0), end: d(120), confidence: 2),
+            MotionSegment(activityType: .cycling, start: d(1_080), end: d(1_320), confidence: 2),
+            MotionSegment(activityType: .walking, start: d(2_000), end: d(2_120), confidence: 2),
+            MotionSegment(activityType: .walking, start: d(2_600), end: d(2_780), confidence: 2),
+        ]
+        let merged = mergeActivitySegments(
+            segs,
+            maxGap: RideDetectionPolicy.defaultMotionMergeGap,
+            minDuration: 90,
+            gapForType: RideDetectionPolicy.motionMergeGap(for:)
+        )
+        XCTAssertEqual(merged.count, 3)
+        XCTAssertEqual(merged[0].activityType, .cycling)
+        XCTAssertEqual(merged[0].start, d(0))
+        XCTAssertEqual(merged[0].end, d(1_320))
+        XCTAssertEqual(merged[1].activityType, .walking)
+        XCTAssertEqual(merged[2].activityType, .walking)
+    }
 }

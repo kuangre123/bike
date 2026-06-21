@@ -43,8 +43,21 @@ final class RideReconcilerTests: XCTestCase {
         XCTAssertEqual(rides.count, 1)
         XCTAssertEqual(rides[0].source, .motionOnly)
         XCTAssertEqual(rides[0].activityType, .walking)
-        XCTAssertNil(rides[0].distanceMeters)
+        XCTAssertNotNil(rides[0].distanceMeters)
+        XCTAssertNotNil(rides[0].avgSpeedMps)
+        XCTAssertNotNil(rides[0].calories)
         XCTAssertEqual(rides[0].confidence, 1)
+    }
+
+    func test_motionOnlyCyclingGetsEstimatedMetrics() {
+        let motion = [MotionSegment(activityType: .cycling, start: d(0), end: d(37 * 60 + 31), confidence: 2)]
+        let rides = RideReconciler.reconcile(motionSegments: motion, trackedRides: [])
+        XCTAssertEqual(rides.count, 1)
+        XCTAssertEqual(rides[0].source, .motionOnly)
+        XCTAssertEqual(rides[0].activityType, .cycling)
+        XCTAssertNotNil(rides[0].distanceMeters)
+        XCTAssertNotNil(rides[0].avgSpeedMps)
+        XCTAssertNotNil(rides[0].calories)
     }
 
     func test_trackedWithoutMotionIsGpsTracked() {
@@ -56,16 +69,37 @@ final class RideReconcilerTests: XCTestCase {
 
     func test_implausibleSpeedTrackedIsDropped() {
         // 约 120 km/h 的「骑行」→ 速度不合理 → 丢弃
+        let duration: TimeInterval = 180
         let fast = TrackedRide(
             activityType: .cycling,
-            start: d(0), end: d(100),
+            start: d(0), end: d(duration),
             samples: [
                 GPSSample(timestamp: d(0), latitude: 0, longitude: 0, speedMps: 33),
-                GPSSample(timestamp: d(100), latitude: (33.3 * 100) / 111_320.0, longitude: 0, speedMps: 33),
+                GPSSample(timestamp: d(duration), latitude: (33.3 * duration) / 111_320.0, longitude: 0, speedMps: 33),
             ]
         )
         let rides = RideReconciler.reconcile(motionSegments: [], trackedRides: [fast])
         XCTAssertTrue(rides.isEmpty)
+    }
+
+    func test_shortTrackedRideIsIgnoredByDefault() {
+        let rides = RideReconciler.reconcile(motionSegments: [], trackedRides: [trackedCycling(start: 0, durationSec: 90)])
+        XCTAssertTrue(rides.isEmpty)
+    }
+
+    func test_shortMotionSegmentIsIgnoredByDefault() {
+        let motion = [MotionSegment(activityType: .walking, start: d(0), end: d(90), confidence: 2)]
+        let rides = RideReconciler.reconcile(motionSegments: motion, trackedRides: [])
+        XCTAssertTrue(rides.isEmpty)
+    }
+
+    func test_customMinimumDurationAllowsShorterRide() {
+        let rides = RideReconciler.reconcile(
+            motionSegments: [],
+            trackedRides: [trackedCycling(start: 0, durationSec: 90)],
+            minimumDuration: 60
+        )
+        XCTAssertEqual(rides.count, 1)
     }
 
     func test_resultSortedByStart() {

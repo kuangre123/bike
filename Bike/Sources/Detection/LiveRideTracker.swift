@@ -55,8 +55,8 @@ final class LiveRideTracker: NSObject, CLLocationManagerDelegate {
                 speedMps: max(0, loc.speed)
             )
         }
-        MainActor.assumeIsolated {
-            samples.append(contentsOf: mapped)
+        Task { @MainActor [weak self, mapped] in
+            self?.samples.append(contentsOf: mapped)
         }
     }
 }

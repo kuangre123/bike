@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 设置：权限状态 + 手动对账（M3 调试 / 演示用）。
+/// 设置：权限状态 + 手动同步（M3 调试 / 演示用）。
 struct SettingsView: View {
     @Environment(PermissionsManager.self) private var permissions
     @Environment(RideDetectionCoordinator.self) private var coordinator
@@ -16,17 +16,17 @@ struct SettingsView: View {
                     Button("请求权限") { permissions.requestAll() }
                 }
                 Section("检测") {
-                    Button("立即对账") {
+                    Button("同步运动数据") {
                         Task { await coordinator.runReconciliation() }
                     }
                     if let last = coordinator.lastReconcileDate {
-                        LabeledContent("上次对账", value: last.formatted(date: .omitted, time: .standard))
+                        LabeledContent("上次同步", value: last.formatted(date: .omitted, time: .standard))
                     }
                     LabeledContent("本次会话已保存", value: "\(coordinator.savedRideCount)")
                 }
                 Section("Apple 健康") {
                     Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)
-                    Text("检测到的运动会写成 Apple 健康里的一次运动（含距离/卡路里/路线）。")
+                    Text("检测到新运动并准备写入时，系统才会请求写入权限；没有新记录时不会弹出。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
