@@ -106,6 +106,8 @@ struct RideTimelineView: View {
             .fullScreenCover(isPresented: $showingManualRide) {
                 ManualRideView(onSave: saveManualRide)
             }
+            .task { PhoneWatchSync.shared.send(todaySummary) }
+            .onChange(of: rides.count) { PhoneWatchSync.shared.send(todaySummary) }
             .onAppear {
                 permissions.refresh()
                 #if DEBUG
@@ -168,6 +170,16 @@ struct RideTimelineView: View {
         } else {
             permissions.requestAll()
         }
+    }
+
+    /// 今日概览（同步给手表）。
+    private var todaySummary: WatchDaySummary {
+        let today = rides.filter { Calendar.current.isDateInToday($0.startDate) }
+        return WatchDaySummary(
+            count: today.count,
+            durationSeconds: today.reduce(0) { $0 + $1.duration },
+            distanceMeters: today.reduce(0) { $0 + ($1.distanceMeters ?? 0) }
+        )
     }
 
     /// 按自然日分组；日组按日期倒序，组内沿用 @Query 的开始时间倒序。
