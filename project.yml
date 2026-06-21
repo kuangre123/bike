@@ -59,6 +59,7 @@ targets:
     dependencies:
       - package: CyclingDomain
         product: CyclingDomain
+      - target: BikeWatch
     entitlements:
       path: Bike/Bike.entitlements
       properties:
@@ -85,6 +86,38 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bochen.bike.tests
         GENERATE_INFOPLIST_FILE: YES
+
+  BikeWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: BikeWatch/Sources
+        excludes:
+          - "**/.DS_Store"
+    info:
+      path: BikeWatch/Info.plist
+      properties:
+        CFBundleDisplayName: "快乐轻骑"
+        CFBundleName: "快乐轻骑"
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: "com.bochen.bike"
+        WKBackgroundModes:
+          - workout-processing
+        NSHealthShareUsageDescription: "在手表上读取运动心率与能量。"
+        NSHealthUpdateUsageDescription: "把手表上记录的运动写入 Apple 健康。"
+    dependencies:
+      - package: CyclingDomain
+        product: CyclingDomain
+    entitlements:
+      path: BikeWatch/BikeWatch.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+    settings:
+      base:
+        INFOPLIST_FILE: BikeWatch/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.bochen.bike.watchkitapp
+        TARGETED_DEVICE_FAMILY: "4"
 
 schemes:
   Bike:
