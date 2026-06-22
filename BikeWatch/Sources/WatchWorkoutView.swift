@@ -1,13 +1,63 @@
 import SwiftUI
 import CyclingDomain
 
-/// 手表进行中运动：时长 + 心率 + 距离/速度 + 能量，可结束。
+/// 手表运动页：两段式。
+/// ① 引导段：底部固定大按钮「允许并开始」，点了才请求系统授权 + 开始（避免一进页面就被系统弹窗怼脸）。
+/// ② 进行段：时长/心率/距离/速度/能量，底部固定「结束」。
 struct WatchWorkoutView: View {
     let activityType: ActivityType
     @State private var manager = WatchWorkoutManager()
+    @State private var phase: Phase = .intro
     @Environment(\.dismiss) private var dismiss
 
+    private enum Phase { case intro, active }
+
     var body: some View {
+        Group {
+            switch phase {
+            case .intro:  introView
+            case .active: activeView
+            }
+        }
+        .navigationTitle(Self.label(activityType))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: 引导段
+
+    private var introView: some View {
+        VStack(spacing: 8) {
+            Image(systemName: Self.icon(activityType))
+                .font(.system(size: 38, weight: .bold))
+                .foregroundStyle(.tint)
+            Text("准备\(Self.label(activityType))")
+                .font(.headline)
+            Text("将读取心率与定位来记录这次运动")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .safeAreaInset(edge: .bottom) {
+            Button {
+                Task {
+                    await manager.requestAuthorization()
+                    manager.start(activityType: activityType)
+                    phase = .active
+                }
+            } label: {
+                Label("允许并开始", systemImage: "play.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .tint(.green)
+            .padding(.horizontal, 4)
+        }
+    }
+
+    // MARK: 进行段
+
+    private var activeView: some View {
         ScrollView {
             VStack(spacing: 8) {
                 if let start = manager.startDate {
@@ -17,8 +67,7 @@ struct WatchWorkoutView: View {
                             .monospacedDigit()
                     }
                 } else {
-                    Text("--:--")
-                        .font(.system(.title, design: .rounded).weight(.bold))
+                    Text("--:--").font(.system(.title, design: .rounded).weight(.bold))
                 }
 
                 HStack(spacing: 6) {
@@ -37,23 +86,19 @@ struct WatchWorkoutView: View {
                     Text("\(Int(manager.activeCalories)) 千卡")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-
-                Button(role: .destructive) {
-                    manager.end()
-                    dismiss()
-                } label: {
-                    Label("结束", systemImage: "stop.fill").frame(maxWidth: .infinity)
-                }
-                .tint(.red)
-                .padding(.top, 2)
             }
             .padding(.horizontal, 4)
         }
-        .navigationTitle(Self.label(activityType))
-        .navigationBarTitleDisplayMode(.inline)
-        .task {
-            await manager.requestAuthorization()
-            manager.start(activityType: activityType)
+        .safeAreaInset(edge: .bottom) {
+            Button(role: .destructive) {
+                manager.end()
+                dismiss()
+            } label: {
+                Label("结束", systemImage: "stop.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .tint(.red)
+            .padding(.horizontal, 4)
         }
     }
 
