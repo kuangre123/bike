@@ -1,5 +1,6 @@
 import Foundation
 import CoreMotion
+import CoreLocation
 import SwiftData
 import CyclingDomain
 import Observation
@@ -20,6 +21,7 @@ final class RideDetectionCoordinator {
     private var pendingTracked: [TrackedRide] = []
     private var liveStopTask: Task<Void, Never>?
     private var started = false
+    private var monitoring = false
 
     private(set) var lastReconcileDate: Date?
     private(set) var savedRideCount: Int = 0
@@ -30,21 +32,40 @@ final class RideDetectionCoordinator {
         self.notifications = NotificationService(container: container)
     }
 
-    /// 启动检测（幂等）。
+    private var isAuthorized: Bool {
+        let loc = permissions.locationStatus
+        let locOK = (loc == .authorizedAlways || loc == .authorizedWhenInUse)
+        return locOK || permissions.motionStatus == .authorized
+    }
+
+    /// 冷启动（幂等）：**不弹任何权限**。已授权用户静默开始；未授权静待用户从首页开启。
     func start() {
         guard !started else { return }
         started = true
+        guard isAuthorized else { return }
+        beginMonitoring()
+        Task { await runReconciliation() }
+    }
+
+    /// 用户在首页点「开启自动检测」时调用：申请权限并开始检测。
+    func enableDetection() {
         notifications.requestAuthorization()
         permissions.requestAll()
+        Task {
+            _ = await health.requestReadAuthorization()
+            beginMonitoring()
+            await runReconciliation()
+        }
+    }
+
+    private func beginMonitoring() {
+        guard !monitoring else { return }
+        monitoring = true
         wake.onSignificantChange = { [weak self] in
             Task { await self?.runReconciliation() }
         }
         wake.start()
         startActivityMonitoring()
-        Task {
-            _ = await health.requestReadAuthorization()
-            await runReconciliation()
-        }
     }
 
     private func startActivityMonitoring() {

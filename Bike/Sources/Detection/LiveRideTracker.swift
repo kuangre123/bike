@@ -17,8 +17,6 @@ final class LiveRideTracker: NSObject, CLLocationManagerDelegate {
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
         manager.activityType = .fitness
-        manager.allowsBackgroundLocationUpdates = true
-        manager.pausesLocationUpdatesAutomatically = false
     }
 
     var isRunning: Bool { startDate != nil }
@@ -29,6 +27,9 @@ final class LiveRideTracker: NSObject, CLLocationManagerDelegate {
         self.onFinish = onFinish
         samples = []
         startDate = Date()
+        // 只在真正开始追踪时开后台更新（未授权时在 init 设置会触发权限请求）
+        manager.allowsBackgroundLocationUpdates = true
+        manager.pausesLocationUpdatesAutomatically = false
         manager.startUpdatingLocation()
     }
 

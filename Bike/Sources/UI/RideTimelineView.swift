@@ -10,6 +10,7 @@ import CyclingDomain
 struct RideTimelineView: View {
     @Environment(\.modelContext) private var context
     @Environment(PermissionsManager.self) private var permissions
+    @Environment(RideDetectionCoordinator.self) private var coordinator
     @Environment(\.openURL) private var openURL
     @Query(sort: \RideModel.startDate, order: .reverse) private var rides: [RideModel]
     @State private var showingSettings = false
@@ -168,7 +169,7 @@ struct RideTimelineView: View {
             || permissions.motionStatus == .denied || permissions.motionStatus == .restricted {
             openURL(URL(string: UIApplication.openSettingsURLString)!)
         } else {
-            permissions.requestAll()
+            coordinator.enableDetection()
         }
     }
 
