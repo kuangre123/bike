@@ -21,6 +21,14 @@ struct WatchWorkoutView: View {
         }
         .navigationTitle(Self.label(activityType))
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["WATCH_AUTOSTART"] == "1", phase == .intro {
+                manager.start(activityType: activityType)
+                phase = .active
+            }
+            #endif
+        }
     }
 
     // MARK: 引导段
@@ -59,7 +67,7 @@ struct WatchWorkoutView: View {
 
     private var activeView: some View {
         ScrollView {
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 if let start = manager.startDate {
                     TimelineView(.periodic(from: start, by: 1)) { context in
                         Text(elapsedText(start, context.date))
@@ -86,19 +94,20 @@ struct WatchWorkoutView: View {
                     Text("\(Int(manager.activeCalories)) 千卡")
                         .font(.caption).foregroundStyle(.secondary)
                 }
+
+                // 「结束」放进滚动流末尾，避免 safeAreaInset 在小屏压住指标
+                Button(role: .destructive) {
+                    manager.end()
+                    dismiss()
+                } label: {
+                    Label("结束", systemImage: "stop.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .tint(.red)
+                .padding(.top, 6)
             }
             .padding(.horizontal, 4)
-        }
-        .safeAreaInset(edge: .bottom) {
-            Button(role: .destructive) {
-                manager.end()
-                dismiss()
-            } label: {
-                Label("结束", systemImage: "stop.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .tint(.red)
-            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
         }
     }
 
