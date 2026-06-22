@@ -106,6 +106,7 @@ targets:
           - workout-processing
         NSHealthShareUsageDescription: "在手表上读取运动心率与能量。"
         NSHealthUpdateUsageDescription: "把手表上记录的运动写入 Apple 健康。"
+        NSLocationWhenInUseUsageDescription: "在手表上记录骑行的距离、速度与路线。"
     dependencies:
       - package: CyclingDomain
         product: CyclingDomain
