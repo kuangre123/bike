@@ -18,3 +18,5 @@ Bike/Info.plist
 Bike/Bike.entitlements
 BikeWatch/Info.plist
 BikeWatch/BikeWatch.entitlements
+BikeWatchWidget/Info.plist
+BikeWatchWidget/BikeWatchWidget.entitlements

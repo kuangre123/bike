@@ -110,14 +110,40 @@ targets:
     dependencies:
       - package: CyclingDomain
         product: CyclingDomain
+      - target: BikeWatchWidget
     entitlements:
       path: BikeWatch/BikeWatch.entitlements
       properties:
         com.apple.developer.healthkit: true
+        com.apple.security.application-groups:
+          - group.com.bochen.bike
     settings:
       base:
         INFOPLIST_FILE: BikeWatch/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.bochen.bike.watchkitapp
+        TARGETED_DEVICE_FAMILY: "4"
+
+  BikeWatchWidget:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: BikeWatchWidget/Sources
+    info:
+      path: BikeWatchWidget/Info.plist
+      properties:
+        CFBundleDisplayName: "快乐轻骑"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: BikeWatchWidget/BikeWatchWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.bochen.bike
+    settings:
+      base:
+        INFOPLIST_FILE: BikeWatchWidget/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.bochen.bike.watchkitapp.widget
         TARGETED_DEVICE_FAMILY: "4"
 
 schemes:
