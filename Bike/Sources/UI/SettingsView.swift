@@ -6,6 +6,8 @@ struct SettingsView: View {
     @Environment(RideDetectionCoordinator.self) private var coordinator
     @Environment(\.dismiss) private var dismiss
     @AppStorage("healthWriteBack") private var healthWriteBack = true
+    @State private var duplicateCleanupMessage: String?
+    @State private var isCleaningDuplicates = false
 
     var body: some View {
         NavigationStack {
@@ -26,6 +28,15 @@ struct SettingsView: View {
                 }
                 Section("Apple 健康") {
                     Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)
+                    Button(isCleaningDuplicates ? "正在清理..." : "清理重复健康记录") {
+                        Task { await cleanupHealthDuplicates() }
+                    }
+                    .disabled(isCleaningDuplicates)
+                    if let duplicateCleanupMessage {
+                        Text(duplicateCleanupMessage)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     Text("检测到新运动并准备写入时，系统才会请求写入权限；没有新记录时不会弹出。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -38,6 +49,20 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private func cleanupHealthDuplicates() async {
+        isCleaningDuplicates = true
+        duplicateCleanupMessage = nil
+        let health = HealthService()
+        guard await health.requestWriteAuthorization() else {
+            duplicateCleanupMessage = "需要先允许写入 Apple 健康。"
+            isCleaningDuplicates = false
+            return
+        }
+        let count = await health.cleanupDuplicateWorkouts()
+        duplicateCleanupMessage = count == 0 ? "没有发现本 app 写入的重复记录。" : "已清理 \(count) 条重复记录。"
+        isCleaningDuplicates = false
     }
 
     private var motionText: String {

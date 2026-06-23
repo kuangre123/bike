@@ -39,12 +39,10 @@ final class HealthService {
         guard isAvailable else { return false }
         let share = writeTypes()
         guard !share.isEmpty else { return false }
-        if hasWorkoutWriteAuthorization {
-            return true
-        }
+        let read: Set<HKObjectType> = [HKObjectType.workoutType()]
 
         return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
-            store.requestAuthorization(toShare: share, read: []) { [weak self] _, _ in
+            store.requestAuthorization(toShare: share, read: read) { [weak self] _, _ in
                 Task { @MainActor in
                     cont.resume(returning: self?.hasWorkoutWriteAuthorization ?? false)
                 }
@@ -115,12 +113,90 @@ final class HealthService {
 
     // MARK: - 写运动
 
+    /// HealthKit 里已有的「本 app + 同类型 + 近似同时间」运动；用于幂等写入和重复清理。
+    private func matchingWorkouts(activityType: ActivityType, start: Date, end: Date) async -> [HKWorkout] {
+        let timePred = HKQuery.predicateForSamples(
+            withStart: start.addingTimeInterval(-120), end: end.addingTimeInterval(120), options: [])
+        let sourcePred = HKQuery.predicateForObjects(from: HKSource.default())
+        let typePred = HKQuery.predicateForWorkouts(with: Self.workoutActivityType(for: activityType))
+        let pred = NSCompoundPredicate(andPredicateWithSubpredicates: [timePred, sourcePred, typePred])
+        let workouts: [HKWorkout] = await withCheckedContinuation { (cont: CheckedContinuation<[HKWorkout], Never>) in
+            let query = HKSampleQuery(
+                sampleType: HKObjectType.workoutType(),
+                predicate: pred,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+            ) { _, samples, _ in
+                cont.resume(returning: samples as? [HKWorkout] ?? [])
+            }
+            store.execute(query)
+        }
+        return workouts.filter {
+            abs($0.startDate.timeIntervalSince(start)) <= 120
+                && abs($0.endDate.timeIntervalSince(end)) <= 120
+        }
+    }
+
+    private func deleteDuplicateWorkouts(_ workouts: [HKWorkout]) async {
+        guard !workouts.isEmpty else { return }
+        for workout in workouts {
+            _ = await withCheckedContinuation { cont in
+                store.delete(workout) { success, _ in
+                    cont.resume(returning: success)
+                }
+            }
+        }
+    }
+
+    func cleanupDuplicateWorkouts(days: Int = 30) async -> Int {
+        guard isAvailable, hasWorkoutWriteAuthorization else { return 0 }
+        let now = Date()
+        let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            HKQuery.predicateForSamples(
+                withStart: now.addingTimeInterval(TimeInterval(-days * 24 * 3600)),
+                end: now,
+                options: []
+            ),
+            HKQuery.predicateForObjects(from: HKSource.default())
+        ])
+        let workouts: [HKWorkout] = await withCheckedContinuation { cont in
+            let query = HKSampleQuery(
+                sampleType: HKObjectType.workoutType(),
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+            ) { _, samples, _ in
+                cont.resume(returning: samples as? [HKWorkout] ?? [])
+            }
+            store.execute(query)
+        }
+
+        let grouped = Dictionary(grouping: workouts, by: duplicateGroupKey(for:))
+        let duplicates = grouped.values.flatMap { group in
+            Array(group.dropFirst())
+        }
+        await deleteDuplicateWorkouts(duplicates)
+        return duplicates.count
+    }
+
+    private func duplicateGroupKey(for workout: HKWorkout) -> String {
+        let startBucket = Int(workout.startDate.timeIntervalSince1970 / 120)
+        let endBucket = Int(workout.endDate.timeIntervalSince1970 / 120)
+        return "\(workout.workoutActivityType.rawValue)-\(startBucket)-\(endBucket)"
+    }
+
     /// 把一条运动写成 `HKWorkout`（含能量 / 距离 / GPS 路线）。返回 workout UUID；失败 nil。
+    /// 幂等：HealthKit 里已有同 app/类型/时间段的运动则直接返回，不重复写。
     func saveWorkout(
         activityType: ActivityType, start: Date, end: Date,
         calories: Double?, distanceMeters: Double?, avgSpeedMps: Double? = nil, route: [RoutePointDTO]
     ) async -> UUID? {
         guard isAvailable, hasWorkoutWriteAuthorization else { return nil }
+        let existing = await matchingWorkouts(activityType: activityType, start: start, end: end)
+        if let workout = existing.first {
+            await deleteDuplicateWorkouts(Array(existing.dropFirst()))
+            return workout.uuid
+        }
         let config = HKWorkoutConfiguration()
         config.activityType = Self.workoutActivityType(for: activityType)
         let builder = HKWorkoutBuilder(healthStore: store, configuration: config, device: .local())

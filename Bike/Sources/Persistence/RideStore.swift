@@ -23,7 +23,7 @@ struct RideStore {
                     autoDetected
                         && $0.isAutoDetected
                         && $0.activityTypeRaw == ride.activityType.rawValue
-                        && ride.duration >= $0.duration
+                        && isBetterAutoDetectedRide(ride, than: $0)
                 }
                 let blocked = overlapping.count != replaceable.count
                 if blocked { continue }
@@ -39,6 +39,17 @@ struct RideStore {
         }
         try context.save()
         return inserted
+    }
+
+    /// 只在自动检测结果明显更完整时替换旧记录，避免每次对账把同一段运动反复写进 Apple 健康。
+    private func isBetterAutoDetectedRide(_ ride: Ride, than model: RideModel) -> Bool {
+        if (model.routeData == nil || model.routeData?.isEmpty == true), ride.route?.isEmpty == false {
+            return true
+        }
+        if model.distanceMeters == nil, ride.distanceMeters != nil {
+            return true
+        }
+        return ride.duration >= model.duration + 60
     }
 
     /// 全部运动，按开始时间倒序。

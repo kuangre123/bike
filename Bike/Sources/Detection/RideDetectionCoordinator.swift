@@ -22,6 +22,7 @@ final class RideDetectionCoordinator {
     private var liveStopTask: Task<Void, Never>?
     private var started = false
     private var monitoring = false
+    private var reconciling = false
 
     private(set) var lastReconcileDate: Date?
     private(set) var savedRideCount: Int = 0
@@ -109,6 +110,9 @@ final class RideDetectionCoordinator {
     /// 回溯 [now-window, now] 运动历史 + 心率，与已采 tracked 对账，落库去重。
     /// 刚结束（20 分钟内）的新运动 → 推「已记录 · 撤销」通知（乐观添加）。
     func runReconciliation(window: TimeInterval = 7 * 24 * 3600) async {
+        guard !reconciling else { return }   // 防并发重入，避免重复写入
+        reconciling = true
+        defer { reconciling = false }
         let now = Date()
         let from = now.addingTimeInterval(-window)
 
