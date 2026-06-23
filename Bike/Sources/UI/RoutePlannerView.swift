@@ -8,6 +8,7 @@ struct RoutePlannerView: View {
     @State private var query = ""
     @State private var results: [Destination] = []
     @State private var plan: RoutePlan?
+    @State private var lastDestination: GeoCoordinate?
     @State private var loading = false
     @State private var errorText: String?
     @State private var showConsent = false
@@ -34,6 +35,13 @@ struct RoutePlannerView: View {
                         LabeledContent("预计", value: "\(plan.estimatedMinutes) 分钟")
                         Label("已尽量避开主干道", systemImage: "leaf")
                             .font(.caption).foregroundStyle(.secondary)
+                        if let dest = lastDestination {
+                            NavigationLink {
+                                RideNavigationView(plan: plan, destination: dest)
+                            } label: {
+                                Label("开始导航", systemImage: "location.north.line.fill")
+                            }
+                        }
                     }
                 }
 
@@ -101,7 +109,7 @@ struct RoutePlannerView: View {
         let result = await service.route(from: from, to: dest.coordinate)
         loading = false
         switch result {
-        case .success(let p): plan = p
+        case .success(let p): plan = p; lastDestination = dest.coordinate
         case .failure(let e): errorText = message(for: e)
         }
     }
