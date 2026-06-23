@@ -26,18 +26,24 @@ struct BikeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RideTimelineView()
-                .environment(permissions)
-                .environment(coordinator)
-                .task {
-                    #if DEBUG
-                    // 截图/演示模式：跳过权限请求与后台调度，避免弹窗遮挡 UI
-                    let env = ProcessInfo.processInfo.environment
-                    if env["SEED_SAMPLE"] == "1" || env["OPEN_FIRST_DETAIL"] == "1" { return }
-                    #endif
-                    coordinator.start()
-                    BackgroundReconcileTask.schedule()
-                }
+            TabView {
+                RideTimelineView()
+                    .environment(permissions)
+                    .environment(coordinator)
+                    .tabItem { Label("运动", systemImage: "figure.run") }
+
+                RoutePlannerView()
+                    .tabItem { Label("路线", systemImage: "map") }
+            }
+            .task {
+                #if DEBUG
+                // 截图/演示模式：跳过权限请求与后台调度，避免弹窗遮挡 UI
+                let env = ProcessInfo.processInfo.environment
+                if env["SEED_SAMPLE"] == "1" || env["OPEN_FIRST_DETAIL"] == "1" { return }
+                #endif
+                coordinator.start()
+                BackgroundReconcileTask.schedule()
+            }
         }
         .modelContainer(container)
     }
