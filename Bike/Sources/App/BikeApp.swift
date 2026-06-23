@@ -35,6 +35,7 @@ struct BikeApp: App {
                 RoutePlannerView()
                     .tabItem { Label("路线", systemImage: "map") }
             }
+            .preferredColorScheme(.light)   // UI 为浅色设计（白卡片+浅渐变），锁定浅色避免深色模式白字隐形
             .task {
                 #if DEBUG
                 // 截图/演示模式：跳过权限请求与后台调度，避免弹窗遮挡 UI
