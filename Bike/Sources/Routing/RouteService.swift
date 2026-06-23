@@ -17,7 +17,10 @@ struct RouteService {
         from: GeoCoordinate, to: GeoCoordinate, profile: String = "trekking"
     ) async -> Result<RoutePlan, RouteError> {
         guard RoutePrefs.networkEnabled else { return .failure(.networkDisabled) }
-        let lonlats = "\(from.longitude),\(from.latitude)|\(to.longitude),\(to.latitude)"
+        // 与 BRouter(WGS-84) 通信前，把 Apple 的 GCJ-02 起终点转成 WGS-84
+        let fromW = ChinaGeo.gcj02ToWgs84(from)
+        let toW = ChinaGeo.gcj02ToWgs84(to)
+        let lonlats = "\(fromW.longitude),\(fromW.latitude)|\(toW.longitude),\(toW.latitude)"
         var comps = URLComponents(string: baseURL)!
         comps.queryItems = [
             .init(name: "lonlats", value: lonlats),
@@ -32,7 +35,12 @@ struct RouteService {
                 return .failure(.server)
             }
             guard let plan = parseBRouterGeoJSON(data) else { return .failure(.noRoute) }
-            return .success(plan)
+            // BRouter 返回 WGS-84，转回 GCJ-02 以便画在 Apple 地图上对齐（否则偏移穿楼）
+            let aligned = RoutePlan(
+                coordinates: plan.coordinates.map(ChinaGeo.wgs84ToGcj02),
+                distanceMeters: plan.distanceMeters,
+                estimatedSeconds: plan.estimatedSeconds)
+            return .success(aligned)
         } catch {
             return .failure(.offline)
         }
