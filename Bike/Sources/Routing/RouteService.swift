@@ -16,11 +16,20 @@ struct RouteService {
     func route(
         from: GeoCoordinate, to: GeoCoordinate, profile: String = "trekking"
     ) async -> Result<RoutePlan, RouteError> {
+        await route(through: [from, to], profile: profile)
+    }
+
+    /// 经过多个航点算一条路线（环线推荐：起点→顶点→顶点→回起点）。
+    func route(
+        through waypoints: [GeoCoordinate], profile: String = "trekking"
+    ) async -> Result<RoutePlan, RouteError> {
         guard RoutePrefs.networkEnabled else { return .failure(.networkDisabled) }
-        // 与 BRouter(WGS-84) 通信前，把 Apple 的 GCJ-02 起终点转成 WGS-84
-        let fromW = ChinaGeo.gcj02ToWgs84(from)
-        let toW = ChinaGeo.gcj02ToWgs84(to)
-        let lonlats = "\(fromW.longitude),\(fromW.latitude)|\(toW.longitude),\(toW.latitude)"
+        guard waypoints.count >= 2 else { return .failure(.noRoute) }
+        // 与 BRouter(WGS-84) 通信前，把 Apple 的 GCJ-02 航点逐个转成 WGS-84
+        let lonlats = waypoints
+            .map(ChinaGeo.gcj02ToWgs84)
+            .map { "\($0.longitude),\($0.latitude)" }
+            .joined(separator: "|")
         var comps = URLComponents(string: baseURL)!
         comps.queryItems = [
             .init(name: "lonlats", value: lonlats),

@@ -12,11 +12,17 @@ struct RoutePlannerView: View {
     @State private var loading = false
     @State private var errorText: String?
     @State private var showConsent = false
+    @State private var scenic: [Destination] = []
+    @State private var scenicLoading = false
     @AppStorage("routeNetworkEnabled") private var networkEnabled = false
 
     private let locationManager = CLLocationManager()
     private let search = DestinationSearch()
     private let service = RouteService()
+    private let loops = defaultLoopSuggestions()
+
+    /// 默认落地态（无搜索、无已选路线）→ 展示推荐。
+    private var showingRecommendations: Bool { plan == nil && results.isEmpty }
 
     var body: some View {
         NavigationStack {
@@ -24,6 +30,58 @@ struct RoutePlannerView: View {
                 Section {
                     TextField("搜索目的地", text: $query)
                         .onSubmit { Task { await runSearch() } }
+                }
+
+                if showingRecommendations {
+                    Section("环形骑行路线") {
+                        ForEach(loops) { loop in
+                            Button {
+                                Task { await planLoop(loop) }
+                            } label: {
+                                Label {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("约 \(Int(loop.targetKilometers)) 公里环线")
+                                        Text("从当前位置出发，绕一圈回到起点")
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
+                                } icon: {
+                                    Image(systemName: "arrow.triangle.capsulepath").foregroundStyle(.tint)
+                                }
+                            }
+                        }
+                    }
+
+                    Section("附近风景目的地") {
+                        if scenicLoading {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                Text("正在找附近好去处…").font(.caption).foregroundStyle(.secondary)
+                            }
+                        } else if scenic.isEmpty {
+                            Text("附近暂时没找到推荐目的地")
+                                .font(.caption).foregroundStyle(.secondary)
+                        } else {
+                            ForEach(scenic) { dest in
+                                Button {
+                                    Task { await planRoute(to: dest) }
+                                } label: {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(dest.name)
+                                            if !dest.subtitle.isEmpty {
+                                                Text(dest.subtitle).font(.caption)
+                                                    .foregroundStyle(.secondary).lineLimit(1)
+                                            }
+                                        }
+                                        Spacer()
+                                        if let dist = distanceText(to: dest.coordinate) {
+                                            Text(dist).font(.caption).foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if let plan {
@@ -41,6 +99,13 @@ struct RoutePlannerView: View {
                             } label: {
                                 Label("开始导航", systemImage: "location.north.line.fill")
                             }
+                        }
+                        Button(role: .cancel) {
+                            self.plan = nil
+                            lastDestination = nil
+                            results = []
+                        } label: {
+                            Label("重新选择", systemImage: "chevron.left")
                         }
                     }
                 }
@@ -70,6 +135,7 @@ struct RoutePlannerView: View {
             .overlay { if loading { ProgressView() } }
             .sheet(isPresented: $showConsent) { consentSheet }
             .onAppear { locationManager.requestWhenInUseAuthorization() }
+            .task { await loadScenic() }
         }
     }
 
@@ -112,6 +178,51 @@ struct RoutePlannerView: View {
         case .success(let p): plan = p; lastDestination = dest.coordinate
         case .failure(let e): errorText = message(for: e)
         }
+    }
+
+    /// 规划一条环线：当前位置出发，绕一圈回起点。
+    private func planLoop(_ loop: LoopSuggestion) async {
+        guard networkEnabled else { showConsent = true; return }
+        guard let from = currentCoordinate() else { errorText = "无法获取当前位置"; return }
+        loading = true
+        errorText = nil
+        // 直线三角骨架沿路绕行后实际里程约为 1.4× 骨架长，故把骨架按系数缩小，
+        // 让算出的真实环线更接近卡片标注的「约 X 公里」。
+        let roadFactor = 0.72
+        let waypoints = loopWaypoints(
+            origin: from,
+            targetMeters: loop.targetMeters * roadFactor,
+            startBearingDegrees: loop.startBearingDegrees)
+        let result = await service.route(through: waypoints)
+        loading = false
+        switch result {
+        case .success(let p): plan = p; lastDestination = from   // 环线终点=起点
+        case .failure(let e): errorText = message(for: e)
+        }
+    }
+
+    /// 进页面时加载附近风景目的地（等定位就绪，最多约 3 秒）。走 Apple 地图，无需联网同意。
+    private func loadScenic() async {
+        guard scenic.isEmpty, !scenicLoading else { return }
+        scenicLoading = true
+        defer { scenicLoading = false }
+        var center = currentCoordinate()
+        var tries = 0
+        while center == nil && tries < 6 {
+            try? await Task.sleep(for: .milliseconds(500))
+            center = currentCoordinate()
+            tries += 1
+        }
+        guard let center else { return }
+        scenic = await search.nearbyScenic(near: center)
+    }
+
+    /// 当前位置到某坐标的直线距离文案（推荐目的地用）。
+    private func distanceText(to coord: GeoCoordinate) -> String? {
+        guard let from = currentCoordinate() else { return nil }
+        let d = CLLocation(latitude: from.latitude, longitude: from.longitude)
+            .distance(from: CLLocation(latitude: coord.latitude, longitude: coord.longitude))
+        return d >= 1000 ? String(format: "%.1fkm", d / 1000) : String(format: "%.0fm", d)
     }
 
     private func message(for error: RouteError) -> String {

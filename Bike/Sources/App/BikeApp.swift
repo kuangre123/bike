@@ -6,6 +6,12 @@ struct BikeApp: App {
     private let container: ModelContainer
     @State private var permissions: PermissionsManager
     @State private var coordinator: RideDetectionCoordinator
+    @State private var selectedTab: Int = {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["OPEN_ROUTE_TAB"] == "1" { return 1 }
+        #endif
+        return 0
+    }()
 
     init() {
         let container: ModelContainer
@@ -26,14 +32,16 @@ struct BikeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            TabView {
+            TabView(selection: $selectedTab) {
                 RideTimelineView()
                     .environment(permissions)
                     .environment(coordinator)
                     .tabItem { Label("运动", systemImage: "figure.run") }
+                    .tag(0)
 
                 RoutePlannerView()
                     .tabItem { Label("路线", systemImage: "map") }
+                    .tag(1)
             }
             .preferredColorScheme(.light)   // UI 为浅色设计（白卡片+浅渐变），锁定浅色避免深色模式白字隐形
             .task {

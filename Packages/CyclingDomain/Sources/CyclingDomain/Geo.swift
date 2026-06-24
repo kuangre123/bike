@@ -17,3 +17,15 @@ public func signedTurnDegrees(incoming: Double, outgoing: Double) -> Double {
     if d < -180 { d += 360 }
     return d
 }
+
+/// 从 origin 出发，按航向(度，正北=0 顺时针)走 distanceMeters 米后的目标点（球面大圆，R=6371km）。
+public func destination(from origin: GeoCoordinate, bearingDegrees: Double, distanceMeters: Double) -> GeoCoordinate {
+    let R = 6_371_000.0
+    let d = distanceMeters / R
+    let brng = bearingDegrees * .pi / 180
+    let lat1 = origin.latitude * .pi / 180
+    let lon1 = origin.longitude * .pi / 180
+    let lat2 = asin(sin(lat1) * cos(d) + cos(lat1) * sin(d) * cos(brng))
+    let lon2 = lon1 + atan2(sin(brng) * sin(d) * cos(lat1), cos(d) - sin(lat1) * sin(lat2))
+    return GeoCoordinate(latitude: lat2 * 180 / .pi, longitude: lon2 * 180 / .pi)
+}
