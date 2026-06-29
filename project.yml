@@ -154,6 +154,7 @@ schemes:
         BikeTests: [test]
     run:
       config: Debug
+      storeKitConfiguration: Bike/StoreKitConfig.storekit
     test:
       config: Debug
       targets:

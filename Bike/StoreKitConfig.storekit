@@ -1,0 +1,69 @@
+{
+  "identifier" : "B1KE5T0R",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_billingGracePeriodEnabled" : false,
+    "_billingRetryEnabled" : true,
+    "_offerCodesEnabled" : true,
+    "_subscriptionGroupResubscribeEnabled" : true,
+    "locale" : "zh_CN",
+    "storefront" : "CHN",
+    "timeRate" : 1
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "C2D3E4F5",
+      "localizations" : [],
+      "name" : "轻骑运动 Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "10.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "A1B2C3D4",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "解锁安静风景路线推荐、逐向导航与高级统计，随时可取消",
+              "displayName" : "月付订阅",
+              "locale" : "zh_Hans_CN"
+            }
+          ],
+          "productID" : "com.bochen.bike.subscription.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Pro",
+          "subscriptionGroupID" : "C2D3E4F5",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "88.00",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "E5F6G7H8",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "解锁安静风景路线推荐、逐向导航与高级统计",
+              "displayName" : "年付订阅",
+              "locale" : "zh_Hans_CN"
+            }
+          ],
+          "productID" : "com.bochen.bike.subscription.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Yearly Pro",
+          "subscriptionGroupID" : "C2D3E4F5",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

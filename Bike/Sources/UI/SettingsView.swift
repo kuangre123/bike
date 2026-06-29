@@ -8,10 +8,28 @@ struct SettingsView: View {
     @AppStorage("healthWriteBack") private var healthWriteBack = true
     @State private var duplicateCleanupMessage: String?
     @State private var isCleaningDuplicates = false
+    @StateObject private var subscription = SubscriptionManager.shared
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    if subscription.isPro {
+                        Label("轻骑运动 Pro 已激活", systemImage: "checkmark.seal.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Button { showPaywall = true } label: {
+                            Label("升级 轻骑运动 Pro", systemImage: "crown.fill")
+                        }
+                    }
+                    Button("恢复购买") { Task { await subscription.restore() } }
+                } header: {
+                    Text("订阅")
+                } footer: {
+                    Text("Pro 解锁安静风景路线推荐、逐向导航与高级统计。")
+                }
+
                 Section("权限") {
                     LabeledContent("运动与健身", value: motionText)
                     LabeledContent("定位", value: locationText)
@@ -48,6 +66,7 @@ struct SettingsView: View {
                     Button("完成") { dismiss() }
                 }
             }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 

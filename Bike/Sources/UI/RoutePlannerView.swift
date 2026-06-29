@@ -14,6 +14,8 @@ struct RoutePlannerView: View {
     @State private var showConsent = false
     @State private var scenic: [Destination] = []
     @State private var scenicLoading = false
+    @StateObject private var subscription = SubscriptionManager.shared
+    @State private var showPaywall = false
     @AppStorage("routeNetworkEnabled") private var networkEnabled = false
 
     private let locationManager = CLLocationManager()
@@ -134,6 +136,7 @@ struct RoutePlannerView: View {
             .navigationTitle("路线")
             .overlay { if loading { ProgressView() } }
             .sheet(isPresented: $showConsent) { consentSheet }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
             .onAppear { locationManager.requestWhenInUseAuthorization() }
             .task { await loadScenic() }
         }
@@ -168,6 +171,7 @@ struct RoutePlannerView: View {
     }
 
     private func planRoute(to dest: Destination) async {
+        guard subscription.isPro else { showPaywall = true; return }
         guard networkEnabled else { showConsent = true; return }
         guard let from = currentCoordinate() else { errorText = "无法获取当前位置"; return }
         loading = true
@@ -182,6 +186,7 @@ struct RoutePlannerView: View {
 
     /// 规划一条环线：当前位置出发，绕一圈回起点。
     private func planLoop(_ loop: LoopSuggestion) async {
+        guard subscription.isPro else { showPaywall = true; return }
         guard networkEnabled else { showConsent = true; return }
         guard let from = currentCoordinate() else { errorText = "无法获取当前位置"; return }
         loading = true
