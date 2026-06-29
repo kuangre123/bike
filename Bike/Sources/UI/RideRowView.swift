@@ -10,18 +10,23 @@ struct RideRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: Formatters.activityIcon(type))
-                .font(.system(size: 21, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 46, height: 46)
-                .background(
-                    LinearGradient(
-                        colors: gradientColors,
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+            VStack(spacing: 6) {
+                Image(systemName: Formatters.activityIcon(type))
+                    .font(.system(size: 21, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 46, height: 46)
+                    .background(
+                        LinearGradient(
+                            colors: gradientColors,
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Text(Formatters.activityLabel(type))
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(accentColor)
+            }
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
@@ -29,13 +34,6 @@ struct RideRowView: View {
                         .font(.headline.weight(.heavy))
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
-                    Text(Formatters.activityLabel(type))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(accentColor)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(accentColor.opacity(0.12))
-                        .clipShape(Capsule())
                     if ride.isAutoDetected {
                         Circle()
                             .fill(accentColor)
