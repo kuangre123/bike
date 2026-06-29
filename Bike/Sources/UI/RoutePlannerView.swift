@@ -17,6 +17,7 @@ struct RoutePlannerView: View {
     @StateObject private var subscription = SubscriptionManager.shared
     @State private var showPaywall = false
     @AppStorage("routeNetworkEnabled") private var networkEnabled = false
+    @AppStorage("routeProfile") private var routeProfile = RoutePreference.safety.rawValue
 
     private let locationManager = CLLocationManager()
     private let search = DestinationSearch()
@@ -35,6 +36,19 @@ struct RoutePlannerView: View {
                 }
 
                 if showingRecommendations {
+                    Section("路线偏好") {
+                        Picker("路线偏好", selection: $routeProfile) {
+                            ForEach(RoutePreference.allCases) { pref in
+                                Text(pref.label).tag(pref.rawValue)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        if let pref = RoutePreference(rawValue: routeProfile) {
+                            Label(pref.detail, systemImage: pref.icon)
+                                .font(.footnote).foregroundStyle(.secondary)
+                        }
+                    }
+
                     Section("环形骑行路线") {
                         ForEach(loops) { loop in
                             Button {
@@ -176,7 +190,7 @@ struct RoutePlannerView: View {
         guard let from = currentCoordinate() else { errorText = "无法获取当前位置"; return }
         loading = true
         errorText = nil
-        let result = await service.route(from: from, to: dest.coordinate)
+        let result = await service.route(from: from, to: dest.coordinate, profile: routeProfile)
         loading = false
         switch result {
         case .success(let p): plan = p; lastDestination = dest.coordinate
@@ -198,7 +212,7 @@ struct RoutePlannerView: View {
             origin: from,
             targetMeters: loop.targetMeters * roadFactor,
             startBearingDegrees: loop.startBearingDegrees)
-        let result = await service.route(through: waypoints)
+        let result = await service.route(through: waypoints, profile: routeProfile)
         loading = false
         switch result {
         case .success(let p): plan = p; lastDestination = from   // 环线终点=起点

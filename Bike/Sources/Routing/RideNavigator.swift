@@ -71,7 +71,7 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesi
     private func reroute(from loc: GeoCoordinate) async {
         rerouting = true
         defer { rerouting = false }
-        if case .success(let plan) = await service.route(from: loc, to: destination) {
+        if case .success(let plan) = await service.route(from: loc, to: destination, profile: RoutePrefs.profile) {
             coords = plan.coordinates
             turns = turnsFromPolyline(plan.coordinates)
             lastSpokenTurnIndex = nil
