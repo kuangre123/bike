@@ -8,20 +8,21 @@ enum RouteError: Error, Equatable {
     case server
 }
 
-/// 调 BRouter 公共服务器算一条安静（trekking）骑行路线。
+/// 调 BRouter 公共服务器算一条安静骑行路线。默认 `safety` 档：避开车多的主干道、
+/// 优先住宅区小路与自行车道（比 trekking 更"小众安静"）。
 struct RouteService {
     var baseURL = "https://brouter.de/brouter"
     var session: URLSession = .shared
 
     func route(
-        from: GeoCoordinate, to: GeoCoordinate, profile: String = "trekking"
+        from: GeoCoordinate, to: GeoCoordinate, profile: String = "safety"
     ) async -> Result<RoutePlan, RouteError> {
         await route(through: [from, to], profile: profile)
     }
 
     /// 经过多个航点算一条路线（环线推荐：起点→顶点→顶点→回起点）。
     func route(
-        through waypoints: [GeoCoordinate], profile: String = "trekking"
+        through waypoints: [GeoCoordinate], profile: String = "safety"
     ) async -> Result<RoutePlan, RouteError> {
         guard RoutePrefs.networkEnabled else { return .failure(.networkDisabled) }
         guard waypoints.count >= 2 else { return .failure(.noRoute) }
