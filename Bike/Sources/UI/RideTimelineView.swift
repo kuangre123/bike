@@ -31,7 +31,7 @@ struct RideTimelineView: View {
                     }
                     .clearHomeRow()
 
-                    if permissions.needsAttention {
+                    if permissions.needsSetup {
                         Section {
                             PermissionBanner(onEnable: enablePermissions)
                         }

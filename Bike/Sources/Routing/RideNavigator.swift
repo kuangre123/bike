@@ -7,7 +7,7 @@ import Observation
 /// 导航运行时：定位 → navigationProgress → 更新转向卡、语音、偏航重算。
 @MainActor
 @Observable
-final class RideNavigator: NSObject, CLLocationManagerDelegate {
+final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesizerDelegate {
     private let manager = CLLocationManager()
     private let speech = AVSpeechSynthesizer()
     private let service = RouteService()
@@ -30,6 +30,7 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        speech.delegate = self
     }
 
     func start() {
@@ -81,9 +82,27 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate {
 
     private func speak(_ text: String) {
         guard voiceEnabled else { return }
+        activateAudioSession()
         let u = AVSpeechUtterance(string: text)
         u.voice = AVSpeechSynthesisVoice(language: "zh-CN")
         speech.speak(u)
+    }
+
+    /// 导航播报：用 .playback + .voicePrompt，静音开关下也出声、并压低背景音乐。
+    private func activateAudioSession() {
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(
+            .playback, mode: .voicePrompt,
+            options: [.duckOthers, .interruptSpokenAudioAndMixWithOthers])
+        try? session.setActive(true)
+    }
+
+    /// 播报全部结束后释放音频会话，让背景音乐恢复原音量。
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            guard !self.speech.isSpeaking else { return }
+            try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+        }
     }
 
     private func phrase(_ d: TurnDirection) -> String {

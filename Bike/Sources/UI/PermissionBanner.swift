@@ -25,7 +25,7 @@ struct PermissionBanner: View {
             VStack(alignment: .leading, spacing: 9) {
                 Text("开启自动记录")
                     .font(.headline.weight(.heavy))
-                Text("授予「始终」定位与运动权限后，快乐轻骑会在你运动时自动记录。")
+                Text("授予定位与运动权限后，快乐轻骑会在你运动时自动记录。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

@@ -7,6 +7,7 @@ import CyclingDomain
 struct RideNavigationView: View {
     @State private var navigator: RideNavigator
     @State private var showArrival = false
+    @State private var showAudioHint = true
     @Environment(\.dismiss) private var dismiss
 
     init(plan: RoutePlan, destination: GeoCoordinate) {
@@ -25,7 +26,17 @@ struct RideNavigationView: View {
             .mapControls { MapUserLocationButton() }
             .ignoresSafeArea()
 
-            turnCard
+            VStack(spacing: 8) {
+                turnCard
+                if showAudioHint {
+                    Label("请关闭静音按钮，以听到语音导航", systemImage: "bell.slash.fill")
+                        .font(.footnote)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .padding(.horizontal)
+                        .transition(.opacity)
+                }
+            }
 
             VStack {
                 Spacer()
@@ -42,6 +53,10 @@ struct RideNavigationView: View {
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
             navigator.start()
+        }
+        .task {
+            try? await Task.sleep(for: .seconds(6))
+            withAnimation { showAudioHint = false }
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false

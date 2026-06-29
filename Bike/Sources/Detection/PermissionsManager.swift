@@ -25,6 +25,14 @@ final class PermissionsManager: NSObject, CLLocationManagerDelegate {
         locationStatus != .authorizedAlways || motionStatus != .authorized
     }
 
+    /// 首页引导横幅是否还要显示。只要定位拿到「使用期间」或「始终」、且运动已授权，就隐藏。
+    /// 注意：不要求「始终」——iOS 首次只给「使用期间」，「始终」是后续单独升级的弹窗，
+    /// 若按 needsAttention（要求始终）来控制横幅，用户授权完后横幅仍会一直显示。
+    var needsSetup: Bool {
+        let locOK = locationStatus == .authorizedAlways || locationStatus == .authorizedWhenInUse
+        return !locOK || motionStatus != .authorized
+    }
+
     /// 请求「始终」定位（需先 When-In-Use 才能升级，系统分步提示）。
     func requestLocationAlways() {
         locationManager.requestWhenInUseAuthorization()
