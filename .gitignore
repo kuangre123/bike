@@ -20,3 +20,9 @@ BikeWatch/Info.plist
 BikeWatch/BikeWatch.entitlements
 BikeWatchWidget/Info.plist
 BikeWatchWidget/BikeWatchWidget.entitlements
+fastlane/.env
+fastlane/certs/
+fastlane/profiles/
+build/
+*.ipa
+*.xcarchive
