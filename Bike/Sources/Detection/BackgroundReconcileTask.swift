@@ -12,9 +12,14 @@ enum BackgroundReconcileTask {
     }
 
     /// 在 App 启动时注册（必须早于启动完成）。
+    ///
+    /// 关键：启动回调闭包必须标 `@Sendable`（非隔离）。否则因 `register` 处于 `@MainActor`
+    /// 上下文，闭包会被推断为 `@MainActor` 隔离，而 BGTaskScheduler 在**后台队列**上调用它，
+    /// Swift 6 运行时进入闭包即做主线程隔离检查 → `_dispatch_assert_queue_fail` 崩溃。
+    /// 需要主线程的工作只在内部 `Task { @MainActor in }` 里做。
     @MainActor
     static func register(coordinator: RideDetectionCoordinator) {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { @Sendable task in
             schedule() // 立刻排下一次
             let box = Box(task)
             let work = Task { @MainActor in
