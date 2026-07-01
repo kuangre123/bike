@@ -121,6 +121,7 @@ targets:
       base:
         INFOPLIST_FILE: BikeWatch/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.bochen.bike.watchkitapp
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "4"
 
   BikeWatchWidget:

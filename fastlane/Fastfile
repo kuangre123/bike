@@ -19,6 +19,14 @@ APP_IDENTIFIER = "com.bochen.bike"      # <-- your Bundle ID
 SCHEME         = "Bike"                 # <-- your scheme
 PROJECT        = "Bike.xcodeproj"       # <-- or use `workspace:` in gym instead
 
+# watchOS companion app + widget extension ship inside the same .ipa and each need their
+# own App Store distribution profile (they declare App Groups / HealthKit entitlements that
+# `-allowProvisioningUpdates` can't satisfy headlessly during `-exportArchive`).
+EXTRA_BUNDLE_IDS = [
+  "com.bochen.bike.watchkitapp",
+  "com.bochen.bike.watchkitapp.widget"
+]
+
 default_platform(:ios)
 
 # ----- shared: API Key loader -----
@@ -42,16 +50,22 @@ platform :ios do
       development: false,
       output_path: "./fastlane/certs"
     )
-    # 2) App Store provisioning profile.
-    #    IMPORTANT: do NOT pass adhoc:/development: — newer fastlane errors with
-    #    "conflict between options: 'adhoc' and 'development'". Omitting both
+    # 2) App Store provisioning profile — one per embedded target (main app + watch app +
+    #    widget extension). IMPORTANT: do NOT pass adhoc:/development: — newer fastlane
+    #    errors with "conflict between options: 'adhoc' and 'development'". Omitting both
     #    yields the App Store profile, which is what we want.
-    sigh(
-      api_key:        asc_api_key,
-      app_identifier: APP_IDENTIFIER,
-      output_path:    "./fastlane/profiles"
-    )
-    # 3) Archive + export .ipa
+    profiles = {}
+    ([APP_IDENTIFIER] + EXTRA_BUNDLE_IDS).each do |bundle_id|
+      sigh(
+        api_key:        asc_api_key,
+        app_identifier: bundle_id,
+        output_path:    "./fastlane/profiles"
+      )
+      profiles[bundle_id] = lane_context[SharedValues::SIGH_NAME]
+    end
+    # 3) Archive + export .ipa — manual signing so the watch/widget profiles above are
+    #    actually used (automatic + -allowProvisioningUpdates can't fetch per-target
+    #    profiles for embedded targets without an Xcode-side Apple ID session).
     gym(
       scheme:           SCHEME,
       project:          PROJECT,
@@ -59,7 +73,11 @@ platform :ios do
       output_directory: "./build",
       output_name:      "#{SCHEME}.ipa",
       clean:            true,
-      xcargs:           "-allowProvisioningUpdates"
+      export_options:   {
+        method:               "app-store",
+        signingStyle:         "manual",
+        provisioningProfiles: profiles
+      }
     )
     # 4) Upload to ASC (TestFlight internal; not external, not submitted for review)
     pilot(

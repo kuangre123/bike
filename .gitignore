@@ -26,3 +26,4 @@ fastlane/profiles/
 build/
 *.ipa
 *.xcarchive
+fastlane/report.xml
