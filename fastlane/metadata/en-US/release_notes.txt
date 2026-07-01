@@ -1,0 +1,13 @@
+Welcome to HappyRide (快乐轻骑) — the activity tracker that starts itself.
+
+This first release brings fully automatic detection for cycling, walking, running, and more, powered by on-device motion sensing, background GPS, and Apple Watch heart rate. No manual start button, no forgotten rides — every qualifying activity is detected and logged automatically, with full detail (route, heart rate, calories) synced straight to Apple Health.
+
+Also included in v1.0:
+- Apple Watch companion app with real-time heart rate, duration, and energy tracking
+- Watch face complication showing today's activity at a glance
+- Ride detail pages with GPS route maps and full data breakdowns
+- Weekly stats with a 7-day trend chart for rides, time, and distance
+- Optional Quiet & Scenic route planning: turn-by-turn cycling navigation with four route styles (Quiet, Scenic, Balanced, Shortest), out-and-back loop suggestions (5/10/20 km), nearby scenic destinations, and spoken turn alerts
+- Privacy-first design: works fully offline by default; only the optional route-planning feature connects to the internet, with your consent
+
+Thanks for trying HappyRide. We're just getting started — more languages and features are on the way.

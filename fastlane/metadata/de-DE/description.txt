@@ -1,0 +1,27 @@
+Kein Start-Knopf. Kein Vergessen. Bike erkennt jede Fahrt von ganz allein.
+
+Kennst du das: Du steigst aufs Rad, radelst los – und merkst erst nach 10 Minuten, dass du vergessen hast, die Trainings-App zu starten? Bei Bike passiert das nicht mehr. Die App erkennt automatisch, wenn du dich bewegst, ob zu Fuß, joggend oder mit dem Rad, und zeichnet alles im Hintergrund auf. Du musst nichts drücken, nichts öffnen, nichts einstellen. Steig einfach aufs Rad – Bike kümmert sich um den Rest.
+
+WARUM BIKE?
+
+Apples eigene Health-App erkennt Radfahren bisher nicht automatisch – genau diese Lücke schließt Bike. Über die Bewegungssensorik deines iPhones erkennt die App zuverlässig, wann eine Fahrt beginnt und endet, auch rückwirkend, ganz ohne GPS-Dauerbetrieb und ohne Akku zu verschwenden. Während der Fahrt ergänzt die Hintergrund-GPS-Ortung Strecke, Tempo und Route, deine Apple Watch liefert die Herzfrequenz dazu. Das Ergebnis: ein vollständiges Bewegungstagebuch, garantiert lückenlos.
+
+AUTOMATISCHE ERKENNUNG FÜR JEDE BEWEGUNGSART
+Bike erkennt nicht nur Radfahren, sondern auch Gehen, Joggen und andere Aktivitäten – automatisch unterschieden und einzeln erfasst. Jede erkannte Einheit wird direkt in die Apple Health-App geschrieben, inklusive Route, Herzfrequenz und Kalorienverbrauch. So laufen alle deine Daten dort zusammen, wo du sie sowieso schon nutzt.
+
+APPLE WATCH INTEGRATION
+Die passende Watch-App zeigt dir Herzfrequenz, Dauer und verbrannte Kalorien in Echtzeit direkt am Handgelenk. Eine Zifferblatt-Komplikation gibt dir jederzeit einen Überblick über deine heutigen Aktivitäten, ohne dass du die App überhaupt öffnen musst.
+
+STRECKEN-DETAILS UND STATISTIKEN
+Jede aufgezeichnete Fahrt bekommt eine eigene Detailansicht: die komplette GPS-Route auf der Karte, dazu Distanz, Dauer, Tempo und Herzfrequenzverlauf. In der Statistik siehst du auf einen Blick, wie oft, wie lange und wie weit du diese Woche unterwegs warst, inklusive Trenddiagramm der letzten 7 Tage.
+
+RUHIGE UND SCHÖNE RADROUTEN (Abo-Funktion)
+Für alle, die nicht nur aufzeichnen, sondern auch besser fahren wollen, bietet Bike eine Routenplanung mit Sprachnavigation. Wähle aus vier Profilen: ruhig (möglichst wenig Hauptstraßen), landschaftlich schön (bevorzugt am Wasser entlang), ausgewogen oder kürzeste Strecke. Bike berechnet dir außerdem Rundtouren ab deinem Standort in 5, 10 oder 20 Kilometern Länge und schlägt landschaftlich reizvolle Ziele in deiner Nähe vor. Unterwegs führt dich eine Sprachansage mit Abbiegehinweisen sicher ans Ziel. Diese Routenfunktion ist ein optionales Abonnement, die automatische Aufzeichnung selbst bleibt komplett kostenlos.
+
+DATENSCHUTZ ZUERST
+Bike ist standardmäßig offline. Nur für die Routenplanung wird eine Verbindung zum Kartendienst benötigt, und auch dafür fragen wir vorher ausdrücklich um deine Zustimmung. Die automatische Bewegungserkennung selbst läuft bevorzugt lokal auf deinem iPhone.
+
+WICHTIGER HINWEIS ZUR SPRACHE
+Die Bedienoberfläche von Bike ist aktuell ausschließlich auf Vereinfachtem Chinesisch verfügbar. Eine deutsche Bedienoberfläche gibt es derzeit noch nicht. Bitte berücksichtige das vor dem Download, auch wenn viele Funktionen (Karte, Diagramme, Symbole) weitgehend selbsterklärend sind.
+
+Bike läuft auf iPhone (iOS 17 oder neuer) und optional mit Apple Watch für Herzfrequenz und Zifferblatt-Komplikation.

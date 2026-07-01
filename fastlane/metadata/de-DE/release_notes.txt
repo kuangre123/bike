@@ -1,0 +1,19 @@
+Willkommen bei Bike!
+
+Bike ist dein automatisches Bewegungstagebuch fürs Rad, zu Fuß und beim Joggen. Kein Start-Knopf, kein manuelles Einstellen, kein Vergessen: Die App erkennt deine Aktivität selbstständig und zeichnet sie im Hintergrund auf.
+
+Das bietet die erste Version:
+
+- Automatische Erkennung von Radfahren, Gehen, Joggen und weiteren Bewegungsarten über die Bewegungssensorik deines iPhones
+- Ergänzung durch Hintergrund-GPS für Strecke, Tempo und Route
+- Direkte Übertragung an Apple Health, inklusive Route, Herzfrequenz und Kalorien
+- Eigene Apple Watch App mit Herzfrequenz, Dauer und Energie in Echtzeit sowie einer Zifferblatt-Komplikation für den Tagesüberblick
+- Detailansicht jeder Fahrt mit GPS-Route auf der Karte
+- Statistikübersicht mit wöchentlicher Häufigkeit, Dauer, Distanz und 7-Tage-Trenddiagramm
+- Routenplanung mit Sprachnavigation: vier Profile (ruhig, landschaftlich schön, ausgewogen, kürzeste Strecke), Rundtouren in 5/10/20 km sowie Vorschläge für schöne Ziele in der Nähe
+
+Die automatische Aufzeichnung ist komplett kostenlos, die Routenplanung mit Navigation ist als Abonnement verfügbar.
+
+Hinweis: Die Bedienoberfläche ist aktuell nur auf Vereinfachtem Chinesisch verfügbar.
+
+Viel Spaß auf deinen Fahrten!

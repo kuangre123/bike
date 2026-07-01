@@ -1,0 +1,37 @@
+Forget to hit "Start" again? Not anymore.
+
+HappyRide (快乐轻骑) runs quietly in the background and automatically detects when you start riding, walking, or running — no button to press, no app to open first. Just go. It's built for the ride you didn't plan to log: the quick errand, the spontaneous loop, the commute you almost forgot to track. Never miss a workout again.
+
+WHY YOU'LL LOVE IT
+
+- Truly hands-free: motion detection on your iPhone (plus background GPS and Apple Watch heart rate) automatically recognizes your activity and starts recording on its own.
+- Never lose a ride: every qualifying activity is captured automatically and written straight to Apple Health, complete with route, heart rate, and calories.
+- Privacy by design: HappyRide works fully offline by default. Nothing leaves your phone unless you explicitly turn on the optional route-planning feature, which needs an internet connection to fetch maps.
+
+WHAT'S INSIDE
+
+Automatic Activity Detection
+Cycling, walking, running, and more are recognized automatically using CoreMotion and background location — no manual start/stop, ever. Every session syncs to Apple Health automatically.
+
+Apple Watch Companion
+A dedicated watchOS app tracks real-time heart rate, duration, and active energy on your wrist, plus a watch face complication that shows today's activity summary at a glance.
+
+Ride Details & Stats
+Every activity gets a detail page with your GPS route plotted on the map and a full data breakdown. The stats page rolls it all up: rides this week, total time, distance, and a 7-day trend chart so you can see your progress build.
+
+Quiet & Scenic Route Navigation (optional, subscription)
+Planning a ride instead of just logging one? Turn on route planning to get turn-by-turn cycling navigation that favors quiet backstreets over busy main roads, or scenic paths along rivers and parks. Choose from four route styles — Quiet, Scenic, Balanced, or Shortest — build an out-and-back loop at 5, 10, or 20 km, discover nearby scenic destinations worth riding to, and get spoken turn alerts as you go.
+
+HOW IT WORKS
+
+HappyRide is free to use for automatic activity tracking, Apple Health sync, Apple Watch support, and your ride history and stats — no strings attached. The optional Quiet & Scenic route planning and turn-by-turn navigation feature is available as an in-app subscription, since it requires live map and routing data.
+
+A NOTE ON LANGUAGE
+
+HappyRide's on-screen interface is currently in Simplified Chinese only, with English App Store text to help you decide if the app is right for you. Every screen — buttons, menus, stats labels — is very simple and icon-driven, and most riders find it easy to navigate by feel even without reading Chinese. Full English localization is on our roadmap.
+
+REQUIREMENTS
+
+iPhone with iOS 17 or later. Apple Watch companion app optional but recommended for real-time heart rate. Background location and Motion & Fitness permissions are needed for automatic detection; Health access is needed to save your activities.
+
+Ride more. Remember less. Let HappyRide catch every mile you didn't plan to track.
