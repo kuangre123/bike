@@ -31,6 +31,30 @@ Archive + upload build to App Store Connect (no review submission)
 
 Print current ASC version + build status
 
+### ios set_app_privacy_and_rights
+
+```sh
+[bundle exec] fastlane ios set_app_privacy_and_rights
+```
+
+Set content rights declaration (no third-party content) via API
+
+### ios create_subscriptions
+
+```sh
+[bundle exec] fastlane ios create_subscriptions
+```
+
+Create ASC subscriptions (group + monthly/yearly + localizations + prices)
+
+### ios check_chn_price
+
+```sh
+[bundle exec] fastlane ios check_chn_price
+```
+
+TEMP: fix + check CHN subscription prices
+
 ### ios ci_build_and_upload
 
 ```sh

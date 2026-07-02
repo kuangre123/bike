@@ -106,6 +106,234 @@ platform :ios do
     end
   end
 
+  # App-level content-rights declaration (required before adding for review).
+  # NOTE: App Privacy nutrition labels CANNOT be set via the API-key Connect API —
+  # Apple removed the old private dataUsages endpoint. Set them once in the ASC web UI
+  # (App 隐私 → 数据未收集 → 发布). Idempotent — safe to re-run.
+  desc "Set content rights declaration (no third-party content) via API"
+  lane :set_app_privacy_and_rights do
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+
+    rc.patch("v1/apps/#{app.id}", {
+      data: {
+        type: "apps",
+        id: app.id,
+        attributes: { contentRightsDeclaration: "DOES_NOT_USE_THIRD_PARTY_CONTENT" }
+      }
+    })
+    check = rc.get("v1/apps/#{app.id}?fields[apps]=contentRightsDeclaration").body
+    UI.success("contentRightsDeclaration = #{check.dig('data', 'attributes', 'contentRightsDeclaration')}")
+
+    # 年龄分级：直接 PATCH ageRatingDeclaration。不走 deliver 的 app_rating —— 新 app 没有
+    # review detail 时 deliver 会在到达该步前先崩 "No data"（fetch_app_store_review_detail）。
+    app_info = app.fetch_edit_app_info || app.fetch_live_app_info
+    UI.user_error!("拿不到可编辑的 app info") unless app_info
+    decl = app_info.fetch_age_rating_declaration
+    require 'json'
+    rating_json = File.exist?("./metadata/app_store_rating_config.json") ? "./metadata/app_store_rating_config.json" : "./fastlane/metadata/app_store_rating_config.json"
+    attributes = JSON.parse(File.read(rating_json))
+    decl.update(attributes: attributes)
+    UI.success("年龄分级问卷已提交（全部无敏感内容）")
+  end
+
+  # Create the subscription group, monthly/yearly auto-renewables, 6-locale
+  # localizations, CNY-anchored prices equalized to all territories, and worldwide
+  # availability — mirroring Bike/StoreKitConfig.storekit. Idempotent.
+  desc "Create ASC subscriptions (group + monthly/yearly + localizations + prices)"
+  lane :create_subscriptions do
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+
+    group_ref = "轻骑运动 Pro"
+    group_locs = {
+      "zh-Hans" => "轻骑运动 Pro",
+      "zh-Hant" => "輕騎運動 Pro",
+      "en-US"   => "HappyRide Pro",
+      "ja"      => "快楽サイクル Pro",
+      "ko"      => "해피라이딩 Pro",
+      "de-DE"   => "HappyRide Pro"
+    }
+    subs_spec = [
+      {
+        product_id: "com.bochen.bike.subscription.monthly",
+        ref_name: "Monthly Pro", period: "ONE_MONTH", price_cny: 10.0,
+        locs: {
+          "zh-Hans" => ["月付订阅", "解锁安静风景路线推荐、逐向导航与高级统计，随时可取消"],
+          "zh-Hant" => ["月付訂閱", "解鎖安靜風景路線推薦、逐向導航與進階統計，隨時可取消"],
+          "en-US"   => ["Monthly Pro", "Quiet-route nav & stats. Cancel anytime."],
+          "ja"      => ["月額プラン", "静か・景色ルート案内と詳細統計。いつでも解約可"],
+          "ko"      => ["월간 구독", "조용한/경치 경로 안내와 통계, 언제든 해지 가능"],
+          "de-DE"   => ["Monatlich Pro", "Ruhige Routen, Navigation, Statistiken."]
+        }
+      },
+      {
+        product_id: "com.bochen.bike.subscription.yearly",
+        ref_name: "Yearly Pro", period: "ONE_YEAR", price_cny: 88.0,
+        locs: {
+          "zh-Hans" => ["年付订阅", "解锁安静风景路线推荐、逐向导航与高级统计"],
+          "zh-Hant" => ["年付訂閱", "解鎖安靜風景路線推薦、逐向導航與進階統計"],
+          "en-US"   => ["Yearly Pro", "Quiet/scenic route navigation and ride stats."],
+          "ja"      => ["年額プラン", "静か・景色ルート案内と詳細統計が使い放題"],
+          "ko"      => ["연간 구독", "조용한/경치 경로 안내와 상세 통계 이용"],
+          "de-DE"   => ["Jährlich Pro", "Ruhige Routen, Navigation, Statistiken."]
+        }
+      }
+    ]
+
+    # ---- 订阅组（幂等）----
+    groups = rc.get("v1/apps/#{app.id}/subscriptionGroups?limit=50").body["data"] || []
+    group = groups.find { |g| g.dig("attributes", "referenceName") == group_ref }
+    unless group
+      group = rc.post("v1/subscriptionGroups", {
+        data: {
+          type: "subscriptionGroups",
+          attributes: { referenceName: group_ref },
+          relationships: { app: { data: { type: "apps", id: app.id } } }
+        }
+      }).body["data"]
+      UI.success("订阅组已创建: #{group['id']}")
+    end
+    gid = group["id"]
+
+    # ---- 订阅组本地化（幂等）----
+    have = (rc.get("v1/subscriptionGroups/#{gid}/subscriptionGroupLocalizations?limit=50").body["data"] || [])
+           .map { |l| l.dig("attributes", "locale") }
+    group_locs.each do |locale, name|
+      next if have.include?(locale)
+      rc.post("v1/subscriptionGroupLocalizations", {
+        data: {
+          type: "subscriptionGroupLocalizations",
+          attributes: { name: name, locale: locale },
+          relationships: { subscriptionGroup: { data: { type: "subscriptionGroups", id: gid } } }
+        }
+      })
+      UI.message("组本地化 #{locale} ✓")
+    end
+
+    # ---- 全部销售地区 id（可用范围用）----
+    territories = []
+    path = "v1/territories?limit=200"
+    loop do
+      resp = rc.get(path).body
+      territories += resp["data"].map { |t| t["id"] }
+      nxt = resp.dig("links", "next")
+      break unless nxt
+      path = nxt.sub("https://api.appstoreconnect.apple.com/", "")
+    end
+    UI.message("销售地区共 #{territories.count} 个")
+
+    existing_subs = (rc.get("v1/subscriptionGroups/#{gid}/subscriptions?limit=50").body["data"] || [])
+
+    subs_spec.each do |spec|
+      sub = existing_subs.find { |s| s.dig("attributes", "productId") == spec[:product_id] }
+      unless sub
+        sub = rc.post("v1/subscriptions", {
+          data: {
+            type: "subscriptions",
+            attributes: {
+              name: spec[:ref_name],
+              productId: spec[:product_id],
+              subscriptionPeriod: spec[:period],
+              familySharable: false,
+              groupLevel: 1,
+              reviewNote: "订阅解锁路线规划与导航功能（路线 tab）。基础自动运动记录免费。"
+            },
+            relationships: { group: { data: { type: "subscriptionGroups", id: gid } } }
+          }
+        }).body["data"]
+        UI.success("订阅已创建: #{spec[:product_id]} → #{sub['id']}")
+      end
+      sid = sub["id"]
+
+      # 本地化（幂等）
+      have_locs = (rc.get("v1/subscriptions/#{sid}/subscriptionLocalizations?limit=50").body["data"] || [])
+                  .map { |l| l.dig("attributes", "locale") }
+      spec[:locs].each do |locale, (name, desc)|
+        next if have_locs.include?(locale)
+        rc.post("v1/subscriptionLocalizations", {
+          data: {
+            type: "subscriptionLocalizations",
+            attributes: { name: name, description: desc, locale: locale },
+            relationships: { subscription: { data: { type: "subscriptions", id: sid } } }
+          }
+        })
+        UI.message("  #{spec[:ref_name]} 本地化 #{locale} ✓")
+      end
+
+      # 定价：找 CNY 锚点价位 → 均衡到全部地区（幂等：已有价格则跳过）
+      existing_prices = rc.get("v1/subscriptions/#{sid}/prices?limit=1").body["data"] || []
+      if existing_prices.any?
+        UI.message("  #{spec[:ref_name]} 已有定价，跳过")
+      else
+        pts = rc.get("v1/subscriptions/#{sid}/pricePoints?filter[territory]=CHN&limit=8000").body["data"] || []
+        anchor = pts.find { |p| p.dig("attributes", "customerPrice").to_f == spec[:price_cny] }
+        UI.user_error!("找不到 CNY #{spec[:price_cny]} 的价位点") unless anchor
+        UI.message("  CNY 锚点: #{anchor.dig('attributes', 'customerPrice')} (#{anchor['id']})")
+
+        eq_path = "v1/subscriptionPricePoints/#{anchor['id']}/equalizations?include=territory&limit=8000"
+        eqs = []
+        loop do
+          resp = rc.get(eq_path).body
+          eqs += resp["data"] || []
+          nxt = resp.dig("links", "next")
+          break unless nxt
+          eq_path = nxt.sub("https://api.appstoreconnect.apple.com/", "")
+        end
+        points = [anchor] + eqs
+        UI.message("  共 #{points.count} 个地区价位，逐个写入…")
+        created = 0
+        points.each do |pt|
+          # anchor 来自不带 include=territory 的查询，territory 关系为空 —— 它就是 CHN
+          terr = pt.dig("relationships", "territory", "data", "id") || (pt == anchor ? "CHN" : nil)
+          next unless terr
+          begin
+            # 注意：不传 territory 关系 —— 价位点 id 本身已编码了地区，
+            # 多传 territory 会被 API 以 "error processing the pricing information" 拒绝。
+            rc.post("v1/subscriptionPrices", {
+              data: {
+                type: "subscriptionPrices",
+                relationships: {
+                  subscription: { data: { type: "subscriptions", id: sid } },
+                  subscriptionPricePoint: { data: { type: "subscriptionPricePoints", id: pt["id"] } }
+                }
+              }
+            })
+            created += 1
+          rescue => e
+            UI.important("  价位写入失败 #{terr}: #{e.message.to_s[0..120]}")
+          end
+        end
+        UI.success("  #{spec[:ref_name]} 定价完成（#{created}/#{points.count}）")
+      end
+
+      # 可用地区：全部 + 新地区自动上架（幂等：查不到可用性才建）
+      begin
+        avail = rc.get("v1/subscriptions/#{sid}/subscriptionAvailability").body["data"]
+      rescue
+        avail = nil
+      end
+      unless avail
+        rc.post("v1/subscriptionAvailabilities", {
+          data: {
+            type: "subscriptionAvailabilities",
+            attributes: { availableInNewTerritories: true },
+            relationships: {
+              subscription: { data: { type: "subscriptions", id: sid } },
+              availableTerritories: { data: territories.map { |t| { type: "territories", id: t } } }
+            }
+          }
+        })
+        UI.success("  #{spec[:ref_name]} 已设为全部地区可用")
+      end
+    end
+    UI.success("订阅创建流程完成")
+  end
+
   # CI build: manual signing (use on GitHub Actions where automatic signing is flaky).
   # Differs from build_and_upload: setup_ci + a temp keychain + force-refreshed profile
   # + manual code-signing settings written into the project before gym.
@@ -281,6 +509,7 @@ platform :ios do
       api_key:                           asc_api_key,
       app_identifier:                    APP_IDENTIFIER,
       metadata_path:                     "./fastlane/metadata",
+      app_rating_config_path:            "./fastlane/metadata/app_store_rating_config.json",
       skip_screenshots:                  true,
       skip_binary_upload:                true,
       skip_metadata:                     false,
