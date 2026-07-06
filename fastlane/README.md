@@ -15,6 +15,22 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
+### ios build_only
+
+```sh
+[bundle exec] fastlane ios build_only
+```
+
+Archive + export .ipa only (no upload) for pre-validation
+
+### ios use_build
+
+```sh
+[bundle exec] fastlane ios use_build
+```
+
+Select build 1.1(1) for the App Store version and report the resulting state
+
 ### ios build_and_upload
 
 ```sh
@@ -46,14 +62,6 @@ Set content rights declaration (no third-party content) via API
 ```
 
 Create ASC subscriptions (group + monthly/yearly + localizations + prices)
-
-### ios check_chn_price
-
-```sh
-[bundle exec] fastlane ios check_chn_price
-```
-
-TEMP: fix + check CHN subscription prices
 
 ### ios ci_build_and_upload
 

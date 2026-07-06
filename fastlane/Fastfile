@@ -42,6 +42,56 @@ end
 
 platform :ios do
 
+  # 只归档导出 .ipa，不上传。用于上传前 altool --validate-app 预检。
+  desc "Archive + export .ipa only (no upload) for pre-validation"
+  lane :build_only do
+    cert(api_key: asc_api_key, development: false, output_path: "./fastlane/certs")
+    profiles = {}
+    ([APP_IDENTIFIER] + EXTRA_BUNDLE_IDS).each do |bundle_id|
+      sigh(api_key: asc_api_key, app_identifier: bundle_id, output_path: "./fastlane/profiles")
+      profiles[bundle_id] = lane_context[SharedValues::SIGH_NAME]
+    end
+    gym(
+      scheme: SCHEME, project: PROJECT, export_method: "app-store",
+      output_directory: "./build", output_name: "#{SCHEME}.ipa", clean: true,
+      export_options: { method: "app-store", signingStyle: "manual", provisioningProfiles: profiles }
+    )
+  end
+
+  # 把版本记录设为 1.1 并挂上 1.1(1) 这个 build，观察 INVALID_BINARY 是否消除。
+  # 只改版本+选 build，不提交审核。用来验证「二进制到底行不行」。
+  desc "Select build 1.1(1) for the App Store version and report the resulting state"
+  lane :use_build do
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+
+    # 找 train=1.1 的 build
+    resp = rc.get("v1/builds?filter[app]=#{app.id}&include=preReleaseVersion&limit=50&sort=-uploadedDate").body
+    prv = {}
+    (resp["included"] || []).each { |i| prv[i["id"]] = i.dig("attributes", "version") if i["type"] == "preReleaseVersions" }
+    b = (resp["data"] || []).find { |bd| prv[bd.dig("relationships", "preReleaseVersion", "data", "id")] == "1.1" }
+    UI.user_error!("没找到 train=1.1 的 build") unless b
+    UI.important("build 1.1(#{b.dig('attributes','version')}) id=#{b['id']} processing=#{b.dig('attributes','processingState')}")
+
+    # 可编辑版本
+    vers = rc.get("v1/apps/#{app.id}/appStoreVersions?limit=10").body["data"] || []
+    ver = vers.find { |v| %w[PREPARE_FOR_SUBMISSION INVALID_BINARY DEVELOPER_REJECTED METADATA_REJECTED REJECTED].include?(v.dig("attributes", "appStoreState")) }
+    UI.user_error!("没有可编辑版本") unless ver
+    UI.message("可编辑版本 #{ver.dig('attributes','versionString')} 现状态=#{ver.dig('attributes','appStoreState')}")
+
+    if ver.dig("attributes", "versionString") != "1.1"
+      rc.patch("v1/appStoreVersions/#{ver['id']}", { data: { type: "appStoreVersions", id: ver["id"], attributes: { versionString: "1.1" } } })
+      UI.message("版本号已改为 1.1")
+    end
+    rc.patch("v1/appStoreVersions/#{ver['id']}/relationships/build", { data: { type: "builds", id: b["id"] } })
+    UI.message("已把 build 挂到该版本，等 5 秒重新读状态…")
+    sleep(5)
+    v2 = rc.get("v1/appStoreVersions/#{ver['id']}").body.dig("data", "attributes")
+    UI.success("→ 版本 #{v2['versionString']} 现在状态: #{v2['appStoreState']}")
+  end
+
   desc "Archive + upload build to App Store Connect (no review submission)"
   lane :build_and_upload do
     # 1) Distribution certificate (private key generated locally)
