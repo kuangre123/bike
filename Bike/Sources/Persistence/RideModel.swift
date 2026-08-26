@@ -26,6 +26,9 @@ final class RideModel {
     var healthKitWorkoutUUID: UUID?
     /// 是否由被动检测自动添加（用于「待确认」指示与撤销提示）。
     var isAutoDetected: Bool = false
+    /// 用户已将该记录排除为电动车：不计入统计、列表收起灰显；可恢复。
+    /// 「疑似电动车」本身是派生量（由轨迹实时计算），只持久化用户的排除决定。
+    var excludedAsEBike: Bool = false
     var createdAt: Date
 
     init(

@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(RideDetectionCoordinator.self) private var coordinator
     @Environment(\.dismiss) private var dismiss
     @AppStorage("healthWriteBack") private var healthWriteBack = true
+    @AppStorage("ebikeAutoFlag") private var ebikeAutoFlag = true
     @State private var duplicateCleanupMessage: String?
     @State private var isCleaningDuplicates = false
     @StateObject private var subscription = SubscriptionManager.shared
@@ -35,7 +36,7 @@ struct SettingsView: View {
                     LabeledContent("定位", value: locationText)
                     Button("请求权限") { permissions.requestAll() }
                 }
-                Section("检测") {
+                Section {
                     Button("同步运动数据") {
                         Task { await coordinator.runReconciliation() }
                     }
@@ -43,6 +44,11 @@ struct SettingsView: View {
                         LabeledContent("上次同步", value: last.formatted(date: .omitted, time: .standard))
                     }
                     LabeledContent("本次会话已保存", value: "\(coordinator.savedRideCount)")
+                    Toggle("自动标注疑似电动车", isOn: $ebikeAutoFlag)
+                } header: {
+                    Text("检测")
+                } footer: {
+                    Text("长时间高速且速度几乎不变的骑行会标为「疑似电动车」，可一键排除。关闭后不再显示提示；已排除的记录不受影响。")
                 }
                 Section("Apple 健康") {
                     Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)

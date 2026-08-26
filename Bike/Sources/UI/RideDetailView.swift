@@ -67,6 +67,34 @@ struct RideDetailView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            if ride.excludedAsEBike {
+                Section {
+                    Button {
+                        Task { await EBikeFlagging.restore(ride, context: context) }
+                    } label: {
+                        Label("恢复此记录", systemImage: "arrow.uturn.backward")
+                    }
+                } footer: {
+                    Text("已排除（电动车）：不计入统计。恢复后重新计入，并按设置写回 Apple 健康。")
+                }
+            } else if type == .cycling {
+                Section {
+                    if EBikeFlagging.showsBadge(for: ride) {
+                        Label("疑似电动车：长时间高速且速度几乎不变", systemImage: "bolt.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                    Button {
+                        Task { await EBikeFlagging.exclude(ride, context: context) }
+                    } label: {
+                        Label("标为电动车并排除", systemImage: "bolt.slash")
+                    }
+                    .foregroundStyle(.orange)
+                } footer: {
+                    Text("排除后不计入统计；若已写入 Apple 健康会一并删除。可随时恢复。")
+                }
+            }
         }
         .navigationTitle(Formatters.activityLabel(type))
         .navigationBarTitleDisplayMode(.inline)

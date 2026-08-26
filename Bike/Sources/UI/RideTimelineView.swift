@@ -15,7 +15,12 @@ struct RideTimelineView: View {
     @Query(sort: \RideModel.startDate, order: .reverse) private var rides: [RideModel]
     @State private var showingSettings = false
     @State private var showingManualRide = false
+    @State private var showingExcluded = false
     @State private var path = NavigationPath()
+
+    /// 计入统计与主列表的记录（排除「已排除（电动车）」）。
+    private var activeRides: [RideModel] { rides.filter { !$0.excludedAsEBike } }
+    private var excludedRides: [RideModel] { rides.filter(\.excludedAsEBike) }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -25,7 +30,7 @@ struct RideTimelineView: View {
 
                 List {
                     Section {
-                        HomeHeroCard(rides: rides) {
+                        HomeHeroCard(rides: activeRides) {
                             showingManualRide = true
                         }
                     }
@@ -45,7 +50,7 @@ struct RideTimelineView: View {
                         .clearHomeRow()
                     } else {
                         Section {
-                            StatsSummaryView(rides: rides)
+                            StatsSummaryView(rides: activeRides)
                         } header: {
                             HomeSectionHeader("本周节奏")
                         }
@@ -67,10 +72,53 @@ struct RideTimelineView: View {
                                         Button("删除", role: .destructive) {
                                             Task { await deleteRide(ride) }
                                         }
+                                        if RideMapping.activityType(of: ride) == .cycling {
+                                            Button("标为电动车") {
+                                                Task { await EBikeFlagging.exclude(ride, context: context) }
+                                            }
+                                            .tint(.orange)
+                                        }
                                     }
                                 }
                             } header: {
                                 HomeSectionHeader(group.day)
+                            }
+                            .textCase(nil)
+                        }
+
+                        if !excludedRides.isEmpty {
+                            Section {
+                                DisclosureGroup(isExpanded: $showingExcluded) {
+                                    ForEach(excludedRides) { ride in
+                                        Button {
+                                            path.append(ride)
+                                        } label: {
+                                            RideRowView(ride: ride)
+                                                .opacity(0.45)
+                                                .saturation(0.3)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                                        .listRowBackground(Color.clear)
+                                        .listRowSeparator(.hidden)
+                                        .swipeActions(edge: .trailing) {
+                                            Button("删除", role: .destructive) {
+                                                Task { await deleteRide(ride) }
+                                            }
+                                            Button("恢复") {
+                                                Task { await EBikeFlagging.restore(ride, context: context) }
+                                            }
+                                            .tint(.green)
+                                        }
+                                    }
+                                } label: {
+                                    Label("已排除（电动车） \(excludedRides.count) 条", systemImage: "bolt.slash")
+                                        .font(.subheadline.weight(.bold))
+                                        .foregroundStyle(.secondary)
+                                }
+                                .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                             }
                             .textCase(nil)
                         }
@@ -108,7 +156,7 @@ struct RideTimelineView: View {
                 ManualRideView(onSave: saveManualRide)
             }
             .task { PhoneWatchSync.shared.send(todaySummary) }
-            .onChange(of: rides.count) { PhoneWatchSync.shared.send(todaySummary) }
+            .onChange(of: activeRides.count) { PhoneWatchSync.shared.send(todaySummary) }
             .onAppear {
                 permissions.refresh()
                 #if DEBUG
@@ -173,9 +221,9 @@ struct RideTimelineView: View {
         }
     }
 
-    /// 今日概览（同步给手表）。
+    /// 今日概览（同步给手表）；已排除的电动车记录不计入。
     private var todaySummary: WatchDaySummary {
-        let today = rides.filter { Calendar.current.isDateInToday($0.startDate) }
+        let today = activeRides.filter { Calendar.current.isDateInToday($0.startDate) }
         return WatchDaySummary(
             count: today.count,
             durationSeconds: today.reduce(0) { $0 + $1.duration },
@@ -183,10 +231,10 @@ struct RideTimelineView: View {
         )
     }
 
-    /// 按自然日分组；日组按日期倒序，组内沿用 @Query 的开始时间倒序。
+    /// 按自然日分组（不含已排除）；日组按日期倒序，组内沿用 @Query 的开始时间倒序。
     private var groupedByDay: [(day: String, rides: [RideModel])] {
         let cal = Calendar.current
-        let groups = Dictionary(grouping: rides) { cal.startOfDay(for: $0.startDate) }
+        let groups = Dictionary(grouping: activeRides) { cal.startOfDay(for: $0.startDate) }
         return groups
             .sorted { $0.key > $1.key }
             .map { (day: Formatters.dayHeader($0.key), rides: $0.value) }

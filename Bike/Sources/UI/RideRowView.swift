@@ -44,6 +44,15 @@ struct RideRowView: View {
                 Text(Formatters.duration(ride.duration))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                if EBikeFlagging.showsBadge(for: ride) {
+                    Label("疑似电动车", systemImage: "bolt.fill")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.orange)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Color.orange.opacity(0.13))
+                        .clipShape(Capsule())
+                }
             }
 
             Spacer()
