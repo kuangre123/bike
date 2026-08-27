@@ -37,7 +37,8 @@ enum RideMapping {
         guard let route, !route.isEmpty else { return nil }
         let dtos = route.map {
             RoutePointDTO(latitude: $0.latitude, longitude: $0.longitude,
-                          timestamp: $0.timestamp, speedMps: $0.speedMps)
+                          timestamp: $0.timestamp, speedMps: $0.speedMps,
+                          altitude: $0.altitude)
         }
         return try? JSONEncoder().encode(dtos)
     }

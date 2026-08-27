@@ -79,6 +79,16 @@ struct RideTimelineView: View {
                                             .tint(.orange)
                                         }
                                     }
+                                    .contextMenu {
+                                        if let candidate = mergeCandidate(for: ride) {
+                                            Button {
+                                                Task { await RideMerging.merge(candidate, ride, context: context) }
+                                            } label: {
+                                                Label("与 \(Formatters.clockTime(candidate.startDate)) 的记录合并",
+                                                      systemImage: "arrow.triangle.merge")
+                                            }
+                                        }
+                                    }
                                 }
                             } header: {
                                 HomeSectionHeader(group.day)
@@ -198,6 +208,13 @@ struct RideTimelineView: View {
                 try? context.save()
             }
         }
+    }
+
+    /// 合并候选：时间上紧邻的前一条（同类型、间隔 ≤ 2 小时才给入口）。
+    private func mergeCandidate(for ride: RideModel) -> RideModel? {
+        // activeRides 沿用 @Query 的开始时间倒序，first 即最近的更早一条
+        guard let previous = activeRides.first(where: { $0.startDate < ride.startDate }) else { return nil }
+        return RideMerging.canMerge(previous, ride) ? previous : nil
     }
 
     private func deleteRide(_ ride: RideModel) async {
@@ -481,6 +498,8 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     @Published private(set) var averageHeartRate: Double?
     @Published private(set) var heartRateState: HeartRateState = .requestingAuthorization
     @Published private(set) var isPaused = false
+    /// 停等自动暂停（等红灯不计时长）：GPS 持续采集以便检测恢复移动，仅计时冻结。
+    @Published private(set) var isAutoPaused = false
 
     private let locationManager = CLLocationManager()
     private let health = HealthService()
@@ -488,11 +507,16 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     private var lastAcceptedLocation: CLLocation?
     private var accumulatedActiveDuration: TimeInterval = 0
     private var activeSegmentStart: Date?
+    private var lowSpeedSince: Date?
+    private var lastOverspeedAlert: Date?
 
     private let warmupInterval: TimeInterval = 8
     private let maximumHorizontalAccuracy: CLLocationAccuracy = 25
     private let minimumSegmentDistance: CLLocationDistance = 10
     private let minimumMovingSpeed: CLLocationSpeed = 1.4
+    private let autoPauseBelowMps: CLLocationSpeed = 1.0
+    private let autoResumeAboveMps: CLLocationSpeed = 1.6
+    private let autoPauseAfterSeconds: TimeInterval = 5
 
     override init() {
         super.init()
@@ -510,6 +534,11 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
 
     var averageSpeedMps: Double {
         CyclingDomain.averageSpeedMps(distanceMeters: distanceMeters, duration: duration)
+    }
+
+    /// 当前时速（km/h），码表显示用。
+    var currentSpeedKmh: Double {
+        max(0, displayLocation?.speedMps ?? 0) * 3.6
     }
 
     var coordinates: [CLLocationCoordinate2D] {
@@ -540,6 +569,9 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         averageHeartRate = nil
         heartRateState = .requestingAuthorization
         isPaused = false
+        isAutoPaused = false
+        lowSpeedSince = nil
+        lastOverspeedAlert = nil
         accumulatedActiveDuration = 0
         activeSegmentStart = startDate
         locationManager.requestWhenInUseAuthorization()
@@ -552,6 +584,8 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         accumulatedActiveDuration = activeDuration(at: Date())
         activeSegmentStart = nil
         isPaused = true
+        isAutoPaused = false
+        lowSpeedSince = nil
         lastAcceptedLocation = nil
         locationManager.stopUpdatingLocation()
     }
@@ -559,6 +593,8 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     func resume() {
         guard isPaused else { return }
         isPaused = false
+        isAutoPaused = false
+        lowSpeedSince = nil
         activeSegmentStart = Date()
         lastAcceptedLocation = nil
         locationManager.startUpdatingLocation()
@@ -603,6 +639,42 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         return accumulatedActiveDuration + max(0, date.timeIntervalSince(activeSegmentStart))
     }
 
+    /// 停等自动暂停：低速持续超过阈值秒数冻结计时；恢复移动自动续。速度无效（<0）不参与判定。
+    private func updateAutoPause(with location: CLLocation) {
+        let speed = location.speed
+        guard speed >= 0 else { return }
+        let now = location.timestamp
+        if isAutoPaused {
+            if speed >= autoResumeAboveMps {
+                isAutoPaused = false
+                activeSegmentStart = now
+                lowSpeedSince = nil
+            }
+        } else if speed < autoPauseBelowMps {
+            if let since = lowSpeedSince {
+                if now.timeIntervalSince(since) >= autoPauseAfterSeconds, activeSegmentStart != nil {
+                    accumulatedActiveDuration = activeDuration(at: now)
+                    activeSegmentStart = nil
+                    isAutoPaused = true
+                }
+            } else {
+                lowSpeedSince = now
+            }
+        } else {
+            lowSpeedSince = nil
+        }
+    }
+
+    /// 超速提醒：达到设置阈值（0=关闭）触发警示震动，10 秒内不重复。
+    private func checkOverspeed(_ location: CLLocation) {
+        let thresholdKmh = UserDefaults.standard.double(forKey: "overspeedAlertKmh")
+        guard thresholdKmh > 0, location.speed >= 0, location.speed * 3.6 >= thresholdKmh else { return }
+        let now = Date()
+        if let last = lastOverspeedAlert, now.timeIntervalSince(last) < 10 { return }
+        lastOverspeedAlert = now
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+    }
+
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor [weak self, locations] in
             self?.handleLocations(locations)
@@ -613,6 +685,14 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         guard !isPaused else { return }
         for location in locations where location.horizontalAccuracy >= 0 {
             displayLocation = sample(from: location)
+            updateAutoPause(with: location)
+            checkOverspeed(location)
+
+            // 自动暂停中：不累计距离/轨迹，但记住位置，恢复后从这里继续（跳变不计入距离）。
+            if isAutoPaused {
+                lastAcceptedLocation = location
+                continue
+            }
 
             guard location.horizontalAccuracy <= maximumHorizontalAccuracy else { continue }
             guard let activeSegmentStart else { continue }
@@ -647,7 +727,8 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
             timestamp: timestamp,
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
-            speedMps: speedMps ?? max(0, location.speed)
+            speedMps: speedMps ?? max(0, location.speed),
+            altitude: location.verticalAccuracy >= 0 ? location.altitude : nil
         )
     }
 
@@ -698,6 +779,8 @@ private struct ManualRideView: View {
     @State private var showingStopConfirmation = false
     @State private var showingDiscardConfirmation = false
     @State private var showingTooShortAlert = false
+    @State private var showDashboard = false
+    @AppStorage("overspeedAlertKmh") private var overspeedAlertKmh: Double = 0
 
     let onSave: (Ride) -> Void
 
@@ -710,13 +793,17 @@ private struct ManualRideView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 14) {
-                    mapPanel
-                    metricGrid
+                    if showDashboard {
+                        dashboardPanel
+                    } else {
+                        mapPanel
+                        metricGrid
+                    }
                     controlPanel
                 }
                 .padding(16)
             }
-            .navigationTitle("骑行中")
+            .navigationTitle(showDashboard ? "码表" : "骑行中")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -724,9 +811,21 @@ private struct ManualRideView: View {
                         showingDiscardConfirmation = true
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        withAnimation { showDashboard.toggle() }
+                    } label: {
+                        Label(showDashboard ? "地图" : "码表",
+                              systemImage: showDashboard ? "map" : "gauge.with.needle")
+                    }
+                }
             }
             .onAppear {
                 session.start()
+                UIApplication.shared.isIdleTimerDisabled = true   // 骑行中屏幕常亮
+            }
+            .onDisappear {
+                UIApplication.shared.isIdleTimerDisabled = false
             }
             .onReceive(timer) { date in
                 now = date
@@ -820,6 +919,50 @@ private struct ManualRideView: View {
         }
     }
 
+    /// 码表面板：当前时速大字 + 时长/距离/均速/心率。超速时时速变红。
+    private var dashboardPanel: some View {
+        let speedKmh = session.currentSpeedKmh
+        let overspeeding = overspeedAlertKmh > 0 && speedKmh >= overspeedAlertKmh
+        return VStack(spacing: 14) {
+            Spacer(minLength: 0)
+
+            VStack(spacing: 2) {
+                Text(String(format: "%.1f", speedKmh))
+                    .font(.system(size: 104, weight: .black, design: .rounded))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .foregroundStyle(overspeeding ? Color.red : Color(red: 0.05, green: 0.42, blue: 0.50))
+                    .contentTransition(.numericText())
+                Text(overspeeding ? "超速！注意安全" : "公里/时")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(overspeeding ? .red : .secondary)
+            }
+
+            if session.isAutoPaused || session.isPaused {
+                Label(session.isPaused ? "已暂停" : "停等中，计时暂停",
+                      systemImage: "pause.circle.fill")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
+                    .background(Color.orange.opacity(0.13))
+                    .clipShape(Capsule())
+            }
+
+            Spacer(minLength: 0)
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                liveMetric("时长", Formatters.duration(session.duration), "timer", .cyan)
+                liveMetric("距离", Formatters.distance(session.distanceMeters), "point.topleft.down.curvedto.point.bottomright.up", .mint)
+                liveMetric("均速", speedText, "speedometer", .orange)
+                liveMetric(heartRateTitle, heartRateText, "heart.fill", .pink)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.vertical, 8)
+    }
+
     private var controlPanel: some View {
         HStack(spacing: 10) {
             Button {
@@ -882,6 +1025,7 @@ private struct ManualRideView: View {
 
     private var routeStatusText: String {
         if session.isPaused { return "已暂停" }
+        if session.isAutoPaused { return "停等中，移动后继续计时" }
         if session.currentCoordinate == nil { return "等待定位" }
         if session.isRecordingRoute { return "正在记录路线" }
         return "定位中，移动后记录"

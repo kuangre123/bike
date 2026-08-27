@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("healthWriteBack") private var healthWriteBack = true
     @AppStorage("ebikeAutoFlag") private var ebikeAutoFlag = true
+    @AppStorage("overspeedAlertKmh") private var overspeedAlertKmh: Double = 0
     @State private var duplicateCleanupMessage: String?
     @State private var isCleaningDuplicates = false
     @StateObject private var subscription = SubscriptionManager.shared
@@ -45,10 +46,17 @@ struct SettingsView: View {
                     }
                     LabeledContent("本次会话已保存", value: "\(coordinator.savedRideCount)")
                     Toggle("自动标注疑似电动车", isOn: $ebikeAutoFlag)
+                    Picker("超速提醒", selection: $overspeedAlertKmh) {
+                        Text("关闭").tag(0.0)
+                        Text("25 公里/时").tag(25.0)
+                        Text("30 公里/时").tag(30.0)
+                        Text("35 公里/时").tag(35.0)
+                        Text("40 公里/时").tag(40.0)
+                    }
                 } header: {
                     Text("检测")
                 } footer: {
-                    Text("长时间高速且速度几乎不变的骑行会标为「疑似电动车」，可一键排除。关闭后不再显示提示；已排除的记录不受影响。")
+                    Text("长时间高速且速度几乎不变的骑行会标为「疑似电动车」，可一键排除。超速提醒在手动骑行时达到所选速度会震动警示。")
                 }
                 Section("Apple 健康") {
                     Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)

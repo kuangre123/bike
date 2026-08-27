@@ -7,4 +7,14 @@ struct RoutePointDTO: Codable, Equatable {
     var longitude: Double
     var timestamp: Date
     var speedMps: Double
+    /// 海拔（米）。可选：旧记录的 JSON 没有此键，解码得 nil。
+    var altitude: Double?
+
+    init(latitude: Double, longitude: Double, timestamp: Date, speedMps: Double, altitude: Double? = nil) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.timestamp = timestamp
+        self.speedMps = speedMps
+        self.altitude = altitude
+    }
 }

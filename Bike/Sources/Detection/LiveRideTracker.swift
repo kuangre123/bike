@@ -53,7 +53,8 @@ final class LiveRideTracker: NSObject, CLLocationManagerDelegate {
                 timestamp: loc.timestamp,
                 latitude: loc.coordinate.latitude,
                 longitude: loc.coordinate.longitude,
-                speedMps: max(0, loc.speed)
+                speedMps: max(0, loc.speed),
+                altitude: loc.verticalAccuracy >= 0 ? loc.altitude : nil
             )
         }
         Task { @MainActor [weak self, mapped] in

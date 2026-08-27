@@ -31,11 +31,14 @@ public struct GPSSample: Equatable, Sendable {
     public let longitude: Double
     /// 瞬时速度 m/s，负值表示无效。
     public let speedMps: Double
-    public init(timestamp: Date, latitude: Double, longitude: Double, speedMps: Double) {
+    /// 海拔（米）；无有效垂直定位时为 nil。旧数据缺省 nil。
+    public let altitude: Double?
+    public init(timestamp: Date, latitude: Double, longitude: Double, speedMps: Double, altitude: Double? = nil) {
         self.timestamp = timestamp
         self.latitude = latitude
         self.longitude = longitude
         self.speedMps = speedMps
+        self.altitude = altitude
     }
 }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 import MapKit
 import SwiftData
+import Charts
 import CyclingDomain
 
 /// 单次运动详情：地图轨迹（有路线时）+ 数据。
@@ -9,6 +10,7 @@ struct RideDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let ride: RideModel
     @State private var showingDeleteConfirmation = false
+    @State private var shareItem: ShareableImage?
 
     private var type: ActivityType { RideMapping.activityType(of: ride) }
     private var source: RideSource { RideMapping.source(of: ride) }
@@ -24,6 +26,22 @@ struct RideDetailView: View {
             .map(\.speedMps)
             .filter { $0 > 0 && $0 < 30 }
             .max()
+    }
+    /// 累计爬升（米）；轨迹无海拔（旧记录/无垂直定位）为 nil。
+    private var elevationGain: Double? {
+        let alts = routePoints.compactMap(\.altitude)
+        guard alts.count >= 2 else { return nil }
+        return elevationGainMeters(altitudes: alts)
+    }
+    /// 速度曲线数据点（分钟, km/h），降采样到 ≤120 点防长轨迹卡顿。
+    private var speedCurve: [(minutes: Double, kmh: Double)] {
+        let valid = routePoints.filter { $0.speedMps >= 0 && $0.speedMps < 30 }
+        guard valid.count >= 5, let start = valid.first?.timestamp else { return [] }
+        let stride = max(1, valid.count / 120)
+        return valid.enumerated()
+            .filter { $0.offset.isMultiple(of: stride) }
+            .map { (minutes: $0.element.timestamp.timeIntervalSince(start) / 60,
+                    kmh: $0.element.speedMps * 3.6) }
     }
 
     var body: some View {
@@ -44,6 +62,51 @@ struct RideDetailView: View {
                 }
             }
 
+            if !speedCurve.isEmpty {
+                Section("速度曲线") {
+                    Chart(speedCurve, id: \.minutes) { point in
+                        AreaMark(
+                            x: .value("分钟", point.minutes),
+                            y: .value("速度", point.kmh)
+                        )
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color(red: 0.05, green: 0.64, blue: 0.86).opacity(0.32), .clear],
+                                startPoint: .top, endPoint: .bottom
+                            )
+                        )
+                        LineMark(
+                            x: .value("分钟", point.minutes),
+                            y: .value("速度", point.kmh)
+                        )
+                        .foregroundStyle(Color(red: 0.05, green: 0.64, blue: 0.86))
+                        .interpolationMethod(.monotone)
+                    }
+                    .chartXAxis {
+                        AxisMarks { value in
+                            AxisGridLine()
+                            AxisValueLabel {
+                                if let m = value.as(Double.self) {
+                                    Text("\(Int(m))分").font(.caption2)
+                                }
+                            }
+                        }
+                    }
+                    .chartYAxis {
+                        AxisMarks { value in
+                            AxisGridLine()
+                            AxisValueLabel {
+                                if let v = value.as(Double.self) {
+                                    Text("\(Int(v))").font(.caption2)
+                                }
+                            }
+                        }
+                    }
+                    .frame(height: 150)
+                    .padding(.vertical, 4)
+                }
+            }
+
             Section("数据") {
                 row("类型", Formatters.activityLabel(type))
                 row("开始", Formatters.fullDateTime(ride.startDate))
@@ -54,6 +117,7 @@ struct RideDetailView: View {
                     row(metricLabel("配速"), pace)
                 }
                 if let maxSpeed = maxRouteSpeedMps { row("最高速度", Formatters.speed(maxSpeed)) }
+                if let gain = elevationGain, gain >= 1 { row("累计爬升", "\(Int(gain.rounded())) 米") }
                 if let c = ride.calories { row(metricLabel("卡路里"), Formatters.calories(c)) }
                 if ride.distanceMeters != nil { row("估算减碳", Formatters.carbonSaved(ride.distanceMeters)) }
                 if let hr = Formatters.heartRate(ride.avgHeartRate) { row("均心率", hr) }
@@ -100,12 +164,25 @@ struct RideDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    if let image = RideShareCard.renderImage(for: ride) {
+                        shareItem = ShareableImage(image: image)
+                    }
+                } label: {
+                    Label("分享", systemImage: "square.and.arrow.up")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Button(role: .destructive) {
                     showingDeleteConfirmation = true
                 } label: {
                     Label("删除", systemImage: "trash")
                 }
             }
+        }
+        .sheet(item: $shareItem) { item in
+            ShareImageSheet(image: item.image)
+                .presentationDetents([.medium, .large])
         }
         .confirmationDialog("删除这次运动？", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
             Button("删除", role: .destructive) {
