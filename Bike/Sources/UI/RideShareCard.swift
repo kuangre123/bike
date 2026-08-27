@@ -143,9 +143,11 @@ private struct RouteSilhouette: Shape {
 }
 
 /// `.sheet(item:)` 用的可识别图片包装。
-struct ShareableImage: Identifiable {
+struct ShareableImage: Identifiable, Equatable {
     let id = UUID()
     let image: UIImage
+
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
 }
 
 /// UIActivityViewController 的 SwiftUI 包装（分享图片到微信/相册等）。

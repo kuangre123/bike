@@ -4,6 +4,7 @@ import UIKit
 import MapKit
 import CoreLocation
 import Combine
+import StoreKit
 import CyclingDomain
 
 /// 运动时间线：权限引导 + 本周概览 + 按自然日分组；点进单次看详情，滑动删除。
@@ -12,6 +13,7 @@ struct RideTimelineView: View {
     @Environment(PermissionsManager.self) private var permissions
     @Environment(RideDetectionCoordinator.self) private var coordinator
     @Environment(\.openURL) private var openURL
+    @Environment(\.requestReview) private var requestReview
     @Query(sort: \RideModel.startDate, order: .reverse) private var rides: [RideModel]
     @State private var showingSettings = false
     @State private var showingManualRide = false
@@ -166,6 +168,14 @@ struct RideTimelineView: View {
                 ManualRideView(onSave: saveManualRide)
             }
             .task { PhoneWatchSync.shared.send(todaySummary) }
+            .task {
+                // 价值时刻①：打开时间线看到自动记录的成果（被动用户的主场景）。
+                // 延迟让 UI 稳定，避免启动瞬间打断；门槛全在 ReviewPrompt 里。
+                try? await Task.sleep(for: .seconds(2))
+                if ReviewPrompt.registerPositiveMomentAndDecide(totalRides: activeRides.count) {
+                    requestReview()
+                }
+            }
             .onChange(of: activeRides.count) { PhoneWatchSync.shared.send(todaySummary) }
             .onAppear {
                 permissions.refresh()
@@ -186,6 +196,14 @@ struct RideTimelineView: View {
         let store = RideStore(context: context)
         let inserted = (try? store.save([ride], autoDetected: false)) ?? []
         guard let model = inserted.first else { return }
+
+        // 价值时刻②：刚完成并保存一次手动骑行。延迟等全屏页收起再弹。
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.5))
+            if ReviewPrompt.registerPositiveMomentAndDecide(totalRides: activeRides.count) {
+                requestReview()
+            }
+        }
 
         let writeBack = UserDefaults.standard.object(forKey: "healthWriteBack") as? Bool ?? true
         guard writeBack else { return }

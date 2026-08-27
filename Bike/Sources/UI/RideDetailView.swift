@@ -2,12 +2,14 @@ import SwiftUI
 import MapKit
 import SwiftData
 import Charts
+import StoreKit
 import CyclingDomain
 
 /// 单次运动详情：地图轨迹（有路线时）+ 数据。
 struct RideDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.requestReview) private var requestReview
     let ride: RideModel
     @State private var showingDeleteConfirmation = false
     @State private var shareItem: ShareableImage?
@@ -183,6 +185,14 @@ struct RideDetailView: View {
         .sheet(item: $shareItem) { item in
             ShareImageSheet(image: item.image)
                 .presentationDetents([.medium, .large])
+        }
+        .onChange(of: shareItem) { old, new in
+            // 价值时刻③：分享完卡片（分享面板收起）——最强好感信号。
+            guard old != nil, new == nil else { return }
+            let total = (try? context.fetchCount(FetchDescriptor<RideModel>())) ?? 0
+            if ReviewPrompt.registerPositiveMomentAndDecide(totalRides: total) {
+                requestReview()
+            }
         }
         .confirmationDialog("删除这次运动？", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
             Button("删除", role: .destructive) {
