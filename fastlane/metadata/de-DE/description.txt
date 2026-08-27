@@ -25,3 +25,5 @@ WICHTIGER HINWEIS ZUR SPRACHE
 Die Bedienoberfläche von Bike ist aktuell ausschließlich auf Vereinfachtem Chinesisch verfügbar. Eine deutsche Bedienoberfläche gibt es derzeit noch nicht. Bitte berücksichtige das vor dem Download, auch wenn viele Funktionen (Karte, Diagramme, Symbole) weitgehend selbsterklärend sind.
 
 Bike läuft auf iPhone (iOS 17 oder neuer) und optional mit Apple Watch für Herzfrequenz und Zifferblatt-Komplikation.
+
+Standard Apple Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

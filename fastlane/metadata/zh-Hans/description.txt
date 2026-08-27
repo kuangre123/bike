@@ -25,3 +25,5 @@
 无论是扫码就走的共享单车用户、每天通勤的骑行党，还是周末想探索安静小路的骑行爱好者，"快乐轻骑"都能让记录这件事彻底自动化——你只管骑，它替你记。
 
 App内提供路线规划与导航功能的订阅服务，基础的自动运动记录功能完全免费。
+
+Standard Apple Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

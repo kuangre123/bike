@@ -25,3 +25,5 @@ Apple Watch用アプリでリアルタイムの心拍数・運動時間・消費
 
 対応デバイス：iPhone（iOS 17以降）、Apple Watch
 カテゴリ：ヘルスケア/フィットネス
+
+Standard Apple Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

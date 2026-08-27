@@ -39,3 +39,5 @@ Apple Watch隨行
 尤其適合騎共享單車的人：掃碼就走、還車即停，裝不了碼錶也常忘記打卡，快樂輕騎會在背景默默把每一段掃碼騎行都記下來。
 
 不管是每天通勤、假日騎車兜風，還是想探索附近的安靜巷弄與河濱風景，快樂輕騎都幫你把每一趟路都好好記下來。
+
+Standard Apple Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

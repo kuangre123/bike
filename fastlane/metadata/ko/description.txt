@@ -27,3 +27,5 @@
 현재 앱 화면은 중국어 간체로만 제공되며, 한국어 UI는 아직 지원하지 않습니다. 다만 아이콘과 지도, 그래프 중심의 직관적인 구성이라 사용에는 큰 무리가 없도록 신경 썼습니다. 추후 업데이트를 통해 한국어를 포함한 다국어 지원을 준비하고 있으니 참고해 주세요.
 
 iPhone과 Apple Watch를 가지고 계신 분, 자전거·러닝·걷기를 즐기지만 매번 앱을 켜고 끄는 게 번거로우셨던 분께 추천합니다.
+
+Standard Apple Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

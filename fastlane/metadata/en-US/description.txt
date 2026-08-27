@@ -35,3 +35,5 @@ REQUIREMENTS
 iPhone with iOS 17 or later. Apple Watch companion app optional but recommended for real-time heart rate. Background location and Motion & Fitness permissions are needed for automatic detection; Health access is needed to save your activities.
 
 Ride more. Remember less. Let HappyRide catch every mile you didn't plan to track.
+
+Standard Apple Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
