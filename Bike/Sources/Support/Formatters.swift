@@ -11,6 +11,16 @@ enum Formatters {
         return "\(m) 分"
     }
 
+    /// 实时时钟格式（秒级跳动），码表/骑行中用：<1 小时显示「M:SS」，否则「H:MM:SS」。
+    static func durationClock(_ t: TimeInterval) -> String {
+        let total = max(0, Int(t))
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        let s = total % 60
+        if h > 0 { return String(format: "%d:%02d:%02d", h, m, s) }
+        return String(format: "%d:%02d", m, s)
+    }
+
     static func distance(_ meters: Double?) -> String {
         guard let meters else { return "无路线" }
         if meters >= 1000 {

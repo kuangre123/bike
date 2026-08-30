@@ -658,7 +658,9 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     }
 
     /// 停等自动暂停：低速持续超过阈值秒数冻结计时；恢复移动自动续。速度无效（<0）不参与判定。
+    /// 仅在真正开始移动后（已记录轨迹点）启用，避免起步前静止就误暂停。
     private func updateAutoPause(with location: CLLocation) {
+        guard isAutoPaused || !samples.isEmpty else { return }
         let speed = location.speed
         guard speed >= 0 else { return }
         let now = location.timestamp
@@ -930,7 +932,7 @@ private struct ManualRideView: View {
 
     private var metricGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-            liveMetric("时长", Formatters.duration(session.duration), "timer", .cyan)
+            liveMetric("时长", Formatters.durationClock(session.duration), "timer", .cyan)
             liveMetric("距离", Formatters.distance(session.distanceMeters), "point.topleft.down.curvedto.point.bottomright.up", .mint)
             liveMetric("均速", speedText, "speedometer", .orange)
             liveMetric(heartRateTitle, heartRateText, "heart.fill", .pink)
@@ -971,7 +973,7 @@ private struct ManualRideView: View {
             Spacer(minLength: 0)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                liveMetric("时长", Formatters.duration(session.duration), "timer", .cyan)
+                liveMetric("时长", Formatters.durationClock(session.duration), "timer", .cyan)
                 liveMetric("距离", Formatters.distance(session.distanceMeters), "point.topleft.down.curvedto.point.bottomright.up", .mint)
                 liveMetric("均速", speedText, "speedometer", .orange)
                 liveMetric(heartRateTitle, heartRateText, "heart.fill", .pink)

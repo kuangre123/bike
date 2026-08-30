@@ -8,6 +8,9 @@ struct SettingsView: View {
     @AppStorage("healthWriteBack") private var healthWriteBack = true
     @AppStorage("ebikeAutoFlag") private var ebikeAutoFlag = true
     @AppStorage("overspeedAlertKmh") private var overspeedAlertKmh: Double = 0
+    @AppStorage("recordWalking") private var recordWalking = true
+    @AppStorage("recordEBike") private var recordEBike = true
+    @AppStorage("recordOther") private var recordOther = true
     @State private var duplicateCleanupMessage: String?
     @State private var isCleaningDuplicates = false
     @StateObject private var subscription = SubscriptionManager.shared
@@ -57,6 +60,15 @@ struct SettingsView: View {
                     Text("检测")
                 } footer: {
                     Text("长时间高速且速度几乎不变的骑行会标为「疑似电动车」，可一键排除。超速提醒在手动骑行时达到所选速度会震动警示。")
+                }
+                Section {
+                    Toggle("步行", isOn: $recordWalking)
+                    Toggle("电动车", isOn: $recordEBike)
+                    Toggle("其他运动", isOn: $recordOther)
+                } header: {
+                    Text("自动记录的运动类型")
+                } footer: {
+                    Text("默认全部记录。关闭后，被动检测到的该类型运动不再自动保存。骑行与跑步始终记录；「电动车」指自动识别为疑似电动车的骑行。手动开始的骑行不受影响。")
                 }
                 Section("Apple 健康") {
                     Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)

@@ -135,7 +135,7 @@ final class RideDetectionCoordinator {
         pendingTracked = []
         let rides = RideReconciler.reconcile(
             motionSegments: segments, trackedRides: tracked, heartRateSegments: hrSegments
-        )
+        ).filter { ActivityRecordingPreferences.shouldRecord($0) }
         lastReconcileDate = now
         guard !rides.isEmpty else { return }
 
