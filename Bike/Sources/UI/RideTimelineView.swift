@@ -18,6 +18,9 @@ struct RideTimelineView: View {
     @State private var showingSettings = false
     @State private var showingManualRide = false
     @State private var showingExcluded = false
+    @State private var showingAdvancedStats = false
+    @State private var showPaywall = false
+    @StateObject private var subscription = SubscriptionManager.shared
     @State private var path = NavigationPath()
 
     /// 计入统计与主列表的记录（排除「已排除（电动车）」）。
@@ -53,6 +56,38 @@ struct RideTimelineView: View {
                     } else {
                         Section {
                             StatsSummaryView(rides: activeRides)
+                            Button(action: openAdvancedStats) {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "chart.bar.xaxis")
+                                        .font(.subheadline.weight(.bold))
+                                        .foregroundStyle(.white)
+                                        .frame(width: 30, height: 30)
+                                        .background(
+                                            LinearGradient(colors: [Color(red: 0.04, green: 0.68, blue: 0.82),
+                                                                    Color(red: 0.27, green: 0.82, blue: 0.62)],
+                                                           startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text("高级统计").font(.subheadline.weight(.heavy)).foregroundStyle(.primary)
+                                        Text("记录 · 连续天数 · 月度趋势").font(.caption2).foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    if !subscription.isPro {
+                                        Text("Pro").font(.caption2.weight(.heavy)).foregroundStyle(.white)
+                                            .padding(.horizontal, 7).padding(.vertical, 3)
+                                            .background(Color.orange).clipShape(Capsule())
+                                    }
+                                    Image(systemName: "chevron.right").font(.caption.weight(.bold))
+                                        .foregroundStyle(.secondary.opacity(0.55))
+                                }
+                                .padding(12)
+                                .background(Color.white.opacity(0.82))
+                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color.white.opacity(0.85), lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.top, 8)
                         } header: {
                             HomeSectionHeader("本周节奏")
                         }
@@ -145,6 +180,9 @@ struct RideTimelineView: View {
             .navigationDestination(for: RideModel.self) { ride in
                 RideDetailView(ride: ride)
             }
+            .navigationDestination(isPresented: $showingAdvancedStats) {
+                AdvancedStatsView(rides: rides)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -163,6 +201,9 @@ struct RideTimelineView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
             .fullScreenCover(isPresented: $showingManualRide) {
                 ManualRideView(onSave: saveManualRide)
@@ -233,6 +274,15 @@ struct RideTimelineView: View {
         // activeRides 沿用 @Query 的开始时间倒序，first 即最近的更早一条
         guard let previous = activeRides.first(where: { $0.startDate < ride.startDate }) else { return nil }
         return RideMerging.canMerge(previous, ride) ? previous : nil
+    }
+
+    /// 高级统计：Pro 专享。未订阅先弹 paywall。
+    private func openAdvancedStats() {
+        if subscription.isPro {
+            showingAdvancedStats = true
+        } else {
+            showPaywall = true
+        }
     }
 
     private func deleteRide(_ ride: RideModel) async {
