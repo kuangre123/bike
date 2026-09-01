@@ -19,6 +19,7 @@ struct RideTimelineView: View {
     @State private var showingManualRide = false
     @State private var showingExcluded = false
     @State private var showingAdvancedStats = false
+    @State private var showingHeatmap = false
     @State private var showPaywall = false
     @StateObject private var subscription = SubscriptionManager.shared
     @AppStorage("weeklyGoalKm") private var weeklyGoalKm: Double = 30
@@ -187,7 +188,17 @@ struct RideTimelineView: View {
             .navigationDestination(isPresented: $showingAdvancedStats) {
                 AdvancedStatsView(rides: rides)
             }
+            .navigationDestination(isPresented: $showingHeatmap) {
+                RouteHeatmapView(rides: rides)
+            }
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingHeatmap = true
+                    } label: {
+                        Label("骑行足迹", systemImage: "map")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingSettings = true
