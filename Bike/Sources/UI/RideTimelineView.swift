@@ -21,6 +21,7 @@ struct RideTimelineView: View {
     @State private var showingAdvancedStats = false
     @State private var showPaywall = false
     @StateObject private var subscription = SubscriptionManager.shared
+    @AppStorage("weeklyGoalKm") private var weeklyGoalKm: Double = 30
     @State private var path = NavigationPath()
 
     /// 计入统计与主列表的记录（排除「已排除（电动车）」）。
@@ -55,6 +56,9 @@ struct RideTimelineView: View {
                         .clearHomeRow()
                     } else {
                         Section {
+                            if weeklyGoalKm > 0 {
+                                WeeklyGoalCard(rides: activeRides, goalKm: weeklyGoalKm)
+                            }
                             StatsSummaryView(rides: activeRides)
                             Button(action: openAdvancedStats) {
                                 HStack(spacing: 10) {

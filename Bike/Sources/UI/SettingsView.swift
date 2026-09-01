@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("healthWriteBack") private var healthWriteBack = true
     @AppStorage("ebikeAutoFlag") private var ebikeAutoFlag = true
+    @AppStorage("weeklyGoalKm") private var weeklyGoalKm: Double = 30
     @AppStorage("overspeedAlertKmh") private var overspeedAlertKmh: Double = 0
     @AppStorage("recordWalking") private var recordWalking = true
     @AppStorage("recordEBike") private var recordEBike = true
@@ -60,6 +61,19 @@ struct SettingsView: View {
                     Text("检测")
                 } footer: {
                     Text("长时间高速且速度几乎不变的骑行会标为「疑似电动车」，可一键排除。超速提醒在手动骑行时达到所选速度会震动警示。")
+                }
+                Section {
+                    Picker("每周距离目标", selection: $weeklyGoalKm) {
+                        Text("关闭").tag(0.0)
+                        Text("20 公里").tag(20.0)
+                        Text("30 公里").tag(30.0)
+                        Text("50 公里").tag(50.0)
+                        Text("100 公里").tag(100.0)
+                    }
+                } header: {
+                    Text("目标")
+                } footer: {
+                    Text("设定后，首页会显示本周骑行距离的进度。仅本地统计，不含已排除记录。")
                 }
                 Section {
                     Toggle("步行", isOn: $recordWalking)
