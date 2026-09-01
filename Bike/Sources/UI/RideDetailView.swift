@@ -13,6 +13,7 @@ struct RideDetailView: View {
     let ride: RideModel
     @State private var showingDeleteConfirmation = false
     @State private var shareItem: ShareableImage?
+    @State private var gpxFile: GPXFile?
 
     private var type: ActivityType { RideMapping.activityType(of: ride) }
     private var source: RideSource { RideMapping.source(of: ride) }
@@ -166,9 +167,18 @@ struct RideDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    if let image = RideShareCard.renderImage(for: ride) {
-                        shareItem = ShareableImage(image: image)
+                Menu {
+                    Button {
+                        if let image = RideShareCard.renderImage(for: ride) {
+                            shareItem = ShareableImage(image: image)
+                        }
+                    } label: {
+                        Label("分享卡片", systemImage: "photo")
+                    }
+                    if !routePoints.isEmpty {
+                        Button(action: exportGPX) {
+                            Label("导出 GPX 轨迹", systemImage: "point.topleft.down.curvedto.point.bottomright.up")
+                        }
                     }
                 } label: {
                     Label("分享", systemImage: "square.and.arrow.up")
@@ -185,6 +195,9 @@ struct RideDetailView: View {
         .sheet(item: $shareItem) { item in
             ShareImageSheet(image: item.image)
                 .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $gpxFile) { item in
+            ShareFileSheet(url: item.url)
         }
         .onChange(of: shareItem) { old, new in
             // 价值时刻③：分享完卡片（分享面板收起）——最强好感信号。
@@ -217,6 +230,25 @@ struct RideDetailView: View {
         return "自动检测添加"
     }
 
+    /// 导出当前骑行为 GPX，写入临时文件并弹分享面板。无轨迹则忽略。
+    private func exportGPX() {
+        let samples = RideMapping.gpsSamples(ride.routeData)
+        guard !samples.isEmpty else { return }
+        let name = "\(Formatters.activityLabel(type)) \(Formatters.fullDateTime(ride.startDate))"
+        let xml = gpxDocument(trackName: name, points: samples)
+
+        let stamp = DateFormatter()
+        stamp.dateFormat = "yyyyMMdd-HHmm"
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("HappyRide-\(stamp.string(from: ride.startDate)).gpx")
+        do {
+            try xml.data(using: .utf8)?.write(to: fileURL, options: .atomic)
+            gpxFile = GPXFile(url: fileURL)
+        } catch {
+            // 写入失败静默忽略——不影响其它功能。
+        }
+    }
+
     private func deleteRide() async {
         if let uuid = ride.healthKitWorkoutUUID {
             let health = HealthService()
@@ -241,4 +273,10 @@ struct RideDetailView: View {
         )
         return MKCoordinateRegion(center: center, span: span)
     }
+}
+
+/// `.sheet(item:)` 用的 GPX 文件包装。
+private struct GPXFile: Identifiable {
+    let id = UUID()
+    let url: URL
 }

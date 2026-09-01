@@ -160,3 +160,14 @@ struct ShareImageSheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
+
+/// 分享任意文件（如导出的 GPX）到其它 App。
+struct ShareFileSheet: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
+}

@@ -48,4 +48,12 @@ enum RideMapping {
         guard let data else { return [] }
         return (try? JSONDecoder().decode([RoutePointDTO].self, from: data)) ?? []
     }
+
+    /// 解码为领域 `GPSSample`（用于 GPX 导出等领域函数）。
+    static func gpsSamples(_ data: Data?) -> [GPSSample] {
+        decodeRoute(data).map {
+            GPSSample(timestamp: $0.timestamp, latitude: $0.latitude,
+                      longitude: $0.longitude, speedMps: $0.speedMps, altitude: $0.altitude)
+        }
+    }
 }
