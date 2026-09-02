@@ -86,8 +86,10 @@ struct SettingsView: View {
                 }
                 Section("Apple 健康") {
                     Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)
-                    Button(isCleaningDuplicates ? "正在清理..." : "清理重复健康记录") {
+                    Button {
                         Task { await cleanupHealthDuplicates() }
+                    } label: {
+                        Text(isCleaningDuplicates ? String(localized: "正在清理...") : String(localized: "清理重复健康记录"))
                     }
                     .disabled(isCleaningDuplicates)
                     if let duplicateCleanupMessage {
@@ -115,33 +117,33 @@ struct SettingsView: View {
         duplicateCleanupMessage = nil
         let health = HealthService()
         guard await health.requestWriteAuthorization() else {
-            duplicateCleanupMessage = "需要先允许写入 Apple 健康。"
+            duplicateCleanupMessage = String(localized: "需要先允许写入 Apple 健康。")
             isCleaningDuplicates = false
             return
         }
         let count = await health.cleanupDuplicateWorkouts()
-        duplicateCleanupMessage = count == 0 ? "没有发现本 app 写入的重复记录。" : "已清理 \(count) 条重复记录。"
+        duplicateCleanupMessage = count == 0 ? String(localized: "没有发现本 app 写入的重复记录。") : String(localized: "已清理 \(count) 条重复记录。")
         isCleaningDuplicates = false
     }
 
     private var motionText: String {
         switch permissions.motionStatus {
-        case .notDetermined: return "未授权"
-        case .restricted: return "受限"
-        case .denied: return "已拒绝"
-        case .authorized: return "已授权"
-        @unknown default: return "未知"
+        case .notDetermined: return String(localized: "未授权")
+        case .restricted: return String(localized: "受限")
+        case .denied: return String(localized: "已拒绝")
+        case .authorized: return String(localized: "已授权")
+        @unknown default: return String(localized: "未知")
         }
     }
 
     private var locationText: String {
         switch permissions.locationStatus {
-        case .notDetermined: return "未授权"
-        case .restricted: return "受限"
-        case .denied: return "已拒绝"
-        case .authorizedWhenInUse: return "使用期间"
-        case .authorizedAlways: return "始终"
-        @unknown default: return "未知"
+        case .notDetermined: return String(localized: "未授权")
+        case .restricted: return String(localized: "受限")
+        case .denied: return String(localized: "已拒绝")
+        case .authorizedWhenInUse: return String(localized: "使用期间")
+        case .authorizedAlways: return String(localized: "始终")
+        @unknown default: return String(localized: "未知")
         }
     }
 }

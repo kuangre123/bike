@@ -24,7 +24,8 @@ struct WeeklyGoalCard: View {
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(Color(red: 0.10, green: 0.34, blue: 0.40))
                 Spacer()
-                Text(reached ? "已达成 🎉" : String(format: "%.1f / %.0f 公里", doneKm, goalKm))
+                Text(reached ? String(localized: "已达成 🎉")
+                             : String(localized: "\(doneKm.formatted(.number.precision(.fractionLength(1)))) / \(Int(goalKm)) 公里"))
                     .font(.caption.weight(.heavy))
                     .foregroundStyle(reached ? Color(red: 0.18, green: 0.66, blue: 0.46) : .secondary)
                     .contentTransition(.numericText())
@@ -46,7 +47,7 @@ struct WeeklyGoalCard: View {
             .frame(height: 12)
 
             if !reached {
-                Text(String(format: "还差 %.1f 公里", max(0, goalKm - doneKm)))
+                Text(String(localized: "还差 \((max(0, goalKm - doneKm)).formatted(.number.precision(.fractionLength(1)))) 公里"))
                     .font(.caption2).foregroundStyle(.secondary)
             }
         }

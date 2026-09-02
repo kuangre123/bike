@@ -15,7 +15,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         super.init()
         let center = UNUserNotificationCenter.current()
         center.delegate = self
-        let undo = UNNotificationAction(identifier: Self.undoActionID, title: "撤销", options: [.destructive])
+        let undo = UNNotificationAction(identifier: Self.undoActionID, title: String(localized: "撤销"), options: [.destructive])
         let category = UNNotificationCategory(identifier: Self.categoryID, actions: [undo], intentIdentifiers: [], options: [])
         center.setNotificationCategories([category])
     }
@@ -26,8 +26,8 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
 
     func notifyWorkoutAdded(rideID: UUID, activityType: ActivityType, duration: TimeInterval) {
         let content = UNMutableNotificationContent()
-        content.title = "已记录一次\(Formatters.activityLabel(activityType))"
-        content.body = "\(Formatters.duration(duration)) · 滑动通知可撤销"
+        content.title = String(localized: "已记录一次\(Formatters.activityLabel(activityType))")
+        content.body = String(localized: "\(Formatters.duration(duration)) · 滑动通知可撤销")
         content.categoryIdentifier = Self.categoryID
         content.userInfo = ["rideID": rideID.uuidString]
         let request = UNNotificationRequest(identifier: rideID.uuidString, content: content, trigger: nil)

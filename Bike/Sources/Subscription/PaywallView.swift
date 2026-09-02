@@ -112,14 +112,14 @@ struct PaywallView: View {
             let yearlyTrialText: String = {
                 if let offer = manager.yearlyProduct?.subscription?.introductoryOffer,
                    offer.paymentMode == .freeTrial {
-                    return "试用 \(trialPeriodText(for: offer))，到期自动续费"
+                    return String(localized: "试用 \(trialPeriodText(for: offer))，到期自动续费")
                 }
-                return manager.yearlyPerMonthDisplay.map { "折合每月约 \($0)" } ?? "年付更划算"
+                return manager.yearlyPerMonthDisplay.map { String(localized: "折合每月约 \($0)") } ?? String(localized: "年付更划算")
             }()
 
             PlanCard(
-                title: "按年订阅", price: manager.yearlyProduct?.displayPrice ?? "—", period: "/ 年",
-                badge: manager.yearlySavingsPercent.map { "省 \($0)%" },
+                title: String(localized: "按年订阅"), price: manager.yearlyProduct?.displayPrice ?? "—", period: String(localized: "/ 年"),
+                badge: manager.yearlySavingsPercent.map { String(localized: "省 \($0)%") },
                 subtext: yearlyTrialText, isSelected: selectedPlan == .yearly, isRecommended: true
             ) { selectedPlan = .yearly }
             .redacted(reason: manager.yearlyProduct == nil ? .placeholder : [])
@@ -127,13 +127,13 @@ struct PaywallView: View {
             let monthlyTrialText: String = {
                 if let offer = manager.monthlyProduct?.subscription?.introductoryOffer,
                    offer.paymentMode == .freeTrial {
-                    return "试用 \(trialPeriodText(for: offer))，到期自动续费"
+                    return String(localized: "试用 \(trialPeriodText(for: offer))，到期自动续费")
                 }
-                return "按月续订随时取消"
+                return String(localized: "按月续订随时取消")
             }()
 
             PlanCard(
-                title: "按月订阅", price: manager.monthlyProduct?.displayPrice ?? "—", period: "/ 月",
+                title: String(localized: "按月订阅"), price: manager.monthlyProduct?.displayPrice ?? "—", period: String(localized: "/ 月"),
                 badge: nil, subtext: monthlyTrialText,
                 isSelected: selectedPlan == .monthly, isRecommended: false
             ) { selectedPlan = .monthly }
@@ -162,11 +162,11 @@ struct PaywallView: View {
     private func trialPeriodText(for offer: Product.SubscriptionOffer) -> String {
         let v = offer.period.value
         switch offer.period.unit {
-        case .day: return "\(v) 天"
-        case .week: return "\(v) 周"
-        case .month: return "\(v) 个月"
-        case .year: return "\(v) 年"
-        @unknown default: return "\(v) 天"
+        case .day: return String(localized: "\(v) 天")
+        case .week: return String(localized: "\(v) 周")
+        case .month: return String(localized: "\(v) 个月")
+        case .year: return String(localized: "\(v) 年")
+        @unknown default: return String(localized: "\(v) 天")
         }
     }
 
@@ -182,7 +182,7 @@ struct PaywallView: View {
                         ProgressView().tint(.white)
                     } else {
                         let hasTrial = selectedProduct?.subscription?.introductoryOffer?.paymentMode == .freeTrial
-                        Text(hasTrial ? "开始免费试用" : "立即订阅")
+                        Text(hasTrial ? String(localized: "开始免费试用") : String(localized: "立即订阅"))
                             .font(.headline).foregroundStyle(.white)
                     }
                 }
@@ -201,7 +201,7 @@ struct PaywallView: View {
 
     private func doPurchase() async {
         guard let product = selectedProduct else {
-            manager.errorMessage = "产品信息未加载，请稍后重试"; showError = true; return
+            manager.errorMessage = String(localized: "产品信息未加载，请稍后重试"); showError = true; return
         }
         isPurchasing = true
         defer { isPurchasing = false }

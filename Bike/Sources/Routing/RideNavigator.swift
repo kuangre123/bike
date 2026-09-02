@@ -107,13 +107,13 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesi
 
     private func phrase(_ d: TurnDirection) -> String {
         switch d {
-        case .left, .slightLeft: return "向左"
-        case .sharpLeft: return "向左急转"
-        case .right, .slightRight: return "向右"
-        case .sharpRight: return "向右急转"
-        case .uTurn: return "掉头"
-        case .straight: return "直行"
-        case .arrive: return "到达"
+        case .left, .slightLeft: return String(localized: "向左")
+        case .sharpLeft: return String(localized: "向左急转")
+        case .right, .slightRight: return String(localized: "向右")
+        case .sharpRight: return String(localized: "向右急转")
+        case .uTurn: return String(localized: "掉头")
+        case .straight: return String(localized: "直行")
+        case .arrive: return String(localized: "到达")
         }
     }
 

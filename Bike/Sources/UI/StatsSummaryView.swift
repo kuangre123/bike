@@ -60,9 +60,7 @@ struct StatsSummaryView: View {
     private var totalDuration: TimeInterval { weekRides.reduce(0) { $0 + $1.duration } }
 
     private var totalDistanceText: String {
-        let meters = weekRides.reduce(0.0) { $0 + ($1.distanceMeters ?? 0) }
-        if meters >= 1000 { return String(format: "%.1f 公里", meters / 1000) }
-        return "\(Int(meters)) 米"
+        Formatters.distance(weekRides.reduce(0.0) { $0 + ($1.distanceMeters ?? 0) })
     }
 
     private struct DayBar: Identifiable {

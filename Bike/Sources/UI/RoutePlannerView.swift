@@ -105,7 +105,7 @@ struct RoutePlannerView: View {
                         RoutePreviewMap(coordinates: plan.coordinates)
                             .frame(height: 220)
                             .listRowInsets(EdgeInsets())
-                        LabeledContent("距离", value: String(format: "%.1f 公里", plan.distanceMeters / 1000))
+                        LabeledContent("距离", value: Formatters.distance(plan.distanceMeters))
                         LabeledContent("预计", value: "\(plan.estimatedMinutes) 分钟")
                         Label("已尽量避开主干道", systemImage: "leaf")
                             .font(.caption).foregroundStyle(.secondary)
@@ -187,7 +187,7 @@ struct RoutePlannerView: View {
     private func planRoute(to dest: Destination) async {
         guard subscription.isPro else { showPaywall = true; return }
         guard networkEnabled else { showConsent = true; return }
-        guard let from = currentCoordinate() else { errorText = "无法获取当前位置"; return }
+        guard let from = currentCoordinate() else { errorText = String(localized: "无法获取当前位置"); return }
         loading = true
         errorText = nil
         let result = await service.route(from: from, to: dest.coordinate, profile: routeProfile)
@@ -202,7 +202,7 @@ struct RoutePlannerView: View {
     private func planLoop(_ loop: LoopSuggestion) async {
         guard subscription.isPro else { showPaywall = true; return }
         guard networkEnabled else { showConsent = true; return }
-        guard let from = currentCoordinate() else { errorText = "无法获取当前位置"; return }
+        guard let from = currentCoordinate() else { errorText = String(localized: "无法获取当前位置"); return }
         loading = true
         errorText = nil
         // 直线三角骨架沿路绕行后实际里程约为 1.4× 骨架长，故把骨架按系数缩小，
@@ -246,10 +246,10 @@ struct RoutePlannerView: View {
 
     private func message(for error: RouteError) -> String {
         switch error {
-        case .networkDisabled: return "未启用联网"
-        case .offline: return "网络不可用"
-        case .noRoute: return "没找到合适的路线"
-        case .server: return "路线服务暂时不可用"
+        case .networkDisabled: return String(localized: "未启用联网")
+        case .offline: return String(localized: "网络不可用")
+        case .noRoute: return String(localized: "没找到合适的路线")
+        case .server: return String(localized: "路线服务暂时不可用")
         }
     }
 }

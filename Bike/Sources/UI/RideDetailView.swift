@@ -114,14 +114,14 @@ struct RideDetailView: View {
                 row("类型", Formatters.activityLabel(type))
                 row("开始", Formatters.fullDateTime(ride.startDate))
                 row("时长", Formatters.duration(ride.duration))
-                if let d = ride.distanceMeters { row(metricLabel("距离"), Formatters.distance(d)) }
-                if let s = ride.avgSpeedMps { row(metricLabel("均速"), Formatters.speed(s)) }
+                if let d = ride.distanceMeters { row(isEstimatedMetrics ? "估算距离" : "距离", Formatters.distance(d)) }
+                if let s = ride.avgSpeedMps { row(isEstimatedMetrics ? "估算均速" : "均速", Formatters.speed(s)) }
                 if let pace = Formatters.pace(duration: ride.duration, distanceMeters: ride.distanceMeters) {
-                    row(metricLabel("配速"), pace)
+                    row(isEstimatedMetrics ? "估算配速" : "配速", pace)
                 }
                 if let maxSpeed = maxRouteSpeedMps { row("最高速度", Formatters.speed(maxSpeed)) }
-                if let gain = elevationGain, gain >= 1 { row("累计爬升", "\(Int(gain.rounded())) 米") }
-                if let c = ride.calories { row(metricLabel("卡路里"), Formatters.calories(c)) }
+                if let gain = elevationGain, gain >= 1 { row("累计爬升", String(localized: "\(Int(gain.rounded())) 米")) }
+                if let c = ride.calories { row(isEstimatedMetrics ? "估算卡路里" : "卡路里", Formatters.calories(c)) }
                 if ride.distanceMeters != nil { row("估算减碳", Formatters.carbonSaved(ride.distanceMeters)) }
                 if let hr = Formatters.heartRate(ride.avgHeartRate) { row("均心率", hr) }
                 row("来源", Formatters.sourceLabel(source))
@@ -215,19 +215,16 @@ struct RideDetailView: View {
         }
     }
 
-    private func row(_ key: String, _ value: String) -> some View {
-        LabeledContent(key, value: value)
-    }
-
-    private func metricLabel(_ title: String) -> String {
-        isEstimatedMetrics ? "估算\(title)" : title
+    /// key 用 LocalizedStringKey（字面量→走目录本地化）；value 已由 Formatters 本地化，逐字显示。
+    private func row(_ key: LocalizedStringKey, _ value: String) -> some View {
+        LabeledContent(key) { Text(value) }
     }
 
     private var autoDetectedNote: String {
         if isEstimatedMetrics {
-            return "自动检测添加；无 GPS 路线，距离、均速和卡路里按运动历史估算"
+            return String(localized: "自动检测添加；无 GPS 路线，距离、均速和卡路里按运动历史估算")
         }
-        return "自动检测添加"
+        return String(localized: "自动检测添加")
     }
 
     /// 导出当前骑行为 GPX，写入临时文件并弹分享面板。无轨迹则忽略。

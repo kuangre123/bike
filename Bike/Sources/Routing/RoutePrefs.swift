@@ -28,19 +28,19 @@ enum RoutePreference: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .safety:   return "安静"
-        case .river:    return "风景"
-        case .trekking: return "通用"
-        case .shortest: return "最短"
+        case .safety:   return String(localized: "安静")
+        case .river:    return String(localized: "风景")
+        case .trekking: return String(localized: "通用")
+        case .shortest: return String(localized: "最短")
         }
     }
 
     var detail: String {
         switch self {
-        case .safety:   return "避开车多的主干道，走住宅小路与自行车道"
-        case .river:    return "尽量沿河边、水岸与绿道，风景更好（会绕远）"
-        case .trekking: return "速度与安静均衡的通用骑行路线"
-        case .shortest: return "尽量短、最直接，不挑路"
+        case .safety:   return String(localized: "避开车多的主干道，走住宅小路与自行车道")
+        case .river:    return String(localized: "尽量沿河边、水岸与绿道，风景更好（会绕远）")
+        case .trekking: return String(localized: "速度与安静均衡的通用骑行路线")
+        case .shortest: return String(localized: "尽量短、最直接，不挑路")
         }
     }
 

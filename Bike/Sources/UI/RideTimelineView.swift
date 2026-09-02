@@ -94,7 +94,7 @@ struct RideTimelineView: View {
                             .buttonStyle(.plain)
                             .padding(.top, 8)
                         } header: {
-                            HomeSectionHeader("本周节奏")
+                            HomeSectionHeader(String(localized: "本周节奏"))
                         }
                         .clearHomeRow()
 
@@ -557,19 +557,19 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         var displayText: String {
             switch self {
             case .requestingAuthorization:
-                return "等待授权"
+                return String(localized: "等待授权")
             case .waitingForData:
-                return "等待心率"
+                return String(localized: "等待心率")
             case .unavailable:
-                return "健康不可用"
+                return String(localized: "健康不可用")
             case .live(let bpm), .recent(let bpm):
-                return "\(Int(bpm.rounded())) 次/分钟"
+                return String(localized: "\(Int(bpm.rounded())) 次/分钟")
             }
         }
 
         var title: String {
-            if case .recent = self { return "最近心率" }
-            return "心率"
+            if case .recent = self { return String(localized: "最近心率") }
+            return String(localized: "心率")
         }
     }
 
@@ -888,7 +888,7 @@ private struct ManualRideView: View {
                 }
                 .padding(16)
             }
-            .navigationTitle(showDashboard ? "码表" : "骑行中")
+            .navigationTitle(showDashboard ? Text("码表") : Text("骑行中"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -900,7 +900,7 @@ private struct ManualRideView: View {
                     Button {
                         withAnimation { showDashboard.toggle() }
                     } label: {
-                        Label(showDashboard ? "地图" : "码表",
+                        Label(showDashboard ? String(localized: "地图") : String(localized: "码表"),
                               systemImage: showDashboard ? "map" : "gauge.with.needle")
                     }
                 }
@@ -1019,13 +1019,13 @@ private struct ManualRideView: View {
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(overspeeding ? Color.red : Color(red: 0.05, green: 0.42, blue: 0.50))
                     .contentTransition(.numericText())
-                Text(overspeeding ? "超速！注意安全" : "公里/时")
+                Text(overspeeding ? String(localized: "超速！注意安全") : String(localized: "公里/时"))
                     .font(.headline.weight(.bold))
                     .foregroundStyle(overspeeding ? .red : .secondary)
             }
 
             if session.isAutoPaused || session.isPaused {
-                Label(session.isPaused ? "已暂停" : "停等中，计时暂停",
+                Label(session.isPaused ? String(localized: "已暂停") : String(localized: "停等中，计时暂停"),
                       systemImage: "pause.circle.fill")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(.orange)
@@ -1057,7 +1057,7 @@ private struct ManualRideView: View {
                     session.pause()
                 }
             } label: {
-                Label(session.isPaused ? "继续" : "暂停", systemImage: session.isPaused ? "play.fill" : "pause.fill")
+                Label(session.isPaused ? String(localized: "继续") : String(localized: "暂停"), systemImage: session.isPaused ? "play.fill" : "pause.fill")
                     .font(.headline.weight(.heavy))
                     .foregroundStyle(Color(red: 0.06, green: 0.36, blue: 0.42))
                     .frame(maxWidth: .infinity)
@@ -1109,11 +1109,11 @@ private struct ManualRideView: View {
     }
 
     private var routeStatusText: String {
-        if session.isPaused { return "已暂停" }
-        if session.isAutoPaused { return "停等中，移动后继续计时" }
-        if session.currentCoordinate == nil { return "等待定位" }
-        if session.isRecordingRoute { return "正在记录路线" }
-        return "定位中，移动后记录"
+        if session.isPaused { return String(localized: "已暂停") }
+        if session.isAutoPaused { return String(localized: "停等中，移动后继续计时") }
+        if session.currentCoordinate == nil { return String(localized: "等待定位") }
+        if session.isRecordingRoute { return String(localized: "正在记录路线") }
+        return String(localized: "定位中，移动后记录")
     }
 
     private var mapPosition: MapCameraPosition {
