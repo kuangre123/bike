@@ -2,13 +2,15 @@ import Foundation
 import CyclingDomain
 
 /// UI 展示用的格式化工具。纯函数，无共享可变状态。
+/// 文案经 `String(localized:)` 走 Localizable.xcstrings（源语言简体中文）；
+/// 数字用 `.formatted()`（当前地区小数点，如德语 1,5）；日期用地区感知格式（去掉硬编码 zh_CN）。
 enum Formatters {
     static func duration(_ t: TimeInterval) -> String {
         let totalMinutes = Int(t) / 60
         let h = totalMinutes / 60
         let m = totalMinutes % 60
-        if h > 0 { return "\(h) 小时 \(m) 分" }
-        return "\(m) 分"
+        if h > 0 { return String(localized: "\(h) 小时 \(m) 分") }
+        return String(localized: "\(m) 分")
     }
 
     /// 实时时钟格式（秒级跳动），码表/骑行中用：<1 小时显示「M:SS」，否则「H:MM:SS」。
@@ -22,55 +24,52 @@ enum Formatters {
     }
 
     static func distance(_ meters: Double?) -> String {
-        guard let meters else { return "无路线" }
+        guard let meters else { return String(localized: "无路线") }
         if meters >= 1000 {
-            return String(format: "%.1f 公里", meters / 1000)
+            let km = (meters / 1000).formatted(.number.precision(.fractionLength(1)))
+            return String(localized: "\(km) 公里")
         }
-        return "\(Int(meters)) 米"
+        return String(localized: "\(Int(meters)) 米")
     }
 
     static func calories(_ kcal: Double?) -> String {
         guard let kcal else { return "—" }
-        return "\(Int(kcal.rounded())) 千卡"
+        return String(localized: "\(Int(kcal.rounded())) 千卡")
     }
 
     static func carbonSaved(_ meters: Double?) -> String {
         guard let meters else { return "—" }
         let grams = meters / 1000 * 48.5
         if grams >= 1000 {
-            return String(format: "%.1f 千克", grams / 1000)
+            let kg = (grams / 1000).formatted(.number.precision(.fractionLength(1)))
+            return String(localized: "\(kg) 千克")
         }
-        return "\(Int(grams.rounded())) 克"
+        return String(localized: "\(Int(grams.rounded())) 克")
     }
 
     /// 均心率展示，如「132 次/分钟」；无则 nil。
     static func heartRate(_ bpm: Double?) -> String? {
         guard let bpm else { return nil }
-        return "\(Int(bpm.rounded())) 次/分钟"
+        return String(localized: "\(Int(bpm.rounded())) 次/分钟")
     }
 
     static func clockTime(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f.string(from: date)
+        date.formatted(date: .omitted, time: .shortened)
     }
 
     static func dayHeader(_ date: Date) -> String {
         let cal = Calendar.current
-        if cal.isDateInToday(date) { return "今天" }
-        if cal.isDateInYesterday(date) { return "昨天" }
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "zh_CN")
-        f.dateFormat = "M月d日 EEEE"
-        return f.string(from: date)
+        if cal.isDateInToday(date) { return String(localized: "今天") }
+        if cal.isDateInYesterday(date) { return String(localized: "昨天") }
+        return date.formatted(.dateTime.month().day().weekday(.wide))
     }
 
     static func activityLabel(_ type: ActivityType) -> String {
         switch type {
-        case .walking: return "步行"
-        case .running: return "跑步"
-        case .cycling: return "骑行"
-        case .other:   return "其他运动"
+        case .walking: return String(localized: "步行")
+        case .running: return String(localized: "跑步")
+        case .cycling: return String(localized: "骑行")
+        case .other:   return String(localized: "其他运动")
         }
     }
 
@@ -84,15 +83,13 @@ enum Formatters {
     }
 
     static func fullDateTime(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "zh_CN")
-        f.dateFormat = "M月d日 EEEE HH:mm"
-        return f.string(from: date)
+        date.formatted(.dateTime.month().day().weekday(.abbreviated).hour().minute())
     }
 
     static func speed(_ mps: Double?) -> String {
         guard let mps else { return "—" }
-        return String(format: "%.1f 公里/时", mps * 3.6)
+        let kmh = (mps * 3.6).formatted(.number.precision(.fractionLength(1)))
+        return String(localized: "\(kmh) 公里/时")
     }
 
     static func pace(duration: TimeInterval, distanceMeters: Double?) -> String? {
@@ -100,16 +97,16 @@ enum Formatters {
         let secondsPerKm = duration / (distanceMeters / 1000)
         guard secondsPerKm.isFinite, secondsPerKm > 0 else { return nil }
         let minutes = Int(secondsPerKm) / 60
-        let seconds = Int(secondsPerKm.rounded()) % 60
-        return "\(minutes)分\(String(format: "%02d", seconds))秒/公里"
+        let seconds = String(format: "%02d", Int(secondsPerKm.rounded()) % 60)
+        return String(localized: "\(minutes)分\(seconds)秒/公里")
     }
 
     static func sourceLabel(_ source: RideSource) -> String {
         switch source {
-        case .motionOnly:    return "运动历史"
-        case .gpsTracked:    return "GPS 实采"
-        case .merged:        return "运动历史 + GPS"
-        case .heartRateOnly: return "心率检测"
+        case .motionOnly:    return String(localized: "运动历史")
+        case .gpsTracked:    return String(localized: "GPS 实采")
+        case .merged:        return String(localized: "运动历史 + GPS")
+        case .heartRateOnly: return String(localized: "心率检测")
         }
     }
 }

@@ -445,8 +445,8 @@ private struct HomeHeroCard: View {
     }
 
     private var heroSubtitle: String {
-        if todayRides.isEmpty { return "今天还很清爽，适合出门动一动" }
-        return "今天已记录 \(todayRides.count) 次运动"
+        if todayRides.isEmpty { return String(localized: "今天还很清爽，适合出门动一动") }
+        return String(localized: "今天已记录 \(todayRides.count) 次运动")
     }
 
     private var todayRides: [RideModel] {

@@ -73,16 +73,14 @@ struct StatsSummaryView: View {
 
     private var last7Days: [DayBar] {
         let cal = Calendar.current
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_CN")
-        fmt.dateFormat = "E"
         return (0..<7).reversed().map { offset in
             let day = cal.date(byAdding: .day, value: -offset, to: cal.startOfDay(for: Date()))!
             let next = cal.date(byAdding: .day, value: 1, to: day)!
             let minutes = rides
                 .filter { $0.startDate >= day && $0.startDate < next }
                 .reduce(0.0) { $0 + $1.duration } / 60
-            return DayBar(label: fmt.string(from: day), minutes: minutes)
+            // 地区感知的星期缩写（中/英/日/韩/繁/德各自习惯）。
+            return DayBar(label: day.formatted(.dateTime.weekday(.abbreviated)), minutes: minutes)
         }
     }
 

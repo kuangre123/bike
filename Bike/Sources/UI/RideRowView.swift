@@ -85,12 +85,12 @@ struct RideRowView: View {
     private var primaryMetric: String {
         if let meters = ride.distanceMeters {
             let text = Formatters.distance(meters)
-            return source == .motionOnly ? "估算 \(text)" : text
+            return source == .motionOnly ? String(localized: "估算 \(text)") : text
         }
         if let hr = Formatters.heartRate(ride.avgHeartRate) {
             return hr
         }
-        return "无路线"
+        return String(localized: "无路线")
     }
 
     private var primaryMetricColor: Color {
