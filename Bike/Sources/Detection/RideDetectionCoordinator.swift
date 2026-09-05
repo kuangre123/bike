@@ -141,12 +141,17 @@ final class RideDetectionCoordinator {
 
         let context = ModelContext(container)
         let store = RideStore(context: context)
-        let inserted = (try? store.save(rides, autoDetected: true)) ?? []
+        let result = (try? store.save(rides, autoDetected: true)) ?? .empty
+        let inserted = result.inserted
         savedRideCount += inserted.count
 
         // 写回 Apple 健康（默认开；含路线）。回填 workout UUID 便于后续去重 / 删除联动。
         let writeBack = UserDefaults.standard.object(forKey: "healthWriteBack") as? Bool ?? true
         if writeBack, await health.requestWriteAuthorization() {
+            // 被更完整结果替换掉的旧自动记录：删除其健康 workout，避免残留重复。
+            for uuid in result.replacedHealthWorkoutUUIDs {
+                _ = await health.deleteWorkout(uuid: uuid)
+            }
             for model in inserted {
                 let route = RideMapping.decodeRoute(model.routeData)
                 if let uuid = await health.saveWorkout(

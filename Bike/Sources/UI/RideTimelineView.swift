@@ -21,6 +21,8 @@ struct RideTimelineView: View {
     @State private var showingAdvancedStats = false
     @State private var showingHeatmap = false
     @State private var showPaywall = false
+    /// 手动记录被同时段的已有手动记录挡下时提示用户，避免「点了保存却什么都没发生」。
+    @State private var manualSaveBlocked = false
     @StateObject private var subscription = SubscriptionManager.shared
     @AppStorage("weeklyGoalKm") private var weeklyGoalKm: Double = 30
     @State private var path = NavigationPath()
@@ -223,6 +225,11 @@ struct RideTimelineView: View {
             .fullScreenCover(isPresented: $showingManualRide) {
                 ManualRideView(onSave: saveManualRide)
             }
+            .alert("未保存", isPresented: $manualSaveBlocked) {
+                Button("好") {}
+            } message: {
+                Text("这段时间已有一条你手动记录的运动，为避免重复没有再存一次。")
+            }
             .task { PhoneWatchSync.shared.send(todaySummary) }
             .task {
                 // 价值时刻①：打开时间线看到自动记录的成果（被动用户的主场景）。
@@ -250,8 +257,12 @@ struct RideTimelineView: View {
 
     private func saveManualRide(_ ride: Ride) {
         let store = RideStore(context: context)
-        let inserted = (try? store.save([ride], autoDetected: false)) ?? []
-        guard let model = inserted.first else { return }
+        let result = (try? store.save([ride], autoDetected: false)) ?? .empty
+        guard let model = result.inserted.first else {
+            manualSaveBlocked = true
+            return
+        }
+        let replacedHealthUUIDs = result.replacedHealthWorkoutUUIDs
 
         // 价值时刻②：刚完成并保存一次手动骑行。延迟等全屏页收起再弹。
         Task { @MainActor in
@@ -262,10 +273,17 @@ struct RideTimelineView: View {
         }
 
         let writeBack = UserDefaults.standard.object(forKey: "healthWriteBack") as? Bool ?? true
-        guard writeBack else { return }
 
         Task { @MainActor in
             let health = HealthService()
+            // 被本次实录替换掉的自动记录（如骑行途中被动检测的估算记录）：
+            // 一并删掉它写进 Apple 健康的 workout，避免残留错误数据。
+            if !replacedHealthUUIDs.isEmpty, await health.requestWriteAuthorization() {
+                for uuid in replacedHealthUUIDs {
+                    _ = await health.deleteWorkout(uuid: uuid)
+                }
+            }
+            guard writeBack else { return }
             guard await health.requestWriteAuthorization() else { return }
             let route = RideMapping.decodeRoute(model.routeData)
             let workoutEnd = model.startDate.addingTimeInterval(model.duration)
