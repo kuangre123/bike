@@ -15,6 +15,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
+### ios update_promo
+
+```sh
+[bundle exec] fastlane ios update_promo
+```
+
+Push promotional_text to the live version (no review needed)
+
 ### ios build_only
 
 ```sh
@@ -30,6 +38,38 @@ Archive + export .ipa only (no upload) for pre-validation
 ```
 
 Select build 1.1(1) for the App Store version and report the resulting state
+
+### ios cloud_status
+
+```sh
+[bundle exec] fastlane ios cloud_status
+```
+
+List Xcode Cloud workflows + recent build runs
+
+### ios cloud_trigger
+
+```sh
+[bundle exec] fastlane ios cloud_trigger
+```
+
+Trigger an Xcode Cloud build run
+
+### ios cloud_wait_and_fetch
+
+```sh
+[bundle exec] fastlane ios cloud_wait_and_fetch
+```
+
+Poll a Cloud build run and download its app-store .ipa
+
+### ios ver_info
+
+```sh
+[bundle exec] fastlane ios ver_info
+```
+
+Show which build the App Store version is using
 
 ### ios build_and_upload
 

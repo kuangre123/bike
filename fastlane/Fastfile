@@ -42,6 +42,38 @@ end
 
 platform :ios do
 
+  # 更新已上架版本的 promotional_text（该字段可免审核实时改）。从 metadata 文件读，
+  # 逐 locale PATCH appStoreVersionLocalizations。默认只推有变化的 zh-Hans。
+  desc "Push promotional_text to the live version (no review needed)"
+  lane :update_promo do
+    only = (ENV["PROMO_LOCALES"] || "zh-Hans").split(",")
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+    ver = (rc.get("v1/apps/#{app.id}/appStoreVersions?limit=5").body["data"] || []).first
+    UI.important("目标版本 #{ver.dig('attributes', 'versionString')} 状态=#{ver.dig('attributes', 'appStoreState')}")
+    locs = rc.get("v1/appStoreVersions/#{ver['id']}/appStoreVersionLocalizations?limit=50").body["data"] || []
+    UI.message("该版本本地化 locales: #{locs.map { |l| l.dig('attributes', 'locale') }.inspect}")
+    locs.each do |l|
+      locale = l.dig("attributes", "locale")
+      next unless only.include?(locale)
+      path = ["./metadata/#{locale}/promotional_text.txt", "./fastlane/metadata/#{locale}/promotional_text.txt"].find { |p| File.exist?(p) }
+      unless path
+        UI.important("#{locale}: 找不到 promotional_text.txt，跳过")
+        next
+      end
+      promo = File.read(path).strip
+      rc.patch("v1/appStoreVersionLocalizations/#{l['id']}", {
+        data: { type: "appStoreVersionLocalizations", id: l["id"], attributes: { promotionalText: promo } }
+      })
+      back = rc.get("v1/appStoreVersionLocalizations/#{l['id']}?fields[appStoreVersionLocalizations]=promotionalText").body.dig("data", "attributes", "promotionalText")
+      ok = back.to_s.strip == promo
+      UI.success("#{locale} 推广文本已更新（#{promo.length}字）回读#{ok ? '一致 ✓' : '不一致 ✗'}")
+      UI.message("  线上现值: #{back}")
+    end
+  end
+
   # 只归档导出 .ipa，不上传。用于上传前 altool --validate-app 预检。
   desc "Archive + export .ipa only (no upload) for pre-validation"
   lane :build_only do
@@ -90,6 +122,106 @@ platform :ios do
     sleep(5)
     v2 = rc.get("v1/appStoreVersions/#{ver['id']}").body.dig("data", "attributes")
     UI.success("→ 版本 #{v2['versionString']} 现在状态: #{v2['appStoreState']}")
+  end
+
+  # 列出 Xcode Cloud 的 workflow 和最近的 build run（看 push 是否已触发新构建）
+  desc "List Xcode Cloud workflows + recent build runs"
+  lane :cloud_status do
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+    prod = (rc.get("v1/ciProducts?include=app&limit=50").body["data"] || []).find { |p| p.dig("relationships", "app", "data", "id") == app.id }
+    UI.user_error!("无 ciProduct") unless prod
+    UI.important("workflows:")
+    (rc.get("v1/ciProducts/#{prod['id']}/workflows?limit=20").body["data"] || []).each do |w|
+      UI.message("  #{w['id']}  name=#{w.dig('attributes', 'name')}")
+    end
+    UI.important("最近 build runs:")
+    (rc.get("v1/ciProducts/#{prod['id']}/buildRuns?limit=5&sort=-number").body["data"] || []).each do |r|
+      a = r["attributes"] || {}
+      UI.message("  ##{a['number']} progress=#{a['executionProgress']} status=#{a['completionStatus']} created=#{a['createdDate']}")
+    end
+  end
+
+  # 触发一次 Xcode Cloud 构建（从 workflow 配置的分支 = main）
+  desc "Trigger an Xcode Cloud build run"
+  lane :cloud_trigger do
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+    wf = "EC92AAA0-42E9-4178-BAE5-A4255D432B6E"
+    # 需要指定 sourceBranchOrTag，取 workflow 关联的 repository 的 main 分支
+    branches = rc.get("v1/ciWorkflows/#{wf}?include=repository").body
+    repo_id = branches.dig("data", "relationships", "repository", "data", "id")
+    gitref = (rc.get("v1/scmRepositories/#{repo_id}/gitReferences?limit=100").body["data"] || [])
+             .find { |g| g.dig("attributes", "name") == "main" && g.dig("attributes", "kind") == "BRANCH" }
+    body = {
+      data: {
+        type: "ciBuildRuns",
+        relationships: { workflow: { data: { type: "ciWorkflows", id: wf } } }
+      }
+    }
+    if gitref
+      body[:data][:relationships][:sourceBranchOrTag] = { data: { type: "scmGitReferences", id: gitref["id"] } }
+      UI.message("在 main 分支 (#{gitref['id']}) 上触发")
+    end
+    resp = rc.post("v1/ciBuildRuns", body)
+    UI.success("触发成功: run ##{resp.body.dig('data', 'attributes', 'number')} id=#{resp.body.dig('data', 'id')}")
+  end
+
+  # 轮询指定 Cloud run 直到结束，然后下载它的 app-store 导出 .ipa 到 scratchpad
+  desc "Poll a Cloud build run and download its app-store .ipa"
+  lane :cloud_wait_and_fetch do
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+    run_id = ENV.fetch("RUN_ID")
+    base = "/private/tmp/claude-501/-Users-sirchen-bike/281dc2b2-e145-4de3-8842-ab1a3eb41bfe/scratchpad"
+    done = false
+    40.times do |i|
+      a = rc.get("v1/ciBuildRuns/#{run_id}").body.dig("data", "attributes") || {}
+      UI.message("[#{i}] progress=#{a['executionProgress']} status=#{a['completionStatus']}")
+      if a["executionProgress"] == "COMPLETE"
+        done = true
+        break
+      end
+      sleep(30)
+    end
+    UI.user_error!("超时未完成") unless done
+    actions = rc.get("v1/ciBuildRuns/#{run_id}/actions?limit=20").body["data"] || []
+    arch = actions.find { |x| x.dig("attributes", "name").to_s.include?("Archive") }
+    UI.user_error!("没有 Archive action") unless arch
+    UI.message("Archive action 状态: #{arch.dig('attributes', 'completionStatus')}")
+    arts = rc.get("v1/ciBuildActions/#{arch['id']}/artifacts?limit=50").body["data"] || []
+    ipa = arts.find { |a| a.dig("attributes", "fileType") == "ARCHIVE_EXPORT" && a.dig("attributes", "fileName").to_s.include?("app-store") }
+    UI.user_error!("没有 app-store 导出成品（归档可能没到导出步骤就挂了）") unless ipa
+    url = rc.get("v1/ciArtifacts/#{ipa['id']}").body.dig("data", "attributes", "downloadUrl")
+    sh("curl -sL -o '#{base}/cloud_appstore11.zip' '#{url}'")
+    UI.success("下载完成: #{base}/cloud_appstore11.zip")
+  end
+
+  # 显示可编辑/在审版本挂的是哪个 build + 版本状态
+  desc "Show which build the App Store version is using"
+  lane :ver_info do
+    api_key = asc_api_key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+    rc = Spaceship::ConnectAPI.client.tunes_request_client
+    vers = rc.get("v1/apps/#{app.id}/appStoreVersions?include=build&limit=10").body
+    incl = {}
+    (vers["included"] || []).each { |i| incl[i["id"]] = i.dig("attributes", "version") if i["type"] == "builds" }
+    (vers["data"] || []).each do |v|
+      bid = v.dig("relationships", "build", "data", "id")
+      UI.message("版本 #{v.dig('attributes', 'versionString')} 状态=#{v.dig('attributes', 'appStoreState')} 挂的 build=#{bid ? incl[bid] : '(无)'}")
+    end
+    # 是否有进行中的审核提交
+    begin
+      sub = app.get_in_progress_review_submission(platform: Spaceship::ConnectAPI::Platform::IOS)
+      UI.important(sub ? "有进行中的审核提交: #{sub.id}" : "无进行中的审核提交")
+    rescue => e
+      UI.message("审核提交查询: #{e.message[0..80]}")
+    end
   end
 
   desc "Archive + upload build to App Store Connect (no review submission)"
