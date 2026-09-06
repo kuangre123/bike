@@ -3,6 +3,10 @@ import WatchConnectivity
 import WidgetKit
 import CyclingDomain
 import Observation
+import os
+
+/// 和手机端同一个分类，控制台过滤 "[WCSync]" 能把两边串起来看。
+private let wcLog = Logger(subsystem: "com.bochen.bike.watchkitapp", category: "WCSync")
 
 /// 手表侧接收手机同步的今日概览；同时写入 app group 供表盘 complication 读取。
 /// 反向把手表测到的心率推给手机（手机自己读 HealthKit 要等系统后台回写，慢很多）。
@@ -38,9 +42,17 @@ final class WatchConnectivityProvider: NSObject, WCSessionDelegate {
         lastSentAt = now
 
         if session.isReachable {
-            session.sendMessage(["heartRate": data], replyHandler: nil, errorHandler: nil)
+            session.sendMessage(["heartRate": data], replyHandler: nil) { error in
+                wcLog.error("[WCSync] 手表→手机 实时消息失败: \(error.localizedDescription, privacy: .public)")
+            }
+            wcLog.notice("[WCSync] 已推送 \(Int(reading.bpm)) bpm（实时消息）")
         } else {
-            try? session.updateApplicationContext(["heartRate": data])
+            do {
+                try session.updateApplicationContext(["heartRate": data])
+                wcLog.notice("[WCSync] 已推送 \(Int(reading.bpm)) bpm（applicationContext，手机不在前台）")
+            } catch {
+                wcLog.error("[WCSync] 手表→手机 context 发送失败: \(error.localizedDescription, privacy: .public)")
+            }
         }
     }
 
@@ -63,6 +75,12 @@ final class WatchConnectivityProvider: NSObject, WCSessionDelegate {
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: Error?
     ) {
+        if let error {
+            wcLog.error("[WCSync] 手表侧 session 激活失败: \(error.localizedDescription, privacy: .public)")
+        }
+        wcLog.notice(
+            "[WCSync] 手表侧激活完成 activation=\(activationState.rawValue) reachable=\(session.isReachable)"
+        )
         let summary = Self.decode(session.receivedApplicationContext)
         Task { @MainActor in if let summary { self.apply(summary) } }
     }

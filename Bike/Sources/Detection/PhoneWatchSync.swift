@@ -1,6 +1,11 @@
 import Foundation
 import WatchConnectivity
 import CyclingDomain
+import os
+
+/// 这条链路失败时全是静默的（sendMessage 的 errorHandler、updateApplicationContext 的 throw
+/// 以前都被吞掉），出问题只能靠猜。统一打到 WCSync 分类下，Xcode 控制台过滤 "[WCSync]" 即可。
+private let wcLog = Logger(subsystem: "com.bochen.bike", category: "WCSync")
 
 /// 手机 ↔ 手表的 WatchConnectivity 通道：
 /// 发「今日概览」给手表，收手表推来的实时心率。
@@ -27,10 +32,29 @@ final class PhoneWatchSync: NSObject, ObservableObject, WCSessionDelegate {
         let session = WCSession.default
         guard session.activationState == .activated else { return }
         guard let data = try? JSONEncoder().encode(summary) else { return }
-        try? session.updateApplicationContext(["today": data])
+        do {
+            try session.updateApplicationContext(["today": data])
+        } catch {
+            wcLog.error("[WCSync] 手机→手表 概览发送失败: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// 手表配对 / 安装状态。收不到心率时，先看这行——`watchAppInstalled=false` 说明手机
+    /// 根本不认为手表上装着本 app 的手表端，这时两个方向都传不了，属于安装状态问题而非代码问题。
+    nonisolated static func logState(_ label: String, _ session: WCSession) {
+        wcLog.notice(
+            """
+            [WCSync] \(label, privacy: .public) \
+            activation=\(session.activationState.rawValue) \
+            paired=\(session.isPaired) \
+            watchAppInstalled=\(session.isWatchAppInstalled) \
+            reachable=\(session.isReachable)
+            """
+        )
     }
 
     private func ingest(_ reading: WatchHeartRate) {
+        wcLog.notice("[WCSync] 收到手表心率 \(Int(reading.bpm)) bpm，测于 \(reading.measuredAt, privacy: .public)")
         watchHeartRate = WatchHeartRate.fresher(watchHeartRate, reading)
     }
 
@@ -45,8 +69,17 @@ final class PhoneWatchSync: NSObject, ObservableObject, WCSessionDelegate {
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: Error?
     ) {
+        if let error {
+            wcLog.error("[WCSync] 手机侧 session 激活失败: \(error.localizedDescription, privacy: .public)")
+        }
+        Self.logState("激活完成", session)
         let reading = Self.decodeHeartRate(session.receivedApplicationContext)
         Task { @MainActor in if let reading { self.ingest(reading) } }
+    }
+
+    /// 配对 / 安装状态变化时打一行——手表 app 装上或被删掉都会走到这里。
+    nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
+        Self.logState("状态变化", session)
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
