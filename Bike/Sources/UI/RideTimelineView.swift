@@ -17,6 +17,8 @@ struct RideTimelineView: View {
     @Query(sort: \RideModel.startDate, order: .reverse) private var rides: [RideModel]
     @State private var showingSettings = false
     @State private var showingManualRide = false
+    /// 码表已完整用掉几次（保存成功才算）。见 `ManualRideTrial`。
+    @AppStorage("manualRideTrialUsed") private var manualRideTrialUsed = 0
     @State private var showingExcluded = false
     @State private var showingAdvancedStats = false
     @State private var showingHeatmap = false
@@ -39,8 +41,8 @@ struct RideTimelineView: View {
 
                 List {
                     Section {
-                        HomeHeroCard(rides: activeRides) {
-                            showingManualRide = true
+                        HomeHeroCard(rides: activeRides, trialHint: manualRideHint) {
+                            openManualRide()
                         }
                     }
                     .clearHomeRow()
@@ -262,6 +264,8 @@ struct RideTimelineView: View {
             manualSaveBlocked = true
             return
         }
+        // 真的存下来了才算用掉一次试用；被已有记录挡下的那条上面已经 return 了。
+        manualRideTrialUsed = ManualRideTrial.consuming(manualRideTrialUsed)
         let replacedHealthUUIDs = result.replacedHealthWorkoutUUIDs
 
         // 价值时刻②：刚完成并保存一次手动骑行。延迟等全屏页收起再弹。
@@ -307,6 +311,28 @@ struct RideTimelineView: View {
         // activeRides 沿用 @Query 的开始时间倒序，first 即最近的更早一条
         guard let previous = activeRides.first(where: { $0.startDate < ride.startDate }) else { return nil }
         return RideMerging.canMerge(previous, ride) ? previous : nil
+    }
+
+    /// 「开始骑行」按钮下的状态提示。订阅用户不显示。
+    ///
+    /// 试用用完后要让用户**看得见**这是 Pro 功能，否则点下去突然弹付费墙像挖坑。
+    private var manualRideHint: String? {
+        guard !subscription.isPro else { return nil }
+        return ManualRideTrial.remainingFreeUses(usedCount: manualRideTrialUsed) > 0
+            ? String(localized: "首次免费体验")
+            : String(localized: "Pro 功能")
+    }
+
+    /// 码表：Pro 专享，但给一次完整的免费试用。
+    ///
+    /// 在**打开时**判断——码表 `onAppear` 就开始记录，等到保存时才拦等于让人白骑一趟。
+    /// 消耗放在 `saveManualRide` 里，所以误点进来又取消不会白白用掉试用。
+    private func openManualRide() {
+        if ManualRideTrial.isAllowed(isPro: subscription.isPro, usedCount: manualRideTrialUsed) {
+            showingManualRide = true
+        } else {
+            showPaywall = true
+        }
     }
 
     /// 高级统计：Pro 专享。未订阅先弹 paywall。
@@ -387,6 +413,8 @@ private struct FreshHomeBackground: View {
 
 private struct HomeHeroCard: View {
     let rides: [RideModel]
+    /// 码表的试用 / Pro 状态；订阅用户为 nil，不占位。
+    let trialHint: String?
     let onStartRide: () -> Void
 
     var body: some View {
@@ -447,6 +475,13 @@ private struct HomeHeroCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
             .buttonStyle(.plain)
+
+            if let trialHint {
+                Label(trialHint, systemImage: "crown.fill")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding(18)
         .background(
