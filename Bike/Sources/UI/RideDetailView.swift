@@ -13,6 +13,7 @@ struct RideDetailView: View {
     let ride: RideModel
     @State private var showingDeleteConfirmation = false
     @State private var shareItem: ShareableImage?
+    @State private var isPreparingShareCard = false
     @State private var gpxFile: GPXFile?
 
     private var type: ActivityType { RideMapping.activityType(of: ride) }
@@ -169,8 +170,12 @@ struct RideDetailView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
-                        if let image = RideShareCard.renderImage(for: ride) {
-                            shareItem = ShareableImage(image: image)
+                        // 地图底图要下载瓦片，慢的话给个转圈，别让人以为按钮没反应。
+                        isPreparingShareCard = true
+                        Task {
+                            let image = await RideShareCard.renderImage(for: ride)
+                            isPreparingShareCard = false
+                            if let image { shareItem = ShareableImage(image: image) }
                         }
                     } label: {
                         Label("分享卡片", systemImage: "photo")
@@ -190,6 +195,13 @@ struct RideDetailView: View {
                 } label: {
                     Label("删除", systemImage: "trash")
                 }
+            }
+        }
+        .overlay {
+            if isPreparingShareCard {
+                ProgressView("正在生成分享卡片…")
+                    .padding(20)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
             }
         }
         .sheet(item: $shareItem) { item in
