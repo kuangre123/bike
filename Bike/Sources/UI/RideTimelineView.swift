@@ -605,6 +605,8 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     private let locationManager = CLLocationManager()
     private let health = HealthService()
     private var heartRateTask: Task<Void, Never>?
+    /// 当前采信的心率读数（手表实时推送与 HealthKit 轮询里测量时间更新的那条）。
+    private var latestHeartRate: WatchHeartRate?
     private var lastAcceptedLocation: CLLocation?
     private var lastOverspeedAlert: Date?
 
@@ -666,6 +668,7 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         lastAcceptedLocation = nil
         currentHeartRate = nil
         averageHeartRate = nil
+        latestHeartRate = nil
         heartRateState = .requestingAuthorization
         lastOverspeedAlert = nil
         tracker.start(at: startDate)
@@ -678,8 +681,12 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     /// UI 每秒心跳：停住不动时 iOS 往往不再回调定位，只靠定位驱动判不出这次停等，
     /// 等红灯会被整段算进骑行时长。
     func tick() {
-        tracker.tick(at: Date(), armed: !samples.isEmpty)
+        let now = Date()
+        tracker.tick(at: now, armed: !samples.isEmpty)
         syncPauseFlags()
+        // 手表推来的心率走实时通道，每秒取一次；HealthKit 轮询 10 秒才一轮，且要等
+        // 手表后台回写，慢几十秒到几分钟。
+        applyHeartRate(PhoneWatchSync.shared.watchHeartRate, at: now)
     }
 
     func pause() {
@@ -826,27 +833,47 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
                 return
             }
 
-            heartRateState = .waitingForData
+            if latestHeartRate == nil { heartRateState = .waitingForData }
             while !Task.isCancelled {
                 let now = Date()
                 let sessionSamples = await health.heartRateSamples(from: startDate, to: now)
-                let recentSamples = sessionSamples.isEmpty
-                    ? await health.heartRateSamples(from: now.addingTimeInterval(-30 * 60), to: now)
-                    : sessionSamples
 
                 if !sessionSamples.isEmpty {
                     let latest = sessionSamples[sessionSamples.count - 1]
-                    currentHeartRate = latest.bpm
-                    heartRateState = .live(latest.bpm)
+                    applyHeartRate(
+                        WatchHeartRate(bpm: latest.bpm, measuredAt: latest.timestamp),
+                        at: now
+                    )
                     averageHeartRate = sessionSamples.reduce(0) { $0 + $1.bpm } / Double(sessionSamples.count)
-                } else if let latest = recentSamples.last {
-                    currentHeartRate = latest.bpm
-                    heartRateState = .recent(latest.bpm)
-                } else if currentHeartRate == nil {
+                } else if let latest = await health
+                    .heartRateSamples(from: now.addingTimeInterval(-30 * 60), to: now).last {
+                    applyHeartRate(
+                        WatchHeartRate(bpm: latest.bpm, measuredAt: latest.timestamp),
+                        at: now
+                    )
+                } else if latestHeartRate == nil {
                     heartRateState = .waitingForData
                 }
                 try? await Task.sleep(for: .seconds(10))
             }
+        }
+    }
+
+    /// 合并两个心率来源（手表实时推送 / HealthKit 轮询），按**测量时间**取更新的一条——
+    /// 后到的不一定更新。够新才算实时，旧了如实标成「最近心率」，太旧就不显示，不推算。
+    private func applyHeartRate(_ reading: WatchHeartRate?, at now: Date) {
+        guard let merged = WatchHeartRate.fresher(latestHeartRate, reading) else { return }
+        latestHeartRate = merged
+        switch merged.freshness(at: now) {
+        case .live:
+            currentHeartRate = merged.bpm
+            heartRateState = .live(merged.bpm)
+        case .recent:
+            currentHeartRate = merged.bpm
+            heartRateState = .recent(merged.bpm)
+        case .stale:
+            currentHeartRate = nil
+            heartRateState = .waitingForData
         }
     }
 }

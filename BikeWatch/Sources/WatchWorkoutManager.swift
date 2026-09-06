@@ -32,6 +32,9 @@ final class WatchWorkoutManager: NSObject {
     private(set) var startDate: Date?
     private var activityType: ActivityType = .cycling
 
+    /// 运动会话里的心率每几秒一次，比写进 HealthKit 更早到；转出去好让首页和手机也用上。
+    @ObservationIgnored var onHeartRate: ((Double, Date) -> Void)?
+
     override init() {
         super.init()
         locationManager.delegate = self
@@ -100,7 +103,10 @@ final class WatchWorkoutManager: NSObject {
     #endif
 
     private func apply(heartRate: Double?, calories: Double?) {
-        if let heartRate { self.heartRate = heartRate }
+        if let heartRate {
+            self.heartRate = heartRate
+            if heartRate > 0 { onHeartRate?(heartRate, Date()) }
+        }
         if let calories { self.activeCalories = calories }
     }
 

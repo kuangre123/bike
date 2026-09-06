@@ -9,6 +9,7 @@ struct WatchWorkoutView: View {
     @State private var manager = WatchWorkoutManager()
     @State private var phase: Phase = .intro
     @Environment(\.dismiss) private var dismiss
+    @Environment(WatchHeartRateMonitor.self) private var heartRateMonitor
 
     private enum Phase { case intro, active }
 
@@ -22,6 +23,10 @@ struct WatchWorkoutView: View {
         .navigationTitle(Self.label(activityType))
         .navigationBarTitleDisplayMode(.inline)
         .task {
+            // 会话里的心率每几秒一次，转给监视器统一去重并推给手机。
+            manager.onHeartRate = { [heartRateMonitor] bpm, date in
+                heartRateMonitor.ingest(bpm: bpm, at: date)
+            }
             #if DEBUG
             if ProcessInfo.processInfo.environment["WATCH_AUTOSTART"] == "1", phase == .intro {
                 manager.start(activityType: activityType)
