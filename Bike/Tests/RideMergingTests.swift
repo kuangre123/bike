@@ -110,4 +110,32 @@ final class RideMergingTests: XCTestCase {
         XCTAssertEqual(a.sourceRaw, RideSource.merged.rawValue)
         XCTAssertFalse(a.isAutoDetected)
     }
+
+    // MARK: - 合并涉及第三方导入记录
+
+    /// 合并后这条不再是「原样搬来的那条 Garmin 记录」，导入标记要清掉
+    /// （防重复导入改由墓碑负责），但来源名保留，用户仍看得出数据来自哪儿。
+    func test_apply_clearsImportMarkerButKeepsSourceName() {
+        let survivor = makeRide(start: 0, end: 600, source: .gpsTracked)
+        survivor.externalWorkoutUUID = UUID()
+        survivor.externalSourceName = "Garmin Connect"
+        let absorbed = makeRide(start: 900, end: 1500, source: .gpsTracked)
+
+        RideMerging.apply(absorbing: absorbed, into: survivor)
+
+        XCTAssertNil(survivor.externalWorkoutUUID, "合并后不得再冒充某条原始导入记录")
+        XCTAssertEqual(survivor.externalSourceName, "Garmin Connect")
+    }
+
+    /// 只有被吸收的那条是导入记录时，来源名要传给幸存者。
+    func test_apply_inheritsSourceNameFromAbsorbed() {
+        let survivor = makeRide(start: 0, end: 600, source: .gpsTracked)
+        let absorbed = makeRide(start: 900, end: 1500, source: .gpsTracked)
+        absorbed.externalWorkoutUUID = UUID()
+        absorbed.externalSourceName = "华为运动健康"
+
+        RideMerging.apply(absorbing: absorbed, into: survivor)
+
+        XCTAssertEqual(survivor.externalSourceName, "华为运动健康")
+    }
 }

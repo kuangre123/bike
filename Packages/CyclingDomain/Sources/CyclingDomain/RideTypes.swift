@@ -6,6 +6,7 @@ public enum RideSource: String, Sendable, Codable {
     case gpsTracked     // 仅 GPS 实采
     case merged         // 运动历史 + GPS 实采都覆盖（最完整）
     case heartRateOnly  // 仅心率检测（无动作分类、无 GPS）—— 心率兜底
+    case externalImport // 从 Apple 健康导入的第三方设备 / app 记录（Garmin、华为、Zepp…）
 }
 
 /// CoreMotion 回溯查询得到的一个运动时段（基线层输入）。

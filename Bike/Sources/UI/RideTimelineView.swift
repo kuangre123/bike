@@ -257,7 +257,7 @@ struct RideTimelineView: View {
 
     private func saveManualRide(_ ride: Ride) {
         let store = RideStore(context: context)
-        let result = (try? store.save([ride], autoDetected: false)) ?? .empty
+        let result = (try? store.save([ride], provenance: .manual)) ?? .empty
         guard let model = result.inserted.first else {
             manualSaveBlocked = true
             return
@@ -319,10 +319,15 @@ struct RideTimelineView: View {
     }
 
     private func deleteRide(_ ride: RideModel) async {
+        // 只删本 app 写进健康的那条。导入记录的 workout 是对方写的，不归我们删——
+        // 改为记个墓碑，下次导入不再把它搬回来。
         if let uuid = ride.healthKitWorkoutUUID {
             let health = HealthService()
             _ = await health.requestWriteAuthorization()
             _ = await health.deleteWorkout(uuid: uuid)
+        }
+        if let external = ride.externalWorkoutUUID {
+            ExternalSourcePreferences.dismiss(external)
         }
         context.delete(ride)
         try? context.save()
@@ -361,7 +366,7 @@ struct RideTimelineView: View {
     #if DEBUG
     private func addSamples() {
         let store = RideStore(context: context)
-        _ = try? store.save(SampleData.rides(), autoDetected: false)
+        _ = try? store.save(SampleData.rides(), provenance: .manual)
     }
     #endif
 }

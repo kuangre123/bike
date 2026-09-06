@@ -4,7 +4,13 @@ import CyclingDomain
 /// 领域 `Ride` <-> 持久化 `RideModel` 的映射 + 路线编解码。纯函数，可单测。
 enum RideMapping {
     /// 由领域 Ride 造一个新的持久化模型（每次生成新 rideID）。
-    static func makeModel(from ride: Ride, autoDetected: Bool = false) -> RideModel {
+    /// `externalWorkoutUUID` / `externalSourceName` 只在从 Apple 健康导入第三方记录时给值。
+    static func makeModel(
+        from ride: Ride,
+        autoDetected: Bool = false,
+        externalWorkoutUUID: UUID? = nil,
+        externalSourceName: String? = nil
+    ) -> RideModel {
         RideModel(
             rideID: UUID(),
             activityTypeRaw: ride.activityType.rawValue,
@@ -18,6 +24,8 @@ enum RideMapping {
             routeData: encodeRoute(ride.route),
             avgHeartRate: ride.avgHeartRate,
             activeDurationSeconds: ride.activeDuration,
+            externalWorkoutUUID: externalWorkoutUUID,
+            externalSourceName: externalSourceName,
             isAutoDetected: autoDetected
         )
     }

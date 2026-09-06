@@ -53,6 +53,10 @@ enum RideMerging {
             survivor.sourceRaw = RideSource.merged.rawValue
         }
         survivor.isAutoDetected = false   // 用户手动整理过
+        // 合并后这条已不是「原样搬来的那条外部记录」了，清掉导入标记；
+        // 来源名留着，用户仍看得出数据来自哪儿。防重复导入改由墓碑负责（见 merge）。
+        survivor.externalWorkoutUUID = nil
+        survivor.externalSourceName = survivor.externalSourceName ?? absorbed.externalSourceName
     }
 
     /// 合并并落库：早的一条为幸存者；删除晚的一条；
@@ -63,11 +67,15 @@ enum RideMerging {
         let survivor = a.startDate <= b.startDate ? a : b
         let absorbed = survivor === a ? b : a
         let oldUUIDs = [survivor.healthKitWorkoutUUID, absorbed.healthKitWorkoutUUID].compactMap { $0 }
+        // 参与合并的导入记录：对方那条 workout 还在健康里且不归我们删，
+        // 但本地承载它的模型即将被合并掉，所以记墓碑，免得下次导入又把它搬回来。
+        let externalUUIDs = [survivor.externalWorkoutUUID, absorbed.externalWorkoutUUID].compactMap { $0 }
 
         apply(absorbing: absorbed, into: survivor)
         survivor.healthKitWorkoutUUID = nil
         context.delete(absorbed)
         try? context.save()
+        for uuid in externalUUIDs { ExternalSourcePreferences.dismiss(uuid) }
 
         guard !oldUUIDs.isEmpty else { return }
         let health = HealthService()
@@ -75,7 +83,9 @@ enum RideMerging {
         for uuid in oldUUIDs { _ = await health.deleteWorkout(uuid: uuid) }
 
         let writeBack = UserDefaults.standard.object(forKey: "healthWriteBack") as? Bool ?? true
-        guard writeBack else { return }
+        // 合并里掺了导入记录就不写回：对方那条原始 workout 还在健康里，
+        // 再写一条含它数据的合并版 = 同一段运动被计两次。
+        guard writeBack, externalUUIDs.isEmpty else { return }
         if let uuid = await health.saveWorkout(
             activityType: RideMapping.activityType(of: survivor),
             start: survivor.startDate,

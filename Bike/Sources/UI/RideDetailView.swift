@@ -125,7 +125,8 @@ struct RideDetailView: View {
                 if let c = ride.calories { row(isEstimatedMetrics ? "估算卡路里" : "卡路里", Formatters.calories(c)) }
                 if ride.distanceMeters != nil { row("估算减碳", Formatters.carbonSaved(ride.distanceMeters)) }
                 if let hr = Formatters.heartRate(ride.avgHeartRate) { row("均心率", hr) }
-                row("来源", Formatters.sourceLabel(source))
+                // 导入记录显示真实来源名（如「Garmin Connect」），比笼统的「外部设备」有用。
+                row("来源", ride.externalSourceName ?? Formatters.sourceLabel(source))
             }
 
             if ride.isAutoDetected {
@@ -259,10 +260,15 @@ struct RideDetailView: View {
     }
 
     private func deleteRide() async {
+        // 只删本 app 写进健康的那条。导入记录的 workout 是对方写的，不归我们删——
+        // 改为记个墓碑，下次导入不再把它搬回来。
         if let uuid = ride.healthKitWorkoutUUID {
             let health = HealthService()
             _ = await health.requestWriteAuthorization()
             _ = await health.deleteWorkout(uuid: uuid)
+        }
+        if let external = ride.externalWorkoutUUID {
+            ExternalSourcePreferences.dismiss(external)
         }
         context.delete(ride)
         try? context.save()

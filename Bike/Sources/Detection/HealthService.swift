@@ -111,6 +111,202 @@ final class HealthService {
         }
     }
 
+    // MARK: - 读第三方运动（Garmin / 华为 / Zepp / Keep …）
+
+    /// 读运动记录需要的授权。和写授权分开请求：用户可能只想导入、不想让本 app 写回。
+    func requestWorkoutReadAuthorization() async -> Bool {
+        guard isAvailable else { return false }
+        var read: Set<HKObjectType> = [HKObjectType.workoutType(), HKSeriesType.workoutRoute()]
+        if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) { read.insert(hr) }
+        return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
+            store.requestAuthorization(toShare: [], read: read) { success, _ in
+                cont.resume(returning: success)
+            }
+        }
+    }
+
+    /// 最近 `days` 天里，除本 app 外往 Apple 健康写过运动的来源，按记录数降序。
+    ///
+    /// HealthKit 读权限是不可见的：没授权时查询返回空，看起来就是「没有其他设备」。
+    /// 所以调用方要先 `requestWorkoutReadAuthorization()`。
+    func externalWorkoutSources(days: Int = 365) async -> [(source: ExternalWorkoutSource, count: Int, latest: Date)] {
+        let workouts = await rawWorkouts(days: days, sourceIDs: nil)
+        var buckets: [String: (name: String, count: Int, latest: Date)] = [:]
+        for workout in workouts {
+            let source = workout.sourceRevision.source
+            guard source.bundleIdentifier != Self.ownBundleIdentifier else { continue }
+            let existing = buckets[source.bundleIdentifier]
+            buckets[source.bundleIdentifier] = (
+                name: source.name,
+                count: (existing?.count ?? 0) + 1,
+                latest: max(existing?.latest ?? .distantPast, workout.endDate)
+            )
+        }
+        return buckets
+            .map { (ExternalWorkoutSource(id: $0.key, name: $0.value.name), $0.value.count, $0.value.latest) }
+            .sorted { $0.1 > $1.1 }
+    }
+
+    /// 第一遍：指定来源在最近 `days` 天里的运动**概要**（无路线 / 无心率）。
+    ///
+    /// 故意不在这里读路线和心率——那是每条一次查询的开销，而绝大多数记录会在
+    /// `ExternalWorkoutImport.importable` 那步被「已导入 / 太短 / 已忽略」筛掉。
+    /// 筛完再对剩下的几条调 `enrich(_:)`。
+    func externalWorkoutSummaries(sourceIDs: Set<String>, days: Int = 365) async -> [ExternalWorkout] {
+        guard !sourceIDs.isEmpty else { return [] }
+        return await rawWorkouts(days: days, sourceIDs: sourceIDs).compactMap(Self.summary(of:))
+    }
+
+    /// 第二遍：给筛选后真要导入的记录补上 GPS 路线和均心率。
+    func enrich(_ workouts: [ExternalWorkout]) async -> [ExternalWorkout] {
+        guard isAvailable, !workouts.isEmpty else { return workouts }
+        let byID = await rawWorkouts(uuids: Set(workouts.map(\.id)))
+            .reduce(into: [UUID: HKWorkout]()) { $0[$1.uuid] = $1 }
+        var result: [ExternalWorkout] = []
+        for workout in workouts {
+            guard let hk = byID[workout.id] else { result.append(workout); continue }
+            result.append(
+                workout.withDetails(
+                    avgHeartRate: await averageHeartRate(from: workout.start, to: workout.end),
+                    route: await route(of: hk)
+                )
+            )
+        }
+        return result
+    }
+
+    private nonisolated static var ownBundleIdentifier: String {
+        Bundle.main.bundleIdentifier ?? ""
+    }
+
+    /// `HKWorkout` → 领域概要。本 app 自己写的、或识别不了类型的返回 nil。
+    private nonisolated static func summary(of workout: HKWorkout) -> ExternalWorkout? {
+        let source = workout.sourceRevision.source
+        guard source.bundleIdentifier != ownBundleIdentifier,
+              let type = activityType(for: workout.workoutActivityType) else { return nil }
+        return ExternalWorkout(
+            id: workout.uuid,
+            source: ExternalWorkoutSource(id: source.bundleIdentifier, name: source.name),
+            activityType: type,
+            start: workout.startDate,
+            end: workout.endDate,
+            distanceMeters: distanceMeters(of: workout, activityType: type),
+            calories: activeCalories(of: workout),
+            avgHeartRate: nil,
+            route: []
+        )
+    }
+
+    private func rawWorkouts(days: Int, sourceIDs: Set<String>?) async -> [HKWorkout] {
+        let now = Date()
+        // HealthKit 的来源谓词要 `HKSource` 实例，这里只有 bundle id，所以取回后再过滤。
+        let all = await rawWorkouts(
+            predicate: HKQuery.predicateForSamples(
+                withStart: now.addingTimeInterval(TimeInterval(-days * 24 * 3600)), end: now, options: [])
+        )
+        guard let sourceIDs else { return all }
+        return all.filter { sourceIDs.contains($0.sourceRevision.source.bundleIdentifier) }
+    }
+
+    private func rawWorkouts(uuids: Set<UUID>) async -> [HKWorkout] {
+        guard !uuids.isEmpty else { return [] }
+        return await rawWorkouts(predicate: HKQuery.predicateForObjects(with: uuids))
+    }
+
+    private func rawWorkouts(predicate: NSPredicate) async -> [HKWorkout] {
+        guard isAvailable else { return [] }
+        return await withCheckedContinuation { cont in
+            let query = HKSampleQuery(
+                sampleType: HKObjectType.workoutType(),
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+            ) { _, samples, _ in
+                cont.resume(returning: samples as? [HKWorkout] ?? [])
+            }
+            store.execute(query)
+        }
+    }
+
+    /// HealthKit workout 类型 → 本 app 的运动类型。
+    /// 只认这四种：游泳、力量训练之类进不了骑行日志，返回 nil 直接跳过。
+    nonisolated static func activityType(for type: HKWorkoutActivityType) -> ActivityType? {
+        switch type {
+        case .cycling: return .cycling
+        case .running: return .running
+        case .walking, .hiking: return .walking
+        default: return nil
+        }
+    }
+
+    /// 对方记了多少就是多少；没记距离就是 nil，不拿时长或轨迹去凑。
+    private nonisolated static func distanceMeters(of workout: HKWorkout, activityType: ActivityType) -> Double? {
+        let id: HKQuantityTypeIdentifier = activityType == .cycling ? .distanceCycling : .distanceWalkingRunning
+        guard let type = HKQuantityType.quantityType(forIdentifier: id),
+              let stats = workout.statistics(for: type),
+              let sum = stats.sumQuantity() else { return nil }
+        return sum.doubleValue(for: .meter())
+    }
+
+    private nonisolated static func activeCalories(of workout: HKWorkout) -> Double? {
+        guard let type = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
+              let stats = workout.statistics(for: type),
+              let sum = stats.sumQuantity() else { return nil }
+        return sum.doubleValue(for: .kilocalorie())
+    }
+
+    /// 该时段的平均心率；没有心率样本就是 nil，不拿静息心率之类去填。
+    private func averageHeartRate(from: Date, to: Date) async -> Double? {
+        let samples = await heartRateSamples(from: from, to: to)
+        guard !samples.isEmpty else { return nil }
+        return samples.map(\.bpm).reduce(0, +) / Double(samples.count)
+    }
+
+    /// 读 workout 关联的 GPS 路线；对方没记路线就是空数组。
+    private func route(of workout: HKWorkout) async -> [GPSSample] {
+        let routes: [HKWorkoutRoute] = await withCheckedContinuation { cont in
+            let query = HKSampleQuery(
+                sampleType: HKSeriesType.workoutRoute(),
+                predicate: HKQuery.predicateForObjects(from: workout),
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                cont.resume(returning: samples as? [HKWorkoutRoute] ?? [])
+            }
+            store.execute(query)
+        }
+        var samples: [GPSSample] = []
+        for route in routes {
+            samples += await locations(in: route)
+        }
+        return samples.sorted { $0.timestamp < $1.timestamp }
+    }
+
+    /// `HKWorkoutRouteQuery` 是分批回调的：要一直收到 `done == true` 才算读完。
+    /// 读的是已完成的 workout，所以 `done` 之后查询自行结束，不需要 `store.stop`。
+    private func locations(in route: HKWorkoutRoute) async -> [GPSSample] {
+        await withCheckedContinuation { (cont: CheckedContinuation<[GPSSample], Never>) in
+            let collector = RouteCollector()
+            let query = HKWorkoutRouteQuery(route: route) { _, locations, done, error in
+                if let locations {
+                    collector.append(locations.map {
+                        GPSSample(
+                            timestamp: $0.timestamp,
+                            latitude: $0.coordinate.latitude,
+                            longitude: $0.coordinate.longitude,
+                            // 没有有效速度 / 海拔时 CoreLocation 给负值，按缺失处理，不猜。
+                            speedMps: $0.speed,
+                            altitude: $0.verticalAccuracy >= 0 ? $0.altitude : nil
+                        )
+                    })
+                }
+                guard done || error != nil, let samples = collector.finish() else { return }
+                cont.resume(returning: samples)
+            }
+            store.execute(query)
+        }
+    }
+
     // MARK: - 写运动
 
     /// HealthKit 里已有的「本 app + 同类型 + 近似同时间」运动；用于幂等写入和重复清理。
@@ -291,5 +487,27 @@ final class HealthService {
         let duration = end.timeIntervalSince(start)
         guard duration > 0 else { return nil }
         return 70 * duration / 3600
+    }
+}
+
+/// `HKWorkoutRouteQuery` 的分批回调可能来自任意线程，用锁攒结果。
+/// `finish()` 只会返回一次，防止 `done` 和 error 各回调一次时把 continuation resume 两遍（会崩）。
+private final class RouteCollector: @unchecked Sendable {
+    private let lock = NSLock()
+    private var samples: [GPSSample] = []
+    private var finished = false
+
+    func append(_ new: [GPSSample]) {
+        lock.lock()
+        defer { lock.unlock() }
+        samples += new
+    }
+
+    func finish() -> [GPSSample]? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !finished else { return nil }
+        finished = true
+        return samples
     }
 }

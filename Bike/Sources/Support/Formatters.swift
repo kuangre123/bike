@@ -107,6 +107,7 @@ enum Formatters {
         case .gpsTracked:    return String(localized: "GPS 实采")
         case .merged:        return String(localized: "运动历史 + GPS")
         case .heartRateOnly: return String(localized: "心率检测")
+        case .externalImport: return String(localized: "外部设备")
         }
     }
 }

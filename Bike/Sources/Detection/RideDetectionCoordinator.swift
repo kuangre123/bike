@@ -141,7 +141,7 @@ final class RideDetectionCoordinator {
 
         let context = ModelContext(container)
         let store = RideStore(context: context)
-        let result = (try? store.save(rides, autoDetected: true)) ?? .empty
+        let result = (try? store.save(rides, provenance: .autoDetected)) ?? .empty
         let inserted = result.inserted
         savedRideCount += inserted.count
 

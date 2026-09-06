@@ -6,6 +6,7 @@ struct BikeApp: App {
     private let container: ModelContainer
     @State private var permissions: PermissionsManager
     @State private var coordinator: RideDetectionCoordinator
+    @State private var externalImporter: ExternalWorkoutImporter
     @State private var selectedTab: Int = {
         #if DEBUG
         if ProcessInfo.processInfo.environment["OPEN_ROUTE_TAB"] == "1" { return 1 }
@@ -26,6 +27,7 @@ struct BikeApp: App {
         let coord = RideDetectionCoordinator(container: container, permissions: perms)
         _permissions = State(initialValue: perms)
         _coordinator = State(initialValue: coord)
+        _externalImporter = State(initialValue: ExternalWorkoutImporter(container: container))
 
         BackgroundReconcileTask.register(coordinator: coord)
     }
@@ -36,6 +38,7 @@ struct BikeApp: App {
                 RideTimelineView()
                     .environment(permissions)
                     .environment(coordinator)
+                    .environment(externalImporter)
                     .tabItem { Label("运动", systemImage: "figure.run") }
                     .tag(0)
 

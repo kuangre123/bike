@@ -4,6 +4,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(PermissionsManager.self) private var permissions
     @Environment(RideDetectionCoordinator.self) private var coordinator
+    @Environment(ExternalWorkoutImporter.self) private var externalImporter
     @Environment(\.dismiss) private var dismiss
     @AppStorage("healthWriteBack") private var healthWriteBack = true
     @AppStorage("ebikeAutoFlag") private var ebikeAutoFlag = true
@@ -14,6 +15,8 @@ struct SettingsView: View {
     @AppStorage("recordOther") private var recordOther = true
     @State private var duplicateCleanupMessage: String?
     @State private var isCleaningDuplicates = false
+    /// 勾选状态存在 UserDefaults 里（`ExternalSourcePreferences`），这里只是让视图跟着刷新。
+    @State private var enabledSourceIDs = ExternalSourcePreferences.enabledSourceIDs
     @StateObject private var subscription = SubscriptionManager.shared
     @State private var showPaywall = false
 
@@ -84,6 +87,8 @@ struct SettingsView: View {
                 } footer: {
                     Text("默认全部记录。关闭后，被动检测到的该类型运动不再自动保存。骑行与跑步始终记录；「电动车」指自动识别为疑似电动车的骑行。手动开始的骑行不受影响。")
                 }
+                externalSourcesSection
+
                 Section("Apple 健康") {
                     Toggle("自动写回 Apple 健康", isOn: $healthWriteBack)
                     Button {
@@ -110,6 +115,71 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
         }
+    }
+
+    /// 其他手表 / 运动 app 的记录：Garmin、华为、Zepp、Wahoo、Keep、Strava 都会写进 Apple 健康，
+    /// 所以这里列的是「健康里有谁写过运动」，勾上谁就导谁，不需要逐家登录。
+    @ViewBuilder
+    private var externalSourcesSection: some View {
+        Section {
+            if externalImporter.sources.isEmpty {
+                Button {
+                    Task { await externalImporter.discoverSources() }
+                } label: {
+                    Text(externalImporter.isWorking
+                         ? String(localized: "正在查找...")
+                         : String(localized: "查找其他设备"))
+                }
+                .disabled(externalImporter.isWorking)
+                if externalImporter.hasScanned && !externalImporter.isWorking {
+                    Text("没有找到其他 app 写入的运动记录。若你的手表 app 已在往「健康」写数据，请到 健康 › 共享 › App 里允许「快乐轻骑」读取「体能训练」。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                ForEach(externalImporter.sources) { discovered in
+                    Toggle(isOn: binding(for: discovered.id)) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(discovered.name)
+                            Text("\(discovered.count) 条 · 最近 \(discovered.latest.formatted(date: .abbreviated, time: .omitted))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                Button {
+                    Task { await externalImporter.importEnabled() }
+                } label: {
+                    Text(externalImporter.isWorking
+                         ? String(localized: "正在导入...")
+                         : String(localized: "导入勾选的记录"))
+                }
+                .disabled(externalImporter.isWorking || enabledSourceIDs.isEmpty)
+                Button("重新查找") {
+                    Task { await externalImporter.discoverSources() }
+                }
+                .disabled(externalImporter.isWorking)
+            }
+            if let message = externalImporter.message {
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("其他手表与运动 App")
+        } footer: {
+            Text("Garmin Connect、华为运动健康、Zepp、Wahoo、Keep、Strava 等都会把运动写进 Apple 健康，勾选后即可导入，无需分别登录。导入的记录只读取不修改，删除本地记录不会影响对方的数据。")
+        }
+    }
+
+    private func binding(for sourceID: String) -> Binding<Bool> {
+        Binding(
+            get: { enabledSourceIDs.contains(sourceID) },
+            set: { isOn in
+                ExternalSourcePreferences.setEnabled(isOn, for: sourceID)
+                enabledSourceIDs = ExternalSourcePreferences.enabledSourceIDs
+            }
+        )
     }
 
     private func cleanupHealthDuplicates() async {

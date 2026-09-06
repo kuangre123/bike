@@ -23,7 +23,14 @@ final class RideModel {
     var avgHeartRate: Double?
     /// 有效运动时长（秒）。手动骑行暂停时不计入暂停时间；历史/自动记录为 nil。
     var activeDurationSeconds: Double?
+    /// **本 app 写进 Apple 健康**的那条 workout。删除 / 排除 / 合并本记录时会连带删除它。
+    /// 从第三方导入的记录这里恒为 nil —— 那条 workout 是 Garmin / 华为写的，不归我们删。
     var healthKitWorkoutUUID: UUID?
+    /// 本记录导入自哪条第三方 workout（HealthKit UUID），用于防止重复导入。
+    /// 只读不删：见 `healthKitWorkoutUUID` 的说明。
+    var externalWorkoutUUID: UUID?
+    /// 第三方来源的显示名，如「Garmin Connect」。本地记录为 nil。
+    var externalSourceName: String?
     /// 是否由被动检测自动添加（用于「待确认」指示与撤销提示）。
     var isAutoDetected: Bool = false
     /// 用户已将该记录排除为电动车：不计入统计、列表收起灰显；可恢复。
@@ -45,6 +52,8 @@ final class RideModel {
         avgHeartRate: Double? = nil,
         activeDurationSeconds: Double? = nil,
         healthKitWorkoutUUID: UUID? = nil,
+        externalWorkoutUUID: UUID? = nil,
+        externalSourceName: String? = nil,
         isAutoDetected: Bool = false,
         createdAt: Date = Date()
     ) {
@@ -61,6 +70,8 @@ final class RideModel {
         self.avgHeartRate = avgHeartRate
         self.activeDurationSeconds = activeDurationSeconds
         self.healthKitWorkoutUUID = healthKitWorkoutUUID
+        self.externalWorkoutUUID = externalWorkoutUUID
+        self.externalSourceName = externalSourceName
         self.isAutoDetected = isAutoDetected
         self.createdAt = createdAt
     }
