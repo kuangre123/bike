@@ -606,18 +606,14 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     private let health = HealthService()
     private var heartRateTask: Task<Void, Never>?
     private var lastAcceptedLocation: CLLocation?
-    private var accumulatedActiveDuration: TimeInterval = 0
-    private var activeSegmentStart: Date?
-    private var lowSpeedSince: Date?
     private var lastOverspeedAlert: Date?
 
-    private let warmupInterval: TimeInterval = 8
+    /// 有效计时 + 停等判定（纯逻辑，见 CyclingDomain.ActiveTimeTracker，有单测覆盖）。
+    private var tracker = ActiveTimeTracker()
+
     private let maximumHorizontalAccuracy: CLLocationAccuracy = 25
     private let minimumSegmentDistance: CLLocationDistance = 10
     private let minimumMovingSpeed: CLLocationSpeed = 1.4
-    private let autoPauseBelowMps: CLLocationSpeed = 1.0
-    private let autoResumeAboveMps: CLLocationSpeed = 1.6
-    private let autoPauseAfterSeconds: TimeInterval = 5
 
     override init() {
         super.init()
@@ -626,11 +622,13 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         locationManager.activityType = .fitness
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.pausesLocationUpdatesAutomatically = false
-        locationManager.distanceFilter = 5
+        // 码表开着时按最高频率送定位：距离过滤会让人停住后彻底收不到回调，
+        // 速度读数卡死，停等也判不出来（GPS 芯片本来就已按 Best 精度全速运行）。
+        locationManager.distanceFilter = kCLDistanceFilterNone
     }
 
     var duration: TimeInterval {
-        activeDuration(at: Date())
+        tracker.activeDuration(at: Date())
     }
 
     var averageSpeedMps: Double {
@@ -669,36 +667,40 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         currentHeartRate = nil
         averageHeartRate = nil
         heartRateState = .requestingAuthorization
-        isPaused = false
-        isAutoPaused = false
-        lowSpeedSince = nil
         lastOverspeedAlert = nil
-        accumulatedActiveDuration = 0
-        activeSegmentStart = startDate
+        tracker.start(at: startDate)
+        syncPauseFlags()
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         startHeartRatePolling()
     }
 
+    /// UI 每秒心跳：停住不动时 iOS 往往不再回调定位，只靠定位驱动判不出这次停等，
+    /// 等红灯会被整段算进骑行时长。
+    func tick() {
+        tracker.tick(at: Date(), armed: !samples.isEmpty)
+        syncPauseFlags()
+    }
+
     func pause() {
         guard !isPaused else { return }
-        accumulatedActiveDuration = activeDuration(at: Date())
-        activeSegmentStart = nil
-        isPaused = true
-        isAutoPaused = false
-        lowSpeedSince = nil
+        tracker.manualPause(at: Date())
+        syncPauseFlags()
         lastAcceptedLocation = nil
         locationManager.stopUpdatingLocation()
     }
 
     func resume() {
         guard isPaused else { return }
-        isPaused = false
-        isAutoPaused = false
-        lowSpeedSince = nil
-        activeSegmentStart = Date()
+        tracker.manualResume(at: Date())
+        syncPauseFlags()
         lastAcceptedLocation = nil
         locationManager.startUpdatingLocation()
+    }
+
+    private func syncPauseFlags() {
+        if isPaused != tracker.isManuallyPaused { isPaused = tracker.isManuallyPaused }
+        if isAutoPaused != tracker.isAutoPaused { isAutoPaused = tracker.isAutoPaused }
     }
 
     func stop() -> Ride? {
@@ -708,7 +710,7 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         lastAcceptedLocation = nil
 
         let end = Date()
-        let duration = activeDuration(at: end)
+        let duration = tracker.activeDuration(at: end)
         guard duration >= RideDetectionPolicy.minimumRideDuration else { return nil }
 
         let distance = distanceMeters
@@ -735,39 +737,6 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         lastAcceptedLocation = nil
     }
 
-    private func activeDuration(at date: Date) -> TimeInterval {
-        guard let activeSegmentStart else { return accumulatedActiveDuration }
-        return accumulatedActiveDuration + max(0, date.timeIntervalSince(activeSegmentStart))
-    }
-
-    /// 停等自动暂停：低速持续超过阈值秒数冻结计时；恢复移动自动续。速度无效（<0）不参与判定。
-    /// 仅在真正开始移动后（已记录轨迹点）启用，避免起步前静止就误暂停。
-    private func updateAutoPause(with location: CLLocation) {
-        guard isAutoPaused || !samples.isEmpty else { return }
-        let speed = location.speed
-        guard speed >= 0 else { return }
-        let now = location.timestamp
-        if isAutoPaused {
-            if speed >= autoResumeAboveMps {
-                isAutoPaused = false
-                activeSegmentStart = now
-                lowSpeedSince = nil
-            }
-        } else if speed < autoPauseBelowMps {
-            if let since = lowSpeedSince {
-                if now.timeIntervalSince(since) >= autoPauseAfterSeconds, activeSegmentStart != nil {
-                    accumulatedActiveDuration = activeDuration(at: now)
-                    activeSegmentStart = nil
-                    isAutoPaused = true
-                }
-            } else {
-                lowSpeedSince = now
-            }
-        } else {
-            lowSpeedSince = nil
-        }
-    }
-
     /// 超速提醒：达到设置阈值（0=关闭）触发警示震动，10 秒内不重复。
     private func checkOverspeed(_ location: CLLocation) {
         let thresholdKmh = UserDefaults.standard.double(forKey: "overspeedAlertKmh")
@@ -788,7 +757,14 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         guard !isPaused else { return }
         for location in locations where location.horizontalAccuracy >= 0 {
             displayLocation = sample(from: location)
-            updateAutoPause(with: location)
+            // 只传 GPS 报速，不用位移推算兜底：静止时 GPS 抖动能推出好几 m/s 的假速度，
+            // 停等就永远判不出来。报速无效交给 tick() 的断流兜底冻结。
+            tracker.ingestLocation(
+                timestamp: location.timestamp,
+                speedMps: location.speed,
+                armed: !samples.isEmpty
+            )
+            syncPauseFlags()
             checkOverspeed(location)
 
             // 自动暂停中：不累计距离/轨迹，但记住位置，恢复后从这里继续（跳变不计入距离）。
@@ -798,8 +774,8 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
             }
 
             guard location.horizontalAccuracy <= maximumHorizontalAccuracy else { continue }
-            guard let activeSegmentStart else { continue }
-            guard location.timestamp.timeIntervalSince(activeSegmentStart) >= warmupInterval else { continue }
+            guard tracker.isRunning else { continue }
+            guard tracker.isWarmedUp(at: location.timestamp) else { continue }
 
             if let last = lastAcceptedLocation {
                 let segmentDistance = location.distance(from: last)
@@ -825,7 +801,7 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     }
 
     private func sample(from location: CLLocation, speedMps: Double? = nil) -> GPSSample {
-        let timestamp = startDate.addingTimeInterval(activeDuration(at: location.timestamp))
+        let timestamp = startDate.addingTimeInterval(tracker.activeDuration(at: location.timestamp))
         return GPSSample(
             timestamp: timestamp,
             latitude: location.coordinate.latitude,
@@ -932,6 +908,7 @@ private struct ManualRideView: View {
             }
             .onReceive(timer) { date in
                 now = date
+                session.tick()
             }
             .confirmationDialog("结束这次骑行？", isPresented: $showingStopConfirmation, titleVisibility: .visible) {
                 Button("结束并保存", role: .destructive) {
