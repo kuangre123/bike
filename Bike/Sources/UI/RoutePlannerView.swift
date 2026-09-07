@@ -37,12 +37,18 @@ struct RoutePlannerView: View {
 
                 if showingRecommendations {
                     Section("路线偏好") {
+                        // 7 个选项塞不进 segmented picker，而且车型和风格本来就不是
+                        // 同一维度的选择，分组列出来更清楚。
                         Picker("路线偏好", selection: $routeProfile) {
-                            ForEach(RoutePreference.allCases) { pref in
-                                Text(pref.label).tag(pref.rawValue)
+                            ForEach(RoutePreference.Group.allCases) { group in
+                                Section(group.label) {
+                                    ForEach(RoutePreference.all(in: group)) { pref in
+                                        Label(pref.label, systemImage: pref.icon).tag(pref.rawValue)
+                                    }
+                                }
                             }
                         }
-                        .pickerStyle(.segmented)
+                        .pickerStyle(.menu)
                         if let pref = RoutePreference(rawValue: routeProfile) {
                             Label(pref.detail, systemImage: pref.icon)
                                 .font(.footnote).foregroundStyle(.secondary)
@@ -107,8 +113,16 @@ struct RoutePlannerView: View {
                             .listRowInsets(EdgeInsets())
                         LabeledContent("距离", value: Formatters.distance(plan.distanceMeters))
                         LabeledContent("预计", value: "\(plan.estimatedMinutes) 分钟")
-                        Label("已尽量避开主干道", systemImage: "leaf")
-                            .font(.caption).foregroundStyle(.secondary)
+                        // 有海拔数据才显示爬升；没有就整行不出现，不显示「0 米」冒充。
+                        if let ascent = plan.ascentMeters {
+                            LabeledContent("累计爬升", value: String(localized: "\(Int(ascent.rounded())) 米"))
+                        }
+                        // 文案跟着实际选的档走——以前写死「已尽量避开主干道」，
+                        // 选「最短」或「公路车」时那句话是假的。
+                        if let pref = RoutePreference(rawValue: routeProfile) {
+                            Label(pref.detail, systemImage: pref.icon)
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
                         if let dest = lastDestination {
                             NavigationLink {
                                 RideNavigationView(plan: plan, destination: dest)
@@ -122,6 +136,29 @@ struct RoutePlannerView: View {
                             results = []
                         } label: {
                             Label("重新选择", systemImage: "chevron.left")
+                        }
+                    }
+
+                    // 没有预警时整节不出现——空的「一切正常」那种话没信息量，
+                    // 而且我们并不真的知道「正常」，只知道这些标签里没查出问题。
+                    if !plan.warnings.isEmpty {
+                        Section {
+                            ForEach(plan.warnings) { warning in
+                                Label {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(Formatters.routeWarningLabel(warning.kind))
+                                        Text(Formatters.routeWarningRange(warning))
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
+                                } icon: {
+                                    Image(systemName: Formatters.routeWarningIcon(warning.kind))
+                                        .foregroundStyle(.orange)
+                                }
+                            }
+                        } header: {
+                            Text("路况提醒")
+                        } footer: {
+                            Text("来自 OpenStreetMap 的路面标签与海拔数据。标签缺失的路段不会给出结论，所以没列出不等于没有问题。")
                         }
                     }
                 }

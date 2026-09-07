@@ -101,6 +101,52 @@ enum Formatters {
         return String(localized: "\(minutes)分\(seconds)秒/公里")
     }
 
+    /// 路况预警的图标 + 文案。
+    static func routeWarningIcon(_ kind: RouteWarningKind) -> String {
+        switch kind {
+        case .steepClimb:   return "arrow.up.forward"
+        case .steepDescent: return "arrow.down.forward"
+        case .unpaved:      return "road.lanes.curved.right"
+        case .busyRoad:     return "car.fill"
+        case .footOnly:     return "figure.walk"
+        }
+    }
+
+    static func routeWarningLabel(_ kind: RouteWarningKind) -> String {
+        switch kind {
+        case .steepClimb(let percent):
+            return String(localized: "陡坡 \(Int(percent.rounded()))%")
+        case .steepDescent(let percent):
+            return String(localized: "陡下坡 \(Int(percent.rounded()))%")
+        case .unpaved(let surface):
+            return String(localized: "非铺装路面（\(surfaceLabel(surface))）")
+        case .busyRoad:
+            return String(localized: "车多且无自行车道")
+        case .footOnly(let highway):
+            return highway == "steps"
+                ? String(localized: "有台阶，需抬车")
+                : String(localized: "步行道，需推车通过")
+        }
+    }
+
+    /// OSM surface 取值 → 中文。没收录的原样显示，不猜。
+    static func surfaceLabel(_ surface: String) -> String {
+        switch surface {
+        case "gravel", "fine_gravel", "pebblestone": return String(localized: "碎石")
+        case "dirt", "earth", "ground", "mud":       return String(localized: "土路")
+        case "sand":                                  return String(localized: "沙地")
+        case "grass":                                 return String(localized: "草地")
+        case "cobblestone", "sett":                   return String(localized: "石板路")
+        case "compacted":                             return String(localized: "压实路面")
+        default:                                      return surface
+        }
+    }
+
+    /// 「距起点 2.1 公里 · 350 米」
+    static func routeWarningRange(_ warning: RouteWarning) -> String {
+        String(localized: "距起点 \(distance(warning.startDistanceMeters)) · 长 \(distance(warning.lengthMeters))")
+    }
+
     static func sourceLabel(_ source: RideSource) -> String {
         switch source {
         case .motionOnly:    return String(localized: "运动历史")
