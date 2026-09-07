@@ -70,6 +70,25 @@ cd Packages/CyclingDomain && swift test
 把第三方的 UUID 存进第一个字段，会导致用户删本地记录时把人家 Apple 健康里的原始
 记录一起删掉。导入的记录也不写回健康——那条 workout 本来就在健康里，写回就是制造重复。
 
+## 本地化
+
+六语言：zh-Hans（源）、en、ja、ko、zh-Hant、de。文案走 `Bike/Sources/Localizable.xcstrings`。
+
+**条目是 Xcode 构建时提取的**，本机跑不了构建，所以新写的 `String(localized:)` /
+`Text("…")` 不会自动进表——要么在 Xcode 里构建一次让它提取，要么手工加条目。
+key 写错只会回落到中文，不会崩，下次构建 Xcode 会自己对账。
+
+手工加条目时的三条格式约定（都是从既有条目里验证出来的，不要凭感觉写）：
+
+1. **插值的格式符看调用方式，不只看类型**
+   - `String(localized: "\(intVar) 分")` → `%lld 分`
+   - `Text("约 \(Int(x)) 公里环线")` → `约 %@ 公里环线`（SwiftUI 的 Text 一律 `%@`）
+2. **两个以上参数的译文用位置化写法**：key 里是裸的 `%@ … %@`，
+   译文里要写 `%1$@ … %2$@`，否则调换语序时会错位。
+3. **字面百分号在 key 里是 `%%`**，如 `陡坡 %lld%%`。
+
+改完用这个自查：每条译文的格式符（把 `%1$` 归一成 `%`）必须和 key 完全一致。
+
 ## 上架
 
 App Store 每个 locale 的描述**最底部**必须附标准 Apple EULA 链接：
