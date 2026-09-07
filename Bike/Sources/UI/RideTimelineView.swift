@@ -657,6 +657,10 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     private let minimumSegmentDistance: CLLocationDistance = 10
     private let minimumMovingSpeed: CLLocationSpeed = 1.4
 
+    /// 语音报时。开关跟随设置，骑行途中改也立即生效。
+    private let announcer = RideAnnouncer(
+        isEnabled: UserDefaults.standard.object(forKey: "voiceAnnouncements") as? Bool ?? true)
+
     override init() {
         super.init()
         locationManager.delegate = self
@@ -727,6 +731,13 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
         // 手表推来的心率走实时通道，每秒取一次；HealthKit 轮询 10 秒才一轮，且要等
         // 手表后台回写，慢几十秒到几分钟。
         applyHeartRate(PhoneWatchSync.shared.watchHeartRate, at: now)
+
+        // 语音报时。还没拿到任何定位时距离传 nil——「没有 GPS 数据」和
+        // 「GPS 正常但你没动」是两回事，后者 0 公里是实话，前者不该念。
+        announcer.isEnabled = UserDefaults.standard.object(forKey: "voiceAnnouncements") as? Bool ?? true
+        announcer.update(
+            durationSeconds: tracker.activeDuration(at: now),
+            distanceMeters: samples.isEmpty ? nil : distanceMeters)
     }
 
     func pause() {
@@ -751,6 +762,7 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     }
 
     func stop() -> Ride? {
+        announcer.stop()
         locationManager.stopUpdatingLocation()
         heartRateTask?.cancel()
         heartRateTask = nil
@@ -778,6 +790,7 @@ private final class ManualRideSession: NSObject, ObservableObject, CLLocationMan
     }
 
     func discard() {
+        announcer.stop()
         locationManager.stopUpdatingLocation()
         heartRateTask?.cancel()
         heartRateTask = nil

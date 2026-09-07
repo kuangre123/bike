@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("ebikeAutoFlag") private var ebikeAutoFlag = true
     @AppStorage("weeklyGoalKm") private var weeklyGoalKm: Double = 30
     @AppStorage("overspeedAlertKmh") private var overspeedAlertKmh: Double = 0
+    @AppStorage("voiceAnnouncements") private var voiceAnnouncements = true
     @AppStorage("recordWalking") private var recordWalking = true
     @AppStorage("recordEBike") private var recordEBike = true
     @AppStorage("recordOther") private var recordOther = true
@@ -65,6 +66,14 @@ struct SettingsView: View {
                 } footer: {
                     Text("长时间高速且速度几乎不变的骑行会标为「疑似电动车」，可一键排除。超速提醒在手动骑行时达到所选速度会震动警示。")
                 }
+                Section {
+                    Toggle("语音报时", isOn: $voiceAnnouncements)
+                } header: {
+                    Text("骑行中播报")
+                } footer: {
+                    Text("码表骑行时，每满 10 分钟、每满 5 公里播报一次时长、距离与平均速度。播报会把正在放的音乐音量压低，念完自动恢复。还没定位到时不播报距离与均速。")
+                }
+
                 Section {
                     Picker("每周距离目标", selection: $weeklyGoalKm) {
                         Text("关闭").tag(0.0)

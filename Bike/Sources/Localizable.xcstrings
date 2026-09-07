@@ -11320,6 +11320,210 @@
           }
         }
       }
+    },
+    "语音报时" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoken updates"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声アナウンス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성 안내"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語音報時"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprachansagen"
+          }
+        }
+      }
+    },
+    "骑行中播报" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During a ride"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライド中のアナウンス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이딩 중 안내"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "騎行中播報"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während der Fahrt"
+          }
+        }
+      }
+    },
+    "码表骑行时，每满 10 分钟、每满 5 公里播报一次时长、距离与平均速度。播报会把正在放的音乐音量压低，念完自动恢复。还没定位到时不播报距离与均速。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During a cyclometer ride, your time, distance and average speed are announced every 10 minutes and every 5 km. Music is ducked during the announcement and restored afterwards. Distance and speed are skipped until GPS has a fix."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サイクロメーターでの走行中、10 分ごと・5 km ごとに時間、距離、平均速度をアナウンスします。再生中の音楽は一時的に音量を下げ、読み上げ後に元へ戻ります。GPS が測位するまでは距離と平均速度はアナウンスしません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "속도계로 주행하는 동안 10분마다, 5km마다 시간·거리·평균 속도를 안내합니다. 안내 중에는 음악 소리를 낮추고 끝나면 원래대로 돌아옵니다. GPS가 잡히기 전에는 거리와 평균 속도를 안내하지 않습니다."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "碼錶騎行時，每滿 10 分鐘、每滿 5 公里播報一次時長、距離與平均速度。播報會把正在放的音樂音量壓低，念完自動恢復。還沒定位到時不播報距離與均速。"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während einer Fahrt mit dem Tacho werden Zeit, Distanz und Durchschnittsgeschwindigkeit alle 10 Minuten und alle 5 km angesagt. Laufende Musik wird währenddessen leiser und danach wiederhergestellt. Distanz und Geschwindigkeit entfallen, solange kein GPS-Signal vorliegt."
+          }
+        }
+      }
+    },
+    "已骑行 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've ridden %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 走行しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 주행했습니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已騎行 %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du bist %@ gefahren"
+          }
+        }
+      }
+    },
+    "已骑行 %@，%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've ridden %1$@, %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@、%2$@ 走行しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@ 주행했습니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已騎行 %1$@，%2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du bist %1$@ gefahren, %2$@"
+          }
+        }
+      }
+    },
+    "已骑行 %@，%@，平均时速 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've ridden %1$@, %2$@, average speed %3$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@、%2$@ 走行しました。平均速度 %3$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@ 주행했습니다. 평균 속도 %3$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已騎行 %1$@，%2$@，平均時速 %3$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du bist %1$@ gefahren, %2$@, Durchschnitt %3$@"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
