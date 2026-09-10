@@ -19,6 +19,8 @@ struct RideTimelineView: View {
     @State private var showingManualRide = false
     /// 码表已完整用掉几次（保存成功才算）。见 `ManualRideTrial`。
     @AppStorage("manualRideTrialUsed") private var manualRideTrialUsed = 0
+    /// 用户点过「不再提示」后，路线权限卡片永久不再出现。
+    @AppStorage("routeHintDismissed") private var routeHintDismissed = false
     @State private var showingExcluded = false
     @State private var showingAdvancedStats = false
     @State private var showingHeatmap = false
@@ -50,6 +52,17 @@ struct RideTimelineView: View {
                     if permissions.needsSetup {
                         Section {
                             PermissionBanner(onEnable: enablePermissions)
+                        }
+                        .clearHomeRow()
+                    }
+
+                    if showsRouteHint {
+                        Section {
+                            RouteRecordingHintCard(
+                                routelessCount: routelessRideCount,
+                                onEnable: { openURL(URL(string: UIApplication.openSettingsURLString)!) },
+                                onDismiss: { routeHintDismissed = true }
+                            )
                         }
                         .clearHomeRow()
                     }
@@ -311,6 +324,26 @@ struct RideTimelineView: View {
         // activeRides 沿用 @Query 的开始时间倒序，first 即最近的更早一条
         guard let previous = activeRides.first(where: { $0.startDate < ride.startDate }) else { return nil }
         return RideMerging.canMerge(previous, ride) ? previous : nil
+    }
+
+    /// 最近「自动检测到但没有轨迹」的骑行数。
+    private var routelessRideCount: Int {
+        RouteRecordingHint.routelessCount(
+            rides.map {
+                RoutelessRideSample(
+                    isAutoDetected: $0.isAutoDetected,
+                    hasRoute: !($0.routeData?.isEmpty ?? true),
+                    end: $0.endDate)
+            },
+            now: Date())
+    }
+
+    /// 攒够几次、定位又确实不是「始终」、且没被永久关掉时才提示。
+    private var showsRouteHint: Bool {
+        RouteRecordingHint.shouldPrompt(
+            routelessCount: routelessRideCount,
+            hasAlwaysLocation: !permissions.needsAlwaysForRouteRecording,
+            dismissed: routeHintDismissed)
     }
 
     /// 「开始骑行」按钮下的状态提示。订阅用户不显示。
