@@ -11693,7 +11693,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Einstellungen öffnen"
+            "value" : "Einstellungen"
           }
         }
       }
@@ -11727,7 +11727,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nicht mehr anzeigen"
+            "value" : "Ausblenden"
           }
         }
       }

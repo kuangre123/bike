@@ -9,6 +9,18 @@ struct RouteRecordingHintCard: View {
     let onEnable: () -> Void
     let onDismiss: () -> Void
 
+    @ViewBuilder
+    private var actions: some View {
+        Button("去设置", action: onEnable)
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            .tint(Color(red: 0.94, green: 0.48, blue: 0.22))
+        Button("不再提示", action: onDismiss)
+            .buttonStyle(.plain)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
@@ -35,15 +47,11 @@ struct RouteRecordingHintCard: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: 12) {
-                    Button("去设置", action: onEnable)
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.small)
-                        .tint(Color(red: 0.94, green: 0.48, blue: 0.22))
-                    Button("不再提示", action: onDismiss)
-                        .buttonStyle(.plain)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                // 德语这两个词比中文长一倍多，并排在窄屏 iPhone 上会挤爆。
+                // 文案已经挑短的了，布局这里再兜一层：放不下就竖排。
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) { actions }
+                    VStack(alignment: .leading, spacing: 8) { actions }
                 }
             }
         }
