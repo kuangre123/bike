@@ -1,12 +1,14 @@
-Dieses Update bringt einen Radcomputer, Fahrten-Sharing und eine schlauere E-Bike-Erkennung.
+Dieses Update holt Workouts aus anderen Uhren und Apps herein, plant Routen nach Radtyp und sagt dir unterwegs deinen Fortschritt an.
 
-- Radcomputer-Modus: Während der Fahrt auf eine große Tachoanzeige umschalten; der Bildschirm bleibt an, mit optionaler Vibration, wenn du ein gesetztes Tempo überschreitest
-- Auto-Pause an Stopps: Warten an der roten Ampel zählt nicht mehr zur Fahrzeit
-- Fahrten-Sharekarte: Verwandle eine Fahrt in eine schlichte Routen-Silhouette und teile sie (keine Straßenkarte — dein genauer Standort bleibt verborgen)
-- Geschwindigkeitskurve & Höhenmeter: Die Detailseite zeigt jetzt Tempoverlauf und Gesamtanstieg
-- Fahrten zusammenführen: Eine in zwei Teile zerfallene Fahrt per Langdruck zusammenführen
-- Schlauere E-Bike-Erkennung: Auffällig schnelle, gleichmäßige Fahrten erhalten einen „Verdacht auf E-Bike"-Hinweis zum Ausschließen; in den Einstellungen wählst du außerdem, welche Aktivitäten automatisch aufgezeichnet werden
+· Workouts anderer Geräte importieren – Fahrten, die Garmin Connect, Huawei Health, Zepp, Wahoo, Keep, Strava und andere in Apple Health schreiben, lassen sich in den Einstellungen nach Quelle auswählen und importieren – ohne separate Anmeldung. Nur lesend: Löschen hier verändert die Daten der anderen App nicht
+· Apple Watch Puls in Echtzeit – der Messwert der Uhr erscheint sofort auf dem iPhone, statt auf eine Hintergrund-Synchronisierung zu warten
+· Routenplanung nach Radtyp – Rennrad, Mountainbike und Gravel bekommen jeweils eigene Routen
+· Hinweise schon vor der Abfahrt – steile Anstiege, unbefestigte Abschnitte, viel befahrene Straßen ohne Radweg und Fußwege, auf denen du schieben musst
+· Sprachansagen während der Fahrt – alle 10 Minuten und alle 5 km werden Dauer, Distanz und Ø-Tempo angesagt. Musik wird leiser, nicht gestoppt. In den Einstellungen abschaltbar
+· Share-Karten mit Kartenhintergrund – deine Route liegt jetzt auf echten Straßen
+· Genauere Zeitmessung an Stopps
+· Fehlt einer Fahrt die Route, erklärt die App jetzt warum – für die Aufzeichnung im Hintergrund braucht es den Standortzugriff „Immer"
 
-Alles läuft auf dem Gerät und ist nur ein Hinweis — nichts wird automatisch gelöscht. Du entscheidest.
+Zum Fahrradcomputer: Der manuelle Fahrradcomputer ist jetzt eine Pro-Funktion – eine vollständige Fahrt ist für alle gratis. Automatische Aufzeichnung, Statistiken und Teilen bleiben kostenlos.
 
-Hinweis: Die Bedienoberfläche ist aktuell nur auf Vereinfachtem Chinesisch verfügbar.
+Gefällt dir HappyRide? Über eine Bewertung freuen wir uns sehr!

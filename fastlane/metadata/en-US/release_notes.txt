@@ -1,12 +1,14 @@
-This update adds a cyclometer, ride sharing, and smarter e-bike filtering.
+This update brings in workouts from other watches and apps, plans routes by bike type, and can read out your progress while you ride.
 
-- Cyclometer mode: switch to a big-number speedometer while riding; the screen stays awake, with an optional vibrate alert when you pass a speed you set
-- Auto-pause at stops: waiting at a red light no longer counts toward your ride time
-- Ride share card: turn a ride into a clean route-silhouette card and share it (no map streets — your exact location isn't exposed)
-- Speed curve & elevation: the detail page now shows your speed over time and total climb
-- Merge tracks: long-press to merge a ride that got split into two
-- Smarter e-bike filtering: unusually fast, steady rides get a "suspected e-bike" badge you can exclude in one swipe; Settings also lets you choose which activity types to auto-record
+- Import workouts from other devices: rides that Garmin Connect, Huawei Health, Zepp, Wahoo, Keep, Strava and others write to Apple Health can be imported by source in Settings — no separate logins. Read-only: deleting a record here never touches their data
+- Live Apple Watch heart rate: your watch's reading shows on the phone right away, instead of waiting for a background sync
+- Route planning by bike type: road bike, mountain bike and gravel each get their own routing
+- Warnings before you set off: steep climbs, unpaved surfaces, busy roads without a bike lane, and footpaths you'd have to push through
+- Spoken updates while riding: every 10 minutes and every 5 km it reads out duration, distance and average speed. Music is ducked, not cut off. Can be turned off in Settings
+- Share cards now include the map: your route is drawn on real streets
+- More accurate cyclometer timing at stops
+- When a ride has no route, the app now explains why — background route recording needs "Always" location access
 
-Everything runs on device and is only a hint — nothing is deleted automatically. You always decide.
+About the cyclometer: manual cyclometer mode is now a Pro feature, with one full free ride for everyone. Passive auto-recording, stats and sharing remain free.
 
 Enjoying HappyRide? A rating would mean a lot!
