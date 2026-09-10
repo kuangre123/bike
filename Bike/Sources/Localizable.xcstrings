@@ -73,6 +73,12 @@
     },
     "%@" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -92,12 +98,6 @@
           }
         },
         "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@"
-          }
-        },
-        "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
@@ -282,10 +282,10 @@
     },
     "%@ 条 · 最近 %@" : {
       "localizations" : {
-        "zh-Hans" : {
+        "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ 条 · 最近 %2$@"
+            "state" : "translated",
+            "value" : "%1$@ Einträge · zuletzt %2$@"
           }
         },
         "en" : {
@@ -306,22 +306,28 @@
             "value" : "%1$@개 · 최근 %2$@"
           }
         },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ 条 · 最近 %2$@"
+          }
+        },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ 筆 · 最近 %2$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ Einträge · zuletzt %2$@"
           }
         }
       }
     },
     "%@ 米" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ m"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -345,17 +351,17 @@
             "state" : "translated",
             "value" : "%@ 公尺"
           }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ m"
-          }
         }
       }
     },
     "%@分" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Min."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -378,12 +384,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ 分"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ Min."
           }
         }
       }
@@ -1117,6 +1117,12 @@
     },
     "Garmin Connect、华为运动健康、Zepp、Wahoo、Keep、Strava 等都会把运动写进 Apple 健康，勾选后即可导入，无需分别登录。导入的记录只读取不修改，删除本地记录不会影响对方的数据。" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garmin Connect, Huawei Health, Zepp, Wahoo, Keep, Strava und andere schreiben Workouts in Apple Health – du kannst sie hier importieren, ohne dich einzeln anzumelden. Importierte Einträge werden nur gelesen; ein Löschen hier verändert die Daten der anderen App nicht."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1139,12 +1145,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Garmin Connect、華為運動健康、Zepp、Wahoo、Keep、Strava 等都會把運動寫進 Apple 健康，勾選後即可匯入，無需分別登入。匯入的記錄只讀取不修改，刪除本機記錄不會影響對方的資料。"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Garmin Connect, Huawei Health, Zepp, Wahoo, Keep, Strava und andere schreiben Workouts in Apple Health – du kannst sie hier importieren, ohne dich einzeln anzumelden. Importierte Einträge werden nur gelesen; ein Löschen hier verändert die Daten der anderen App nicht."
           }
         }
       }
@@ -1184,8 +1184,49 @@
         }
       }
     },
+    "Gravel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravel"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グラベル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그래블"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravel"
+          }
+        }
+      }
+    },
     "Pro" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1209,11 +1250,40 @@
             "state" : "translated",
             "value" : "Pro"
           }
-        },
+        }
+      }
+    },
+    "Pro 功能" : {
+      "extractionState" : "stale",
+      "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pro"
+            "value" : "Pro-Funktion"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro feature"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro 機能"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro 기능"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro 功能"
           }
         }
       }
@@ -1317,6 +1387,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上次同步"
+          }
+        }
+      }
+    },
+    "不回避土路与非铺装路面，可走林道" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimmt Schotter und unbefestigte Wege, auch Waldwege"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takes dirt and unpaved surfaces, including forest tracks"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未舗装路や林道も含めて走ります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비포장길과 임도까지 이용합니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不迴避土路與非鋪裝路面，可走林道"
           }
         }
       }
@@ -1878,6 +1983,41 @@
         }
       }
     },
+    "偏快、优先铺装路面，避开土路与台阶" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schneller, bevorzugt asphaltierte Wege, meidet Schotter und Stufen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faster, prefers paved surfaces, avoids dirt and steps"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度重視。舗装路を優先し、未舗装や階段を避けます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "속도 위주. 포장도로를 우선하고 비포장과 계단을 피합니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "偏快、優先鋪裝路面，避開土路與階梯"
+          }
+        }
+      }
+    },
     "停等中，移动后继续计时" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1983,6 +2123,41 @@
         }
       }
     },
+    "先勾选要导入的来源。" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle zuerst eine Quelle zum Importieren aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a source to import from first."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り込む提供元を先に選択してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가져올 원본을 먼저 선택하세요."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請先勾選要匯入的來源。"
+          }
+        }
+      }
+    },
     "全程本地处理 · 隐私零上传" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2049,6 +2224,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "公園"
+          }
+        }
+      }
+    },
+    "公路车" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rennrad"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Road bike"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ロードバイク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로드 바이크"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公路車"
           }
         }
       }
@@ -2229,6 +2439,12 @@
     },
     "其他手表与运动 App" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Andere Uhren & Fitness-Apps"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2251,12 +2467,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "其他手錶與運動 App"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Andere Uhren & Fitness-Apps"
           }
         }
       }
@@ -2960,6 +3170,41 @@
         }
       }
     },
+    "压实路面" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "verdichtet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "compacted"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "締固め路面"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다짐 노면"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "壓實路面"
+          }
+        }
+      }
+    },
     "取消" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3240,6 +3485,41 @@
         }
       }
     },
+    "土路" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erde"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dirt"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "土"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "흙길"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "土路"
+          }
+        }
+      }
+    },
     "地图" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3277,6 +3557,12 @@
     },
     "地图 © Apple" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte © Apple"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3299,12 +3585,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "地圖 © Apple"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karte © Apple"
           }
         }
       }
@@ -3375,6 +3655,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "均速"
+          }
+        }
+      }
+    },
+    "外部设备" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Externes Gerät"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "External device"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外部デバイス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "외부 기기"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外部裝置"
           }
         }
       }
@@ -3624,6 +3939,41 @@
         }
       }
     },
+    "导入勾选的记录" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswahl importieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import selected"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した記録を取り込む"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 기록 가져오기"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯入勾選的記錄"
+          }
+        }
+      }
+    },
     "导出 GPX 轨迹" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3867,6 +4217,41 @@
         }
       }
     },
+    "山地车" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mountainbike"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mountain bike"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マウンテンバイク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "산악자전거"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登山車"
+          }
+        }
+      }
+    },
     "已到达目的地" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3898,6 +4283,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已到達目的地"
+          }
+        }
+      }
+    },
+    "已导入 %lld 条，另有 %lld 条与已有记录重叠，已跳过。" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld importiert, %2$lld wegen Überschneidung mit vorhandenen Einträgen übersprungen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imported %1$lld; skipped %2$lld that overlap existing records."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld 件を取り込み、既存の記録と重なる %2$lld 件はスキップしました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld개를 가져왔고, 기존 기록과 겹치는 %2$lld개는 건너뛰었습니다."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已匯入 %1$lld 筆，另有 %2$lld 筆與已有記錄重疊，已跳過。"
+          }
+        }
+      }
+    },
+    "已导入 %lld 条记录。" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Workouts importiert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imported %lld workouts."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 件を取り込みました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld개를 가져왔습니다."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已匯入 %lld 筆記錄。"
           }
         }
       }
@@ -4247,6 +4702,111 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已重新規劃路線"
+          }
+        }
+      }
+    },
+    "已骑行 %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du bist %@ gefahren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've ridden %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 走行しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 주행했습니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已騎行 %@"
+          }
+        }
+      }
+    },
+    "已骑行 %@，%@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du bist %1$@ gefahren, %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've ridden %1$@, %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@、%2$@ 走行しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@ 주행했습니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已騎行 %1$@，%2$@"
+          }
+        }
+      }
+    },
+    "已骑行 %@，%@，平均时速 %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du bist %1$@ gefahren, %2$@, Durchschnitt %3$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've ridden %1$@, %2$@, average speed %3$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@、%2$@ 走行しました。平均速度 %3$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@ 주행했습니다. 평균 속도 %3$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已騎行 %1$@，%2$@，平均時速 %3$@"
           }
         }
       }
@@ -5713,6 +6273,41 @@
         }
       }
     },
+    "有台阶，需抬车" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stufen – Rad tragen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps — you'll have to carry the bike"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "階段あり — 自転車を担ぐ必要があります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계단 있음 — 자전거를 들어야 합니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有階梯，需抬車"
+          }
+        }
+      }
+    },
     "服务条款" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6203,6 +6798,75 @@
         }
       }
     },
+    "来自 OpenStreetMap 的路面标签与海拔数据。标签缺失的路段不会给出结论，所以没列出不等于没有问题。" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basiert auf Oberflächen-Tags und Höhendaten von OpenStreetMap. Abschnitte ohne Tags werden ausgelassen statt geraten – eine leere Liste bedeutet also nicht, dass die Strecke frei ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Based on OpenStreetMap surface tags and elevation data. Sections without tags are left out rather than guessed, so an empty list does not mean the route is clear."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenStreetMap の路面タグと標高データに基づきます。タグのない区間は推測せず除外するため、何も表示されなくても問題がないとは限りません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenStreetMap의 노면 태그와 고도 데이터를 사용합니다. 태그가 없는 구간은 추측하지 않고 제외하므로, 목록이 비어 있어도 문제가 없다는 뜻은 아닙니다."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "來自 OpenStreetMap 的路面標籤與海拔資料。標籤缺失的路段不會給出結論，所以沒列出不等於沒有問題。"
+          }
+        }
+      }
+    },
+    "查找其他设备" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Andere Geräte suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find other devices"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他のデバイスを探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다른 기기 찾기"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尋找其他裝置"
+          }
+        }
+      }
+    },
     "标为电动车" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6376,6 +7040,41 @@
         }
       }
     },
+    "正在导入..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import läuft …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importing…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り込み中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가져오는 중…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在匯入…"
+          }
+        }
+      }
+    },
     "正在找附近好去处…" : {
       "localizations" : {
         "de" : {
@@ -6406,6 +7105,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在尋找附近好去處…"
+          }
+        }
+      }
+    },
+    "正在查找..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche läuft …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "찾는 중…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在尋找…"
           }
         }
       }
@@ -6515,6 +7249,41 @@
         }
       }
     },
+    "步行道，需推车通过" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fußweg – Rad schieben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Footpath — you'll have to push"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歩道 — 押して通行してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보행로 — 끌고 지나가야 합니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "步行道，需推車通過"
+          }
+        }
+      }
+    },
     "每周距离目标" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6546,6 +7315,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每週距離目標"
+          }
+        }
+      }
+    },
+    "沙地" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sand"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sand"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "砂"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모래"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沙地"
           }
         }
       }
@@ -6622,6 +7426,12 @@
     },
     "没有找到其他 app 写入的运动记录。若你的手表 app 已在往「健康」写数据，请到 健康 › 共享 › App 里允许「快乐轻骑」读取「体能训练」。" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Workouts anderer Apps gefunden. Falls deine Uhren-App bereits in Health schreibt, erlaube HappyRide unter Health › Freigabe › Apps das Lesen von „Workouts“."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6645,11 +7455,40 @@
             "state" : "translated",
             "value" : "沒有找到其他 app 寫入的運動記錄。若你的手錶 app 已在往「健康」寫資料，請到 健康 › 共享 › App 裡允許「快樂輕騎」讀取「體能訓練」。"
           }
-        },
+        }
+      }
+    },
+    "没有新的记录可导入。" : {
+      "extractionState" : "stale",
+      "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine Workouts anderer Apps gefunden. Falls deine Uhren-App bereits in Health schreibt, erlaube HappyRide unter Health › Freigabe › Apps das Lesen von „Workouts“."
+            "value" : "Keine neuen Workouts zum Importieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No new workouts to import."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り込める新しい記録はありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가져올 새 기록이 없습니다."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有新的記錄可匯入。"
           }
         }
       }
@@ -7142,6 +7981,41 @@
         }
       }
     },
+    "石板路" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopfsteinpflaster"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cobbles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "石畳"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "돌길"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "石板路"
+          }
+        }
+      }
+    },
     "码表" : {
       "localizations" : {
         "de" : {
@@ -7172,6 +8046,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "碼表"
+          }
+        }
+      }
+    },
+    "码表骑行时，每满 10 分钟、每满 5 公里播报一次时长、距离与平均速度。播报会把正在放的音乐音量压低，念完自动恢复。还没定位到时不播报距离与均速。" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während einer Fahrt mit dem Tacho werden Zeit, Distanz und Durchschnittsgeschwindigkeit alle 10 Minuten und alle 5 km angesagt. Laufende Musik wird währenddessen leiser und danach wiederhergestellt. Distanz und Geschwindigkeit entfallen, solange kein GPS-Signal vorliegt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During a cyclometer ride, your time, distance and average speed are announced every 10 minutes and every 5 km. Music is ducked during the announcement and restored afterwards. Distance and speed are skipped until GPS has a fix."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サイクロメーターでの走行中、10 分ごと・5 km ごとに時間、距離、平均速度をアナウンスします。再生中の音楽は一時的に音量を下げ、読み上げ後に元へ戻ります。GPS が測位するまでは距離と平均速度はアナウンスしません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "속도계로 주행하는 동안 10분마다, 5km마다 시간·거리·평균 속도를 안내합니다. 안내 중에는 음악 소리를 낮추고 끝나면 원래대로 돌아옵니다. GPS가 잡히기 전에는 거리와 평균 속도를 안내하지 않습니다."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "碼錶騎行時，每滿 10 分鐘、每滿 5 公里播報一次時長、距離與平均速度。播報會把正在放的音樂音量壓低，念完自動恢復。還沒定位到時不播報距離與均速。"
           }
         }
       }
@@ -7207,6 +8115,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "確定"
+          }
+        }
+      }
+    },
+    "碎石" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schotter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gravel"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "砂利"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자갈"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "碎石"
           }
         }
       }
@@ -7457,6 +8400,12 @@
     },
     "约 %@ 公里环线" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rundkurs ca. %@ km"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7479,12 +8428,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "約 %@ 公里環線"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rundkurs ca. %@ km"
           }
         }
       }
@@ -8153,6 +9096,41 @@
         }
       }
     },
+    "草地" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gras"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "grass"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "草"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잔디"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "草地"
+          }
+        }
+      }
+    },
     "规划路线会把你的起点与目的地坐标发送给地图路线服务（brouter.de），仅用于算路。" : {
       "localizations" : {
         "de" : {
@@ -8462,6 +9440,41 @@
         }
       }
     },
+    "语音报时" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprachansagen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spoken updates"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声アナウンス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성 안내"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語音報時"
+          }
+        }
+      }
+    },
     "请关闭静音按钮，以听到语音导航" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8742,6 +9755,75 @@
         }
       }
     },
+    "距起点 %@ · 长 %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ab Start · %2$@ lang"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ from start · %2$@ long"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタートから %1$@ · 長さ %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출발점에서 %1$@ · 길이 %2$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "距起點 %1$@ · 長 %2$@"
+          }
+        }
+      }
+    },
+    "路况提醒" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streckenhinweise"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Route warnings"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ルートの注意点"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경로 주의사항"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "路況提醒"
+          }
+        }
+      }
+    },
     "路线" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8877,6 +9959,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "路線規劃需要聯網"
+          }
+        }
+      }
+    },
+    "车型" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radtyp"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bike type"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自転車の種類"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자전거 종류"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "車型"
+          }
+        }
+      }
+    },
+    "车多且无自行车道" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viel Verkehr, kein Radweg"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Busy road, no bike lane"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交通量が多く自転車レーンなし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "차량 많음, 자전거 도로 없음"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "車多且無自行車道"
           }
         }
       }
@@ -9508,6 +10660,41 @@
         }
       }
     },
+    "重新查找" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search again"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 찾기"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新尋找"
+          }
+        }
+      }
+    },
     "重新选择" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9573,6 +10760,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重試載入價格"
+          }
+        }
+      }
+    },
+    "铺装与碎石土路都走，偏离主干道" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asphalt und Schotter gemischt, abseits der Hauptstraßen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mixes paved and gravel, stays off main roads"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "舗装路も砂利道も走り、幹線道路を避けます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포장도로와 자갈길을 함께 이용하고 큰길을 피합니다"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鋪裝與碎石土路都走，偏離主幹道"
           }
         }
       }
@@ -9715,6 +10937,76 @@
         }
       }
     },
+    "陡下坡 %lld%%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% Gefälle"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% descent"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下り %lld%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내리막 %lld%%"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "陡下坡 %lld%%"
+          }
+        }
+      }
+    },
+    "陡坡 %lld%%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% Anstieg"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% climb"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上り %lld%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오르막 %lld%%"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "陡坡 %lld%%"
+          }
+        }
+      }
+    },
     "隐私政策" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9785,6 +11077,41 @@
         }
       }
     },
+    "非铺装路面（%@）" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbefestigt (%@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unpaved (%@)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未舗装（%@）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비포장 (%@)"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非鋪裝路面（%@）"
+          }
+        }
+      }
+    },
     "预计" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9851,6 +11178,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "風景"
+          }
+        }
+      }
+    },
+    "风格" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stil"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Style"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタイル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스타일"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "風格"
+          }
+        }
+      }
+    },
+    "首次免费体验" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erste Fahrt gratis"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First ride free"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初回は無料でお試し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "첫 이용은 무료"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首次免費體驗"
           }
         }
       }
@@ -9954,6 +11351,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "騎行中"
+          }
+        }
+      }
+    },
+    "骑行中播报" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während der Fahrt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "During a ride"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライド中のアナウンス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이딩 중 안내"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "騎行中播報"
           }
         }
       }
@@ -10131,1396 +11562,36 @@
         }
       }
     },
-    "车型" : {
+    "定位权限目前不是「始终」，App 无法在后台记录路线。改成「始终」后，之后的骑行会自动画出轨迹。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bike type"
+            "value" : "Location access is not set to Always, so routes can't be recorded in the background. Switch to Always and future rides will be mapped automatically."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自転車の種類"
+            "value" : "位置情報が「常に」になっていないため、バックグラウンドでルートを記録できません。「常に」に変更すると、以降のライドは自動で地図に描かれます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "자전거 종류"
+            "value" : "위치 권한이 '항상'이 아니어서 백그라운드에서 경로를 기록할 수 없습니다. '항상'으로 변경하면 이후 라이딩이 자동으로 지도에 표시됩니다."
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "車型"
+            "value" : "定位權限目前不是「永遠」，App 無法在背景記錄路線。改成「永遠」後，之後的騎行會自動畫出軌跡。"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Radtyp"
-          }
-        }
-      }
-    },
-    "风格" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Style"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スタイル"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "스타일"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "風格"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stil"
-          }
-        }
-      }
-    },
-    "公路车" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Road bike"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ロードバイク"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "로드 바이크"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "公路車"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rennrad"
-          }
-        }
-      }
-    },
-    "Gravel" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gravel"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "グラベル"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "그래블"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gravel"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gravel"
-          }
-        }
-      }
-    },
-    "山地车" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mountain bike"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マウンテンバイク"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "산악자전거"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "登山車"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mountainbike"
-          }
-        }
-      }
-    },
-    "偏快、优先铺装路面，避开土路与台阶" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faster, prefers paved surfaces, avoids dirt and steps"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "速度重視。舗装路を優先し、未舗装や階段を避けます"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "속도 위주. 포장도로를 우선하고 비포장과 계단을 피합니다"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "偏快、優先鋪裝路面，避開土路與階梯"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schneller, bevorzugt asphaltierte Wege, meidet Schotter und Stufen"
-          }
-        }
-      }
-    },
-    "铺装与碎石土路都走，偏离主干道" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mixes paved and gravel, stays off main roads"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "舗装路も砂利道も走り、幹線道路を避けます"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "포장도로와 자갈길을 함께 이용하고 큰길을 피합니다"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "鋪裝與碎石土路都走，偏離主幹道"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Asphalt und Schotter gemischt, abseits der Hauptstraßen"
-          }
-        }
-      }
-    },
-    "不回避土路与非铺装路面，可走林道" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Takes dirt and unpaved surfaces, including forest tracks"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未舗装路や林道も含めて走ります"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "비포장길과 임도까지 이용합니다"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不迴避土路與非鋪裝路面，可走林道"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nimmt Schotter und unbefestigte Wege, auch Waldwege"
-          }
-        }
-      }
-    },
-    "路况提醒" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Route warnings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ルートの注意点"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "경로 주의사항"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "路況提醒"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Streckenhinweise"
-          }
-        }
-      }
-    },
-    "来自 OpenStreetMap 的路面标签与海拔数据。标签缺失的路段不会给出结论，所以没列出不等于没有问题。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Based on OpenStreetMap surface tags and elevation data. Sections without tags are left out rather than guessed, so an empty list does not mean the route is clear."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OpenStreetMap の路面タグと標高データに基づきます。タグのない区間は推測せず除外するため、何も表示されなくても問題がないとは限りません。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OpenStreetMap의 노면 태그와 고도 데이터를 사용합니다. 태그가 없는 구간은 추측하지 않고 제외하므로, 목록이 비어 있어도 문제가 없다는 뜻은 아닙니다."
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "來自 OpenStreetMap 的路面標籤與海拔資料。標籤缺失的路段不會給出結論，所以沒列出不等於沒有問題。"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basiert auf Oberflächen-Tags und Höhendaten von OpenStreetMap. Abschnitte ohne Tags werden ausgelassen statt geraten – eine leere Liste bedeutet also nicht, dass die Strecke frei ist."
-          }
-        }
-      }
-    },
-    "陡坡 %lld%%" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld%% climb"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上り %lld%%"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "오르막 %lld%%"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "陡坡 %lld%%"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld%% Anstieg"
-          }
-        }
-      }
-    },
-    "陡下坡 %lld%%" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld%% descent"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下り %lld%%"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "내리막 %lld%%"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "陡下坡 %lld%%"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld%% Gefälle"
-          }
-        }
-      }
-    },
-    "非铺装路面（%@）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unpaved (%@)"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未舗装（%@）"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "비포장 (%@)"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "非鋪裝路面（%@）"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unbefestigt (%@)"
-          }
-        }
-      }
-    },
-    "车多且无自行车道" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Busy road, no bike lane"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "交通量が多く自転車レーンなし"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "차량 많음, 자전거 도로 없음"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "車多且無自行車道"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Viel Verkehr, kein Radweg"
-          }
-        }
-      }
-    },
-    "有台阶，需抬车" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Steps — you'll have to carry the bike"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "階段あり — 自転車を担ぐ必要があります"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "계단 있음 — 자전거를 들어야 합니다"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "有階梯，需抬車"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stufen – Rad tragen"
-          }
-        }
-      }
-    },
-    "步行道，需推车通过" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Footpath — you'll have to push"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "歩道 — 押して通行してください"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "보행로 — 끌고 지나가야 합니다"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "步行道，需推車通過"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fußweg – Rad schieben"
-          }
-        }
-      }
-    },
-    "距起点 %@ · 长 %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ from start · %2$@ long"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スタートから %1$@ · 長さ %2$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "출발점에서 %1$@ · 길이 %2$@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "距起點 %1$@ · 長 %2$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ ab Start · %2$@ lang"
-          }
-        }
-      }
-    },
-    "碎石" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "gravel"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "砂利"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "자갈"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "碎石"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schotter"
-          }
-        }
-      }
-    },
-    "土路" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "dirt"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "土"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "흙길"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "土路"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erde"
-          }
-        }
-      }
-    },
-    "沙地" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sand"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "砂"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모래"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "沙地"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sand"
-          }
-        }
-      }
-    },
-    "草地" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "grass"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "草"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "잔디"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "草地"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gras"
-          }
-        }
-      }
-    },
-    "石板路" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cobbles"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "石畳"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "돌길"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "石板路"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopfsteinpflaster"
-          }
-        }
-      }
-    },
-    "压实路面" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "compacted"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "締固め路面"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다짐 노면"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "壓實路面"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "verdichtet"
-          }
-        }
-      }
-    },
-    "首次免费体验" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "First ride free"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "初回は無料でお試し"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "첫 이용은 무료"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "首次免費體驗"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erste Fahrt gratis"
-          }
-        }
-      }
-    },
-    "Pro 功能" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro feature"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro 機能"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro 기능"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro 功能"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro-Funktion"
-          }
-        }
-      }
-    },
-    "外部设备" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "External device"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "外部デバイス"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "외부 기기"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "外部裝置"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Externes Gerät"
-          }
-        }
-      }
-    },
-    "查找其他设备" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Find other devices"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "他のデバイスを探す"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다른 기기 찾기"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "尋找其他裝置"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Andere Geräte suchen"
-          }
-        }
-      }
-    },
-    "重新查找" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search again"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "再検索"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 찾기"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新尋找"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erneut suchen"
-          }
-        }
-      }
-    },
-    "正在查找..." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Searching…"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "検索中…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "찾는 중…"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在尋找…"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Suche läuft …"
-          }
-        }
-      }
-    },
-    "正在导入..." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importing…"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取り込み中…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "가져오는 중…"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在匯入…"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import läuft …"
-          }
-        }
-      }
-    },
-    "导入勾选的记录" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Import selected"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選択した記録を取り込む"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "선택한 기록 가져오기"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "匯入勾選的記錄"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auswahl importieren"
-          }
-        }
-      }
-    },
-    "先勾选要导入的来源。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select a source to import from first."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取り込む提供元を先に選択してください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "가져올 원본을 먼저 선택하세요."
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "請先勾選要匯入的來源。"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle zuerst eine Quelle zum Importieren aus."
-          }
-        }
-      }
-    },
-    "没有新的记录可导入。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No new workouts to import."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取り込める新しい記録はありません。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "가져올 새 기록이 없습니다."
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "沒有新的記錄可匯入。"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine neuen Workouts zum Importieren."
-          }
-        }
-      }
-    },
-    "已导入 %lld 条记录。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Imported %lld workouts."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 件を取り込みました。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld개를 가져왔습니다."
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已匯入 %lld 筆記錄。"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld Workouts importiert."
-          }
-        }
-      }
-    },
-    "已导入 %lld 条，另有 %lld 条与已有记录重叠，已跳过。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Imported %1$lld; skipped %2$lld that overlap existing records."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld 件を取り込み、既存の記録と重なる %2$lld 件はスキップしました。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld개를 가져왔고, 기존 기록과 겹치는 %2$lld개는 건너뛰었습니다."
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已匯入 %1$lld 筆，另有 %2$lld 筆與已有記錄重疊，已跳過。"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld importiert, %2$lld wegen Überschneidung mit vorhandenen Einträgen übersprungen."
-          }
-        }
-      }
-    },
-    "语音报时" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spoken updates"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "音声アナウンス"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "음성 안내"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "語音報時"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sprachansagen"
-          }
-        }
-      }
-    },
-    "骑行中播报" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "During a ride"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライド中のアナウンス"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "라이딩 중 안내"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "騎行中播報"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während der Fahrt"
-          }
-        }
-      }
-    },
-    "码表骑行时，每满 10 分钟、每满 5 公里播报一次时长、距离与平均速度。播报会把正在放的音乐音量压低，念完自动恢复。还没定位到时不播报距离与均速。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "During a cyclometer ride, your time, distance and average speed are announced every 10 minutes and every 5 km. Music is ducked during the announcement and restored afterwards. Distance and speed are skipped until GPS has a fix."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サイクロメーターでの走行中、10 分ごと・5 km ごとに時間、距離、平均速度をアナウンスします。再生中の音楽は一時的に音量を下げ、読み上げ後に元へ戻ります。GPS が測位するまでは距離と平均速度はアナウンスしません。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "속도계로 주행하는 동안 10분마다, 5km마다 시간·거리·평균 속도를 안내합니다. 안내 중에는 음악 소리를 낮추고 끝나면 원래대로 돌아옵니다. GPS가 잡히기 전에는 거리와 평균 속도를 안내하지 않습니다."
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "碼錶騎行時，每滿 10 分鐘、每滿 5 公里播報一次時長、距離與平均速度。播報會把正在放的音樂音量壓低，念完自動恢復。還沒定位到時不播報距離與均速。"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während einer Fahrt mit dem Tacho werden Zeit, Distanz und Durchschnittsgeschwindigkeit alle 10 Minuten und alle 5 km angesagt. Laufende Musik wird währenddessen leiser und danach wiederhergestellt. Distanz und Geschwindigkeit entfallen, solange kein GPS-Signal vorliegt."
-          }
-        }
-      }
-    },
-    "已骑行 %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You've ridden %@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 走行しました"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 주행했습니다"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已騎行 %@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du bist %@ gefahren"
-          }
-        }
-      }
-    },
-    "已骑行 %@，%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You've ridden %1$@, %2$@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@、%2$@ 走行しました"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@ 주행했습니다"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已騎行 %1$@，%2$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du bist %1$@ gefahren, %2$@"
-          }
-        }
-      }
-    },
-    "已骑行 %@，%@，平均时速 %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You've ridden %1$@, %2$@, average speed %3$@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@、%2$@ 走行しました。平均速度 %3$@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@, %2$@ 주행했습니다. 평균 속도 %3$@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已騎行 %1$@，%2$@，平均時速 %3$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du bist %1$@ gefahren, %2$@, Durchschnitt %3$@"
+            "value" : "Der Standortzugriff steht nicht auf „Immer“, daher können Routen im Hintergrund nicht aufgezeichnet werden. Stelle auf „Immer“ um, dann werden künftige Fahrten automatisch aufgezeichnet."
           }
         }
       }

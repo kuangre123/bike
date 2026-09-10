@@ -20,9 +20,13 @@ final class PermissionsManager: NSObject, CLLocationManagerDelegate {
         locationStatus = locationManager.authorizationStatus
     }
 
-    /// 检测要正常工作，需要「始终」定位 + 运动授权。
-    var needsAttention: Bool {
-        locationStatus != .authorizedAlways || motionStatus != .authorized
+    /// 后台自动采轨迹只有「始终」定位才行。
+    ///
+    /// 「使用期间」也能让 `needsSetup` 通过、横幅消失，于是会**静默降级**：
+    /// 骑行照样被检测到，但只有动作历史、没有 GPS 轨迹，用户看到「无 GPS 路线」
+    /// 却不知道为什么。详情页用这个把原因讲清楚并给出口。
+    var needsAlwaysForRouteRecording: Bool {
+        locationStatus != .authorizedAlways
     }
 
     /// 首页引导横幅是否还要显示。只要定位拿到「使用期间」或「始终」、且运动已授权，就隐藏。

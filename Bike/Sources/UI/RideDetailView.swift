@@ -10,6 +10,8 @@ struct RideDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.openURL) private var openURL
+    @Environment(PermissionsManager.self) private var permissions
     let ride: RideModel
     @State private var showingDeleteConfirmation = false
     @State private var shareItem: ShareableImage?
@@ -134,6 +136,19 @@ struct RideDetailView: View {
                     Label(autoDetectedNote, systemImage: "sparkles")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    // 没轨迹又不是「始终」定位时，八成就是这个原因。只在这条记录
+                    // 确实缺轨迹时才提示，不是逮着人就催权限。
+                    if coords.isEmpty, permissions.needsAlwaysForRouteRecording {
+                        Button {
+                            openURL(URL(string: UIApplication.openSettingsURLString)!)
+                        } label: {
+                            Label(
+                                "定位权限目前不是「始终」，App 无法在后台记录路线。改成「始终」后，之后的骑行会自动画出轨迹。",
+                                systemImage: "location.slash"
+                            )
+                            .font(.caption)
+                        }
+                    }
                 }
             }
 
