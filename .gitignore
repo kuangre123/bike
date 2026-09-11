@@ -27,3 +27,8 @@ build/
 *.ipa
 *.xcarchive
 fastlane/report.xml
+
+# 宣传片生成产物（714MB，用 scripts/minimax_video.py 可重新生成）
+videos/
+# Python 缓存
+__pycache__/
