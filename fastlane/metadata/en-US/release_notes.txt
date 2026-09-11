@@ -1,14 +1,3 @@
-This update brings in workouts from other watches and apps, plans routes by bike type, and can read out your progress while you ride.
+Fixes an issue where route warnings and total climb did not appear in 1.4. After planning a route you will now see steep climbs, unpaved sections, busy roads and more.
 
-- Import workouts from other devices: rides that Garmin Connect, Huawei Health, Zepp, Wahoo, Keep, Strava and others write to Apple Health can be imported by source in Settings — no separate logins. Read-only: deleting a record here never touches their data
-- Live Apple Watch heart rate: your watch's reading shows on the phone right away, instead of waiting for a background sync
-- Route planning by bike type: road bike, mountain bike and gravel each get their own routing
-- Warnings before you set off: steep climbs, unpaved surfaces, busy roads without a bike lane, and footpaths you'd have to push through
-- Spoken updates while riding: every 10 minutes and every 5 km it reads out duration, distance and average speed. Music is ducked, not cut off. Can be turned off in Settings
-- Share cards now include the map: your route is drawn on real streets
-- More accurate cyclometer timing at stops
-- When a ride has no route, the app now explains why — background route recording needs "Always" location access
-
-About the cyclometer: manual cyclometer mode is now a Pro feature, with one full free ride for everyone. Passive auto-recording, stats and sharing remain free.
-
-Enjoying HappyRide? A rating would mean a lot!
+Voice navigation is also improved: turn prompts now come from the routing engine and only fire at real junctions, so winding roads no longer trigger constant announcements. Adds "keep left / keep right" and roundabout exit prompts. The voice now follows your system language.

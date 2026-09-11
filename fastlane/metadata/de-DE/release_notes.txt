@@ -1,14 +1,3 @@
-Dieses Update holt Workouts aus anderen Uhren und Apps herein, plant Routen nach Radtyp und sagt dir unterwegs deinen Fortschritt an.
+Behebt ein Problem, durch das Streckenhinweise und Höhenmeter in 1.4 nicht angezeigt wurden. Nach der Routenplanung siehst du jetzt steile Anstiege, unbefestigte Abschnitte, viel befahrene Straßen und mehr.
 
-· Workouts anderer Geräte importieren – Fahrten, die Garmin Connect, Huawei Health, Zepp, Wahoo, Keep, Strava und andere in Apple Health schreiben, lassen sich in den Einstellungen nach Quelle auswählen und importieren – ohne separate Anmeldung. Nur lesend: Löschen hier verändert die Daten der anderen App nicht
-· Apple Watch Puls in Echtzeit – der Messwert der Uhr erscheint sofort auf dem iPhone, statt auf eine Hintergrund-Synchronisierung zu warten
-· Routenplanung nach Radtyp – Rennrad, Mountainbike und Gravel bekommen jeweils eigene Routen
-· Hinweise schon vor der Abfahrt – steile Anstiege, unbefestigte Abschnitte, viel befahrene Straßen ohne Radweg und Fußwege, auf denen du schieben musst
-· Sprachansagen während der Fahrt – alle 10 Minuten und alle 5 km werden Dauer, Distanz und Ø-Tempo angesagt. Musik wird leiser, nicht gestoppt. In den Einstellungen abschaltbar
-· Share-Karten mit Kartenhintergrund – deine Route liegt jetzt auf echten Straßen
-· Genauere Zeitmessung an Stopps
-· Fehlt einer Fahrt die Route, erklärt die App jetzt warum – für die Aufzeichnung im Hintergrund braucht es den Standortzugriff „Immer"
-
-Zum Fahrradcomputer: Der manuelle Fahrradcomputer ist jetzt eine Pro-Funktion – eine vollständige Fahrt ist für alle gratis. Automatische Aufzeichnung, Statistiken und Teilen bleiben kostenlos.
-
-Gefällt dir HappyRide? Über eine Bewertung freuen wir uns sehr!
+Auch die Sprachnavigation ist besser: Abbiegehinweise kommen jetzt von der Routing-Engine und erscheinen nur an echten Kreuzungen – kurvige Straßen lösen keine Dauer-Ansagen mehr aus. Neu: „Links halten / Rechts halten" und Kreisverkehr-Ausfahrten. Die Stimme folgt jetzt der Systemsprache.
