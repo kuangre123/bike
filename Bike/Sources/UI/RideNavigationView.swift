@@ -70,12 +70,12 @@ struct RideNavigationView: View {
 
     private var turnCard: some View {
         HStack(spacing: 12) {
-            Image(systemName: icon(navigator.progress?.nextTurn?.direction))
+            Image(systemName: Formatters.turnIcon(navigator.progress?.nextTurn?.direction))
                 .font(.system(size: 30, weight: .bold))
             VStack(alignment: .leading, spacing: 2) {
                 if let p = navigator.progress, let t = p.nextTurn, t.direction != .arrive {
                     Text("\(Int(p.distanceToNextTurnMeters)) 米").font(.title3.bold())
-                    Text(phrase(t.direction)).font(.subheadline)
+                    Text(Formatters.turnPhrase(t)).font(.subheadline)
                 } else {
                     Text("沿路线前进").font(.headline)
                 }
@@ -88,25 +88,5 @@ struct RideNavigationView: View {
         .padding()
     }
 
-    private func icon(_ d: TurnDirection?) -> String {
-        switch d {
-        case .left, .slightLeft, .sharpLeft: return "arrow.turn.up.left"
-        case .right, .slightRight, .sharpRight: return "arrow.turn.up.right"
-        case .uTurn: return "arrow.uturn.down"
-        case .arrive: return "flag.checkered"
-        default: return "arrow.up"
-        }
-    }
 
-    private func phrase(_ d: TurnDirection) -> String {
-        switch d {
-        case .left, .slightLeft: return String(localized: "向左")
-        case .sharpLeft: return String(localized: "向左急转")
-        case .right, .slightRight: return String(localized: "向右")
-        case .sharpRight: return String(localized: "向右急转")
-        case .uTurn: return String(localized: "掉头")
-        case .straight: return String(localized: "直行")
-        case .arrive: return String(localized: "到达")
-        }
-    }
 }

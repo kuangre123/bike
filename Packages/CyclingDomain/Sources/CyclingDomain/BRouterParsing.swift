@@ -36,7 +36,9 @@ public func parseBRouterGeoJSON(_ data: Data) -> RoutePlan? {
         elevations: alignedElevations,
         segments: parseBRouterSegments(props?["messages"]),
         // BRouter 的 key 里真的带空格，不是笔误
-        reportedAscentMeters: (props?["filtered ascend"] as? String).flatMap(Double.init)
+        reportedAscentMeters: (props?["filtered ascend"] as? String).flatMap(Double.init),
+        // 请求带 timode=3 才有；没带就是空数组 → 只剩 .arrive → navigationTurns 退回几何推导
+        turns: props?["voicehints"] == nil ? [] : parseBRouterVoiceHints(props?["voicehints"], coordinates: coordinates)
     )
 }
 

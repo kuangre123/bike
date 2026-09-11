@@ -76,6 +76,27 @@ final class BRouterParsingTests: XCTestCase {
         XCTAssertEqual(plan?.ascentMeters, 50)
     }
 
+    /// 回归：1.4 里 RouteService 做 GCJ-02 对齐时手工重建 RoutePlan，只传了三个字段，
+    /// 海拔 / 逐段 / 爬升全丢——路况预警因此从没工作过。withCoordinates 必须一个都不丢。
+    func testWithCoordinatesPreservesEverythingButCoordinates() {
+        let plan = try! XCTUnwrap(parseBRouterGeoJSON(data))
+        let shifted = plan.coordinates.map {
+            GeoCoordinate(latitude: $0.latitude + 0.002, longitude: $0.longitude + 0.005)
+        }
+        let aligned = plan.withCoordinates(shifted)
+
+        XCTAssertEqual(aligned.coordinates, shifted)
+        XCTAssertEqual(aligned.elevations, plan.elevations)
+        XCTAssertEqual(aligned.segments, plan.segments)
+        XCTAssertEqual(aligned.reportedAscentMeters, plan.reportedAscentMeters)
+        XCTAssertEqual(aligned.turns, plan.turns)
+        XCTAssertEqual(aligned.distanceMeters, plan.distanceMeters)
+        XCTAssertEqual(aligned.estimatedSeconds, plan.estimatedSeconds)
+        // 最关键的：预警不能因为对齐就消失
+        XCTAssertEqual(aligned.warnings, plan.warnings)
+        XCTAssertEqual(aligned.ascentMeters, plan.ascentMeters)
+    }
+
     func testGarbageDataReturnsNil() {
         XCTAssertNil(parseBRouterGeoJSON(Data("not json".utf8)))
         XCTAssertNil(parseBRouterGeoJSON(Data("{}".utf8)))

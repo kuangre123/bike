@@ -147,6 +147,37 @@ enum Formatters {
         String(localized: "距起点 \(distance(warning.startDistanceMeters)) · 长 \(distance(warning.lengthMeters))")
     }
 
+    /// 转向播报 / 转向卡文案。
+    static func turnPhrase(_ turn: TurnInstruction) -> String {
+        switch turn.direction {
+        case .left, .slightLeft: return String(localized: "向左")
+        case .sharpLeft:         return String(localized: "向左急转")
+        case .right, .slightRight: return String(localized: "向右")
+        case .sharpRight:        return String(localized: "向右急转")
+        case .keepLeft:          return String(localized: "靠左")
+        case .keepRight:         return String(localized: "靠右")
+        case .uTurn:             return String(localized: "掉头")
+        case .straight:          return String(localized: "直行")
+        case .arrive:            return String(localized: "到达")
+        case .roundabout:
+            guard let exit = turn.roundaboutExit, exit > 0 else { return String(localized: "进入环岛") }
+            return String(localized: "环岛第 \(exit) 个出口")
+        }
+    }
+
+    static func turnIcon(_ direction: TurnDirection?) -> String {
+        switch direction {
+        case .left, .slightLeft, .sharpLeft: return "arrow.turn.up.left"
+        case .right, .slightRight, .sharpRight: return "arrow.turn.up.right"
+        case .keepLeft:   return "arrow.up.left"
+        case .keepRight:  return "arrow.up.right"
+        case .uTurn:      return "arrow.uturn.down"
+        case .roundabout: return "arrow.triangle.2.circlepath"
+        case .arrive:     return "flag.checkered"
+        case .straight, .none: return "arrow.up"
+        }
+    }
+
     static func sourceLabel(_ source: RideSource) -> String {
         switch source {
         case .motionOnly:    return String(localized: "运动历史")

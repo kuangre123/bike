@@ -23,6 +23,9 @@ public struct RoutePlan: Equatable, Sendable {
     /// 优先用它而不是我们自己把每点高差裸加——SRTM 抖动会让裸加系统性偏高
     /// （实测同一条路线：裸加 1307 m，BRouter 1173 m）。
     public let reportedAscentMeters: Double?
+    /// 算路引擎给的转向指令（含末尾 `.arrive`）。BRouter 没返回时为空，
+    /// 导航端退回几何推导 `turnsFromPolyline`。
+    public let turns: [TurnInstruction]
 
     public init(
         coordinates: [GeoCoordinate],
@@ -30,7 +33,8 @@ public struct RoutePlan: Equatable, Sendable {
         estimatedSeconds: Double,
         elevations: [Double] = [],
         segments: [RouteSegment] = [],
-        reportedAscentMeters: Double? = nil
+        reportedAscentMeters: Double? = nil,
+        turns: [TurnInstruction] = []
     ) {
         self.coordinates = coordinates
         self.distanceMeters = distanceMeters
@@ -38,6 +42,31 @@ public struct RoutePlan: Equatable, Sendable {
         self.elevations = elevations
         self.segments = segments
         self.reportedAscentMeters = reportedAscentMeters
+        self.turns = turns
+    }
+
+    /// 只换坐标（比如 WGS-84 → GCJ-02 对齐），其余字段原样保留。
+    ///
+    /// 海拔、逐段、转向都是按**下标**对应坐标的，坐标做等长变换后下标关系不变，
+    /// 所以可以直接带过去。以前 RouteService 是手工重建 `RoutePlan`，只传了三个字段，
+    /// 把海拔和逐段路面全丢了——路况预警在 1.4 里因此从没工作过。用这个就漏不掉。
+    public func withCoordinates(_ newCoordinates: [GeoCoordinate]) -> RoutePlan {
+        precondition(newCoordinates.count == coordinates.count,
+                     "坐标变换必须等长，否则海拔/转向的下标会错位")
+        return RoutePlan(
+            coordinates: newCoordinates,
+            distanceMeters: distanceMeters,
+            estimatedSeconds: estimatedSeconds,
+            elevations: elevations,
+            segments: segments,
+            reportedAscentMeters: reportedAscentMeters,
+            turns: turns)
+    }
+
+    /// 导航用的转向列表：优先算路引擎的（只在真正的路口发提示），没有才几何推导。
+    /// 「只有 .arrive」等于引擎没给转弯信息，也算没有。
+    public var navigationTurns: [TurnInstruction] {
+        turns.count > 1 ? turns : turnsFromPolyline(coordinates)
     }
 
     public var estimatedMinutes: Int { Int((estimatedSeconds / 60).rounded()) }

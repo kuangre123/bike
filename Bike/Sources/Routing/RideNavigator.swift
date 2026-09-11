@@ -25,7 +25,8 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesi
 
     init(plan: RoutePlan, destination: GeoCoordinate) {
         self.coords = plan.coordinates
-        self.turns = turnsFromPolyline(plan.coordinates)
+        // 优先算路引擎的转向（只在真正的路口发提示），引擎没给才几何推导。
+        self.turns = plan.navigationTurns
         self.destination = destination
         super.init()
         manager.delegate = self
@@ -49,14 +50,14 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesi
 
         if let next = p.nextTurn, next.direction == .arrive, p.distanceToNextTurnMeters < 25 {
             arrived = true
-            speak("已到达目的地")
+            speak(String(localized: "已到达目的地"))
             stop()
             return
         }
         if let next = p.nextTurn, next.direction != .arrive,
            p.distanceToNextTurnMeters < 150, lastSpokenTurnIndex != next.coordinateIndex {
             lastSpokenTurnIndex = next.coordinateIndex
-            speak("前方 \(Int(p.distanceToNextTurnMeters)) 米，\(phrase(next.direction))")
+            speak(String(localized: "前方 \(Int(p.distanceToNextTurnMeters)) 米，\(Formatters.turnPhrase(next))"))
         }
         if p.isOffRoute {
             if offRouteSince == nil { offRouteSince = Date() }
@@ -73,10 +74,10 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesi
         defer { rerouting = false }
         if case .success(let plan) = await service.route(from: loc, to: destination, profile: RoutePrefs.profile) {
             coords = plan.coordinates
-            turns = turnsFromPolyline(plan.coordinates)
+            turns = plan.navigationTurns
             lastSpokenTurnIndex = nil
             offRouteSince = nil
-            speak("已重新规划路线")
+            speak(String(localized: "已重新规划路线"))
         }
     }
 
@@ -84,7 +85,8 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesi
         guard voiceEnabled else { return }
         activateAudioSession()
         let u = AVSpeechUtterance(string: text)
-        u.voice = AVSpeechSynthesisVoice(language: "zh-CN")
+        // 跟随系统语言。以前写死 zh-CN：德语用户会听到中文口音念德语文案。
+        u.voice = AVSpeechSynthesisVoice(language: Locale.preferredLanguages.first)
         speech.speak(u)
     }
 
@@ -105,17 +107,6 @@ final class RideNavigator: NSObject, CLLocationManagerDelegate, AVSpeechSynthesi
         }
     }
 
-    private func phrase(_ d: TurnDirection) -> String {
-        switch d {
-        case .left, .slightLeft: return String(localized: "向左")
-        case .sharpLeft: return String(localized: "向左急转")
-        case .right, .slightRight: return String(localized: "向右")
-        case .sharpRight: return String(localized: "向右急转")
-        case .uTurn: return String(localized: "掉头")
-        case .straight: return String(localized: "直行")
-        case .arrive: return String(localized: "到达")
-        }
-    }
 
     nonisolated func locationManager(_ m: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let last = locations.last else { return }

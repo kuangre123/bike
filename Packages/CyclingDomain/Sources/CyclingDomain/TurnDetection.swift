@@ -2,16 +2,29 @@ import Foundation
 
 public enum TurnDirection: String, Sendable, Equatable {
     case straight, slightLeft, left, sharpLeft, slightRight, right, sharpRight, uTurn, arrive
+    /// 岔路口靠边走（不是转弯，是「保持在左/右侧车道」）。只有算路引擎知道这里有岔路，
+    /// 几何推导给不出这个。
+    case keepLeft, keepRight
+    /// 环岛。第几个出口见 `TurnInstruction.roundaboutExit`。
+    case roundabout
 }
 
 public struct TurnInstruction: Equatable, Sendable {
     public let coordinateIndex: Int
     public let direction: TurnDirection
     public let distanceFromPreviousMeters: Double
-    public init(coordinateIndex: Int, direction: TurnDirection, distanceFromPreviousMeters: Double) {
+    /// 环岛第几个出口；非环岛为 nil。
+    public let roundaboutExit: Int?
+    public init(
+        coordinateIndex: Int,
+        direction: TurnDirection,
+        distanceFromPreviousMeters: Double,
+        roundaboutExit: Int? = nil
+    ) {
         self.coordinateIndex = coordinateIndex
         self.direction = direction
         self.distanceFromPreviousMeters = distanceFromPreviousMeters
+        self.roundaboutExit = roundaboutExit
     }
 }
 

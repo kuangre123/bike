@@ -37,6 +37,9 @@ struct RouteService {
             .init(name: "profile", value: profile),
             .init(name: "alternativeidx", value: "0"),
             .init(name: "format", value: "geojson"),
+            // 要转向指令（voicehints）。几何推导在弯路上会把每个拐角当转弯，
+            // 实测 9.2 km 山路 165 次 vs 引擎 27 次。
+            .init(name: "timode", value: "3"),
         ]
         guard let url = comps.url else { return .failure(.server) }
         do {
@@ -46,10 +49,10 @@ struct RouteService {
             }
             guard let plan = parseBRouterGeoJSON(data) else { return .failure(.noRoute) }
             // BRouter 返回 WGS-84，转回 GCJ-02 以便画在 Apple 地图上对齐（否则偏移穿楼）
-            let aligned = RoutePlan(
-                coordinates: plan.coordinates.map(ChinaGeo.wgs84ToGcj02),
-                distanceMeters: plan.distanceMeters,
-                estimatedSeconds: plan.estimatedSeconds)
+            // BRouter 返回 WGS-84，转回 GCJ-02 以便画在 Apple 地图上对齐（否则偏移穿楼）。
+            // 用 withCoordinates 而不是手工重建：以前手工重建只传了三个字段，把海拔和
+            // 逐段路面全丢了，路况预警因此在 1.4 里从没工作过。
+            let aligned = plan.withCoordinates(plan.coordinates.map(ChinaGeo.wgs84ToGcj02))
             return .success(aligned)
         } catch {
             return .failure(.offline)
